@@ -1,0 +1,91 @@
+{
+  "k-means": {
+    "0": {
+      "Iris-setosa": 0,
+      "Iris-versicolor": 50,
+      "Iris-virginica": 50
+    },
+    "1": {
+      "Iris-setosa": 50,
+      "Iris-versicolor": 0,
+      "Iris-virginica": 0
+    }
+  },
+  "fuzzy-k-means": {
+    "0": {
+      "Iris-setosa": 0,
+      "Iris-versicolor": 50,
+      "Iris-virginica": 50
+    },
+    "1": {
+      "Iris-setosa": 50,
+      "Iris-versicolor": 0,
+      "Iris-virginica": 0
+    }
+  },
+  "kernel-fuzzy-k-means": {
+    "0": {
+      "Iris-setosa": 50,
+      "Iris-versicolor": 0,
+      "Iris-virginica": 0
+    },
+    "1": {
+      "Iris-setosa": 0,
+      "Iris-versicolor": 50,
+      "Iris-virginica": 50
+    }
+  },
+  "k-medoids": {
+    "0": {
+      "Iris-setosa": 0,
+      "Iris-versicolor": 50,
+      "Iris-virginica": 50
+    },
+    "1": {
+      "Iris-setosa": 50,
+      "Iris-versicolor": 0,
+      "Iris-virginica": 0
+    }
+  },
+  "gaussian-mixture": {
+    "0": {
+      "Iris-setosa": 0,
+      "Iris-versicolor": 50,
+      "Iris-virginica": 50
+    },
+    "1": {
+      "Iris-setosa": 50,
+      "Iris-versicolor": 0,
+      "Iris-virginica": 0
+    }
+  },
+  "upgma": {
+    "0": {
+      "Iris-setosa": 50,
+      "Iris-versicolor": 0,
+      "Iris-virginica": 0
+    },
+    "1": {
+      "Iris-setosa": 0,
+      "Iris-versicolor": 50,
+      "Iris-virginica": 50
+    }
+  },
+  "dbscan": {
+    "-1": {
+      "Iris-setosa": 1,
+      "Iris-versicolor": 0,
+      "Iris-virginica": 3
+    },
+    "0": {
+      "Iris-setosa": 49,
+      "Iris-versicolor": 0,
+      "Iris-virginica": 0
+    },
+    "1": {
+      "Iris-setosa": 0,
+      "Iris-versicolor": 50,
+      "Iris-virginica": 47
+    }
+  }
+}

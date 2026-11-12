@@ -1,0 +1,54 @@
+{
+  "base": "iris/iris.data (UCI Iris)",
+  "preprocessamento": {
+    "padronizado": true,
+    "atributos": [
+      "sepal_length",
+      "sepal_width",
+      "petal_length",
+      "petal_width"
+    ],
+    "media_original": [
+      5.843333333333334,
+      3.0540000000000003,
+      3.758666666666666,
+      1.1986666666666668
+    ],
+    "escala_original": [
+      0.8253012917851409,
+      0.4321465800705435,
+      1.7585291834055212,
+      0.7606126185881716
+    ]
+  },
+  "valores_k": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "execucoes_por_algoritmo_particional": 10,
+  "silhueta": {
+    "metrica": "euclidean",
+    "k_1": "indefinida (NaN)"
+  },
+  "dbscan": {
+    "eps": 0.8,
+    "min_samples": 5,
+    "silhueta": "pontos de ruído (-1) removidos",
+    "ari": "todos os pontos, com ruído (-1) mantido"
+  },
+  "versoes": {
+    "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2",
+    "seaborn": "0.13.2",
+    "pydantic": "2.14.1",
+    "fuzzy-c-means": "2.3.1",
+    "kmedoids": "0.5.5"
+  }
+}

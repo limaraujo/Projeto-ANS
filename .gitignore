@@ -1,0 +1,23 @@
+# Ambiente Python e caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Configurações locais
+.idea/
+.vscode/
+.codex/
+.agents/
+.aws/
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+
+# Dados, figuras e relatórios são artefatos do projeto e serão versionados.

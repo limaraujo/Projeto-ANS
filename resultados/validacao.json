@@ -1,0 +1,13 @@
+{
+  "status": "aprovado",
+  "ajustes_questao_1": 252,
+  "tecnicas_questao_2": 4,
+  "verificacoes": [
+    "sementes e contagens",
+    "ótimos por função objetivo",
+    "silhuetas e ARI recalculados",
+    "normalização e argmax das pertinências e probabilidades",
+    "dimensões e finitude das projeções",
+    "variância PCA e KL t-SNE"
+  ]
+}

@@ -1,0 +1,58 @@
+{"ALGORITMOS": {
+    "kmeans": {
+        "nome": "K-Means",
+        "tipo": "crisp",
+        "execucoes": 10,
+        "valores_k": [1, 2, 3, 4, 5],
+        "objetivo": "minimizar"
+    },
+
+    "fuzzy_kmeans": {
+        "nome": "Fuzzy K-Means",
+        "tipo": "fuzzy",
+        "execucoes": 10,
+        "valores_k": [1, 2, 3, 4, 5],
+        "objetivo": "minimizar"
+    },
+
+    "kernel_fuzzy_kmeans": {
+        "nome": "Kernel Fuzzy K-Means",
+        "tipo": "fuzzy",
+        "execucoes": 10,
+        "valores_k": [1, 2, 3, 4, 5],
+        "objetivo": "minimizar"
+    },
+
+    "kmedoids": {
+        "nome": "K-Medoids",
+        "tipo": "crisp",
+        "distancia": "euclidean",
+        "execucoes": 10,
+        "valores_k": [1, 2, 3, 4, 5],
+        "objetivo": "minimizar"
+    },
+
+    "em": {
+        "nome": "Gaussian Mixture",
+        "tipo": "probabilistico",
+        "execucoes": 10,
+        "valores_k": [1, 2, 3, 4, 5],
+        "objetivo": "maximizar"
+    },
+
+    "upgma": {
+        "nome": "UPGMA",
+        "tipo": "hierarquico",
+        "distancia": "manhattan",
+        "linkage": "average",
+        "execucoes": 1,
+        "valores_k": [1, 2, 3, 4, 5]
+    },
+
+    "dbscan": {
+        "nome": "DBSCAN",
+        "tipo": "densidade",
+        "execucoes": 1,
+        "valores_k": "None"
+    }
+}}
