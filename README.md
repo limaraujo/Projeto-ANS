@@ -6,6 +6,25 @@ Implementa os sete agrupamentos da Equipe 08 e PCA, Kernel PCA, t-SNE e UMAP. O 
 
 ## Execução
 
+Para publicar este projeto em um repositório privado na sua conta GitHub e convidar
+`rRodrigoGomes` como colaborador com acesso de escrita, instale o GitHub CLI (`gh`)
+e execute, com as alterações locais já commitadas:
+
+```sh
+bash publicar_github.sh
+```
+
+O script solicita login pelo navegador se necessário. O nome padrão é
+`projeto-amns-equipe08`; para usar outro nome, execute
+`bash publicar_github.sh outro-nome`. Repositórios privados e convites já existentes
+são reutilizados. O script interrompe a publicação se `origin` apontar para outro
+destino, se o repositório for público ou se houver históricos incompatíveis.
+Consulte `bash publicar_github.sh --help` para mais detalhes.
+O fluxo utiliza o [GitHub CLI](https://cli.github.com/manual/gh_repo_create) e a
+[API de colaboradores](https://docs.github.com/en/rest/collaborators/collaborators#add-a-repository-collaborator).
+
+### Executar os experimentos
+
 O ambiente utilizado foi Python 3.14. As versões instaladas estão fixadas em `requirements.txt`.
 
 ```sh
