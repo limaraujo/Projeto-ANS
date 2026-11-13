@@ -1,5 +1,0 @@
--r requirements.txt
-ipykernel
-jupyterlab
-nbformat
-nbclient

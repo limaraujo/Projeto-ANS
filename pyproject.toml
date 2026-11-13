@@ -1,0 +1,14 @@
+[tool.black]
+line-length = 88
+target-version = ["py314"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "PLC", "PLE", "PLW"]
+ignore = ["E501"] # Textos Typst extensos são literais; o Black formata o código.
+
+[tool.ruff.lint.isort]
+known-first-party = ["algoritmos", "questoes"]

@@ -1,5 +1,5 @@
 // Artigo acadêmico em estilo IEEE conference (A4), implementado em Typst.
-// Compilar a partir da raiz: typst compile artigo/artigo_ieee.typ artigo/artigo_ieee.pdf
+// Compilar a partir da raiz: typst compile docs/artigo/artigo_ieee.typ docs/artigo/artigo_ieee.pdf --root docs/artigo
 #set document(title: "Agrupamento e redução de dimensionalidade na base Iris: uma avaliação comparativa", author: "Equipe 08")
 #set page(paper: "a4", margin: (top: 19mm, bottom: 43mm, x: 13mm), numbering: none)
 #set text(font: "Nimbus Roman", size: 10pt, lang: "pt")
@@ -34,6 +34,8 @@
 #text(size: 9pt, weight: "bold", style: "italic")[Palavras-chave—agrupamento, Iris, silhueta, índice de Rand ajustado, redução de dimensionalidade.]
 ]
 = Introdução
+O objetivo é investigar quais estruturas emergem das medidas das flores quando as espécies não são utilizadas no ajuste. A análise procura responder duas perguntas: qual número de grupos é favorecido pela geometria dos dados e quanto dessa organização pode ser representado em duas dimensões? As espécies conhecidas permitem uma avaliação posterior, sem determinar os agrupamentos.
+
 A análise não supervisionada pode revelar estruturas geométricas que não coincidem com classes conhecidas. Na base Iris, essa distinção permite comparar a seleção interna de agrupamentos com sua concordância externa com espécies botânicas. Este artigo avalia sete algoritmos de agrupamento e quatro técnicas de redução de dimensionalidade, seguindo o protocolo atribuído à Equipe 08 no enunciado do projeto [1].
 
 O objetivo é investigar quais partições são favorecidas pela silhueta, como elas se relacionam com as três espécies e quais estruturas são evidenciadas nas projeções bidimensionais. Foram realizados 252 ajustes principais: 250 ajustes particionais, uma hierarquia UPGMA e um DBSCAN. As projeções incluem PCA, Kernel PCA, t-SNE e UMAP. Os rótulos das espécies são utilizados apenas após os ajustes, para interpretação e avaliação externa.
@@ -41,9 +43,11 @@ O objetivo é investigar quais partições são favorecidas pela silhueta, como 
 As contribuições deste estudo são a comparação sob um protocolo comum, o registro completo das execuções e a interpretação conjunta de silhueta, índice de Rand ajustado e projeções. Padronização, sementes e hiperparâmetros são escolhas metodológicas; os requisitos experimentais decorrem exclusivamente de [1].
 
 = Base de dados e preparação
-Foi utilizado o arquivo local `iris/iris.data`, com 150 observações e quatro atributos em centímetros: comprimento e largura de sépala e comprimento e largura de pétala. Há 50 observações por espécie: Iris-setosa, Iris-versicolor e Iris-virginica. Linhas completamente vazias são ignoradas. A matriz numérica é separada dos rótulos antes dos ajustes; os rótulos servem apenas à avaliação externa e às cores e símbolos das figuras.
+Foi utilizado o arquivo local `codigo/iris/iris.data`, com 150 observações e quatro atributos em centímetros: comprimento e largura de sépala e comprimento e largura de pétala. Há 50 observações por espécie: Iris-setosa, Iris-versicolor e Iris-virginica. Linhas completamente vazias são ignoradas. A matriz numérica é separada dos rótulos antes dos ajustes; os rótulos servem apenas à avaliação externa e às cores e símbolos das figuras.
 
 Cada atributo foi transformado pela subtração da média e divisão pelo desvio-padrão populacional, usando StandardScaler. Isso confere escala unitária às variáveis. Essa opção altera a geometria em relação aos dados em centímetros e influencia as conclusões. Não foi feita divisão treino/teste, pois o objetivo é a análise descritiva não supervisionada da base fornecida, e não a estimação de desempenho preditivo em novos dados.
+A descrição da base e de seus atributos está disponível no repositório UCI [2]. Foi mantida a versão local fornecida na atividade; resultados de outras versões da Iris não são automaticamente intercambiáveis.
+
 #figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Estatísticas dos atributos antes da padronização], [
 #set text(size: 8pt)
 #table(columns: 3, inset: (x: 2pt, y: 3pt), stroke: .3pt, table.header([*Atributo*],[*Média (cm)*],[*Escala (cm)*]),
@@ -63,7 +67,16 @@ Cada atributo foi transformado pela subtração da média e divisão pelo desvio
 ])
 
 = Metodologia de agrupamento
+== Desenho experimental e recursos utilizados
+Trata-se de um estudo exploratório e comparativo sobre a base completa, sem estimativa de desempenho preditivo em dados novos. A unidade experimental dos métodos particionais é um ajuste para um par (k, semente). As dez inicializações avaliam dependência do otimizador; não constituem dez amostras independentes da população de flores. Não foram aplicados testes de significância entre algoritmos.
+
+O fluxo adotado consiste em carregar e padronizar os quatro atributos, executar os métodos sem acesso às espécies, selecionar inicializações pelo objetivo, selecionar k pela silhueta e avaliar externamente pelo ARI. As projeções constituem um experimento separado, ajustado sobre os mesmos atributos padronizados. Essa separação evita atribuir às projeções as métricas obtidas no espaço de quatro dimensões.
+
+Os meios computacionais utilizados foram Python em ambiente virtual, NumPy e pandas para manipulação dos dados, scikit-learn para estimadores e métricas, SciPy para a hierarquia, fuzzy-c-means para FCM e Kernel FCM, kmedoids para PAM e umap-learn para UMAP. Matplotlib produziu as figuras, CSV e JSON armazenaram os artefatos e Typst compôs o artigo em duas colunas. Não há registro de hardware ou tempos de execução que permita comparar custo computacional.
+
 == Reinicializações e seleção
+Os sete algoritmos exigidos para a Equipe 08 estão contemplados: K-Means, Fuzzy K-Means, misturas gaussianas via EM e DBSCAN são comuns às equipes; Kernel Fuzzy K-Means, K-Medoids euclidiano e UPGMA city-block são os métodos adicionais indicados na página 6 do enunciado [1]. A Questão 2 inclui as quatro técnicas solicitadas na página 4.
+
 Para cada algoritmo particional e cada k, foram usadas as sementes 42 a 51, com uma inicialização por chamada. Primeiro selecionou-se a execução de melhor função objetivo dentro de cada k; somente então se calculou a silhueta da partição crisp escolhida. O melhor k foi definido pela maior silhueta válida. Em caso de empate na função objetivo, o código retém a primeira execução na ordem das sementes.
 
 K-Means minimiza a soma de quadrados das distâncias aos centroides. Utilizou-se inicialização aleatória, uma inicialização por chamada e os demais controles registrados no código e nas bibliotecas fixadas.
@@ -81,6 +94,8 @@ UPGMA constrói uma única árvore usando distância Manhattan (city-block) e li
 DBSCAN utiliza distância euclidiana, eps igual a 0,8 e `min_samples` igual a 5, incluindo o próprio ponto na contagem da vizinhança. Esses valores foram mantidos da configuração experimental existente e não foram otimizados com os rótulos das espécies. Representam uma configuração exploratória única; não se afirma que sejam ótimos.
 
 == Avaliação
+As definições e convenções das métricas seguem a documentação de avaliação de agrupamentos do scikit-learn [3].
+
 Para cada ponto i, a silhueta é
 $ s(i) = (b(i)-a(i))/max(a(i), b(i)) $,
 em que a(i) é a distância média intragrupo e b(i) é a menor distância média a outro grupo. A avaliação utiliza distância euclidiana em todos os métodos, inclusive UPGMA, cuja construção usa Manhattan. Essa convenção facilita a comparação geométrica, mas não coincide com o critério de construção da árvore. Grupos unitários recebem a convenção de silhueta zero da biblioteca. Para uma única partição global, a silhueta é indefinida e não participa da seleção.
@@ -178,7 +193,7 @@ A tabela apresenta as silhuetas após a seleção pela função objetivo. Para t
 #figure(image("figuras/ieee/silhueta_kernel_fuzzy_k_means.pdf", width: 100%), caption: [Silhueta após seleção da execução por função objetivo: Kernel Fuzzy K-Means.])
 #figure(image("figuras/ieee/silhueta_k_medoids.pdf", width: 100%), caption: [Silhueta após seleção da execução por função objetivo: K-Medoids.])
 #figure(image("figuras/ieee/silhueta_gaussian_mixture.pdf", width: 100%), caption: [Silhueta após seleção da execução por função objetivo: GMM/EM.])
-#figure(image("figuras/ieee/silhueta_upgma.pdf", width: 100%), caption: [Silhueta após seleção da execução por função objetivo: UPGMA.])
+#figure(image("figuras/ieee/silhueta_upgma.pdf", width: 100%), caption: [Silhueta dos cinco cortes de uma única hierarquia UPGMA.])
 
 A silhueta cai ao subdividir o bloco formado por versicolor e virginica. Isso favorece k igual a 2, apesar das três classes biológicas. O efeito é especialmente claro no GMM: a partição de três componentes tem menor silhueta, embora corresponda muito melhor às espécies. A tabela seguinte usa k igual a 3 apenas para interpretação posterior; ela não substitui a seleção exigida no enunciado.
 #figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Avaliação complementar com três grupos], [
@@ -207,6 +222,54 @@ A silhueta cai ao subdividir o bloco formado por versicolor e virginica. Isso fa
 
 O GMM obtém ARI de 0,9039 em k igual a 3, contra 0,5681 na solução escolhida pela silhueta. A modelagem por covariâncias completas permite grupos com formas distintas, enquanto a silhueta euclidiana favorece separação compacta. UPGMA alcança ARI de 0,7184 e K-Medoids 0,6765 em três grupos. Esses valores mostram que a avaliação interna e a recuperação das espécies respondem a perguntas diferentes. Não houve escolha retroativa pelo melhor ARI.
 
+A tabela de contingência da execução selecionada do GMM em k igual a 3 torna essa diferença explícita. Os identificadores dos grupos são arbitrários.
+#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Contingência da mistura gaussiana com três grupos], [
+#set text(size: 8pt)
+#table(columns: 4, inset: (x: 2pt, y: 3pt), stroke: .3pt, table.header([*Espécie*],[*Grupo 0*],[*Grupo 1*],[*Grupo 2*]),
+[Iris-setosa],
+[50],
+[0],
+[0],
+[Iris-versicolor],
+[0],
+[45],
+[5],
+[Iris-virginica],
+[0],
+[0],
+[50]
+)
+])
+
+As 50 setosas formam um grupo exclusivo. Outro contém 45 versicolors, e o terceiro contém as 50 virginicas e cinco versicolors. Essa correspondência é observada após o ajuste e não representa acurácia preditiva em novas amostras. Em particular, ARI igual a 0,9039 não significa que 90,39% das flores foram classificadas corretamente.
+
+== Dependência da inicialização
+Para examinar a variação entre as dez sementes, a tabela apresenta o intervalo da função objetivo em k igual a 3. Cada linha deve ser interpretada na escala do próprio algoritmo; objetivos de métodos diferentes não são diretamente comparáveis.
+#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Faixa das funções objetivo], [
+#set text(size: 8pt)
+#table(columns: 3, inset: (x: 2pt, y: 3pt), stroke: .3pt, table.header([*Método*],[*Mínimo*],[*Máximo*]),
+[K-Means],
+[140,9684],
+[192,0372],
+[FCM],
+[101,2222],
+[101,2222],
+[Kernel FCM],
+[32,7858],
+[32,7858],
+[K-Medoids],
+[131,2703],
+[132,3408],
+[GMM/EM],
+[-318,3884],
+[-292,0196]
+)
+])
+
+K-Means e GMM exibem diferenças entre as soluções encontradas. Fuzzy K-Means e Kernel Fuzzy K-Means apresentam objetivos praticamente iguais entre sementes na precisão exibida. Essa concordância numérica não prova ótimo global. No GMM, as dez execuções com três componentes registraram convergência pelo critério da biblioteca, embora tenham alcançado valores distintos de log-verossimilhança. Convergir e atingir a melhor solução possível são propriedades diferentes.
+
+As explorações posteriores de hiperparâmetros discutidas durante o desenvolvimento não foram incorporadas ao protocolo principal. Aumentar `n_init` para 10 dentro de cada uma das dez chamadas, por exemplo, representa cem inicializações internas por configuração. Portanto, não se deve descrever esse experimento como tendo o mesmo orçamento de dez inicializações utilizado nesta entrega.
+
 == Hierarquia e dendrograma
 #figure(image("figuras/ieee/dendrograma_upgma.pdf", width: 100%), caption: [Uma única árvore UPGMA, construída com distância Manhattan e ligação média.])
 
@@ -216,6 +279,8 @@ O dendrograma registra a sequência de fusões; a altura corresponde à distânc
 As quatro técnicas receberam a mesma matriz padronizada de quatro atributos, sem rótulos de espécie durante o ajuste. As cores foram adicionadas posteriormente. PCA foi ajustada com quatro componentes para apresentar o espectro completo; seu gráfico usa apenas as duas primeiras. Os outros métodos foram ajustados diretamente para duas dimensões. As 150 coordenadas de cada método foram exportadas em CSV, com identificador de observação e espécie.
 
 == PCA
+As saídas de variância explicada, componentes e valores singulares seguem as definições do estimador PCA do scikit-learn [4].
+
 A PCA utiliza decomposição SVD completa. As componentes são combinações lineares ortogonais dos atributos padronizados. A tabela mostra os autovalores da covariância amostral, as proporções explicadas e a soma acumulada.
 #figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Espectro e variância explicada da PCA], [
 #set text(size: 8pt)
@@ -315,6 +380,8 @@ Foi usado kernel RBF com gamma igual a 0,25, matriz de kernel centralizada, duas
 Os autovalores acima pertencem à matriz de kernel centralizada, não à covariância dos quatro atributos originais. Como foram retidas apenas duas componentes, não se divide sua soma para declarar uma porcentagem de variância original explicada. A transformação curva a organização dos pontos e evidencia relações não lineares, mas torna a interpretação por pesos dos atributos menos direta. A escolha de gamma altera a noção de proximidade e não foi submetida a análise de sensibilidade.
 
 == t-SNE
+Os parâmetros e as saídas de otimização são interpretados conforme a documentação de t-SNE [5].
+
 Foram usados perplexidade 30, inicialização por PCA, distância euclidiana, semente 42, exagero inicial 12, método Barnes-Hut com ângulo 0,5 e limite de 1.000 iterações. A taxa de aprendizado automática efetiva foi 50. A perplexidade controla a escala de vizinhança, sem representar um número de grupos.
 #figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Saídas do t-SNE], [
 #set text(size: 8pt)
@@ -332,6 +399,8 @@ Foram usados perplexidade 30, inicialização por PCA, distância euclidiana, se
 Setosa aparece isolada à esquerda, enquanto versicolor e virginica ocupam regiões próximas e parcialmente misturadas à direita. A divergência KL final quantifica o objetivo de preservação de afinidades desse ajuste, não uma taxa de erro de classificação. O atributo `n_iter_` reporta 999; não se toma o esgotamento do orçamento como prova de ótimo global. Distâncias entre ilhas, tamanhos e áreas não devem ser interpretados como distâncias e densidades fiéis do espaço original. Os eixos não têm o significado de componentes lineares nem proporção de variância explicada.
 
 == UMAP
+O papel do número de vizinhos e da distância mínima segue a documentação oficial do UMAP [6].
+
 Foram usados 15 vizinhos, `min_dist` igual a 0,1, spread igual a 1, duas dimensões, distância euclidiana, inicialização espectral e semente 42. A execução foi limitada a uma thread para reprodutibilidade. O número de épocas foi deixado no modo automático da biblioteca, registrado como `n_epochs` nulo nos parâmetros; não se declara aqui um contador de épocas observado.
 #figure(image("figuras/ieee/umap.pdf", width: 100%), caption: [Projeção UMAP com 15 vizinhos e `min_dist` igual a 0,1.])
 
@@ -358,13 +427,16 @@ Nesta execução, t-SNE apresentou o maior valor local (0,9888), seguido de UMAP
 = Discussão e limitações
 Os resultados se referem ao arquivo local Iris, a uma padronização e a um conjunto fixo de hiperparâmetros. Dez reinicializações reduzem a dependência da inicialização dos agrupamentos, mas não asseguram ótimo global. Houve uma execução de cada projeção; não foram estimados intervalos de confiança ou estabilidade entre sementes. A sensibilidade de gamma, perplexidade, vizinhos e eps permanece fora desta análise.
 
+== Experimentos complementares realizados
+As análises de estabilidade, sensibilidade e escala foram executadas posteriormente e estão documentadas no complemento `complemento_experimentos.pdf`. Foram comparados 1.125 pares de inicializações e realizados 840 ajustes adicionais: 252 sobre atributos originais, 48 DBSCAN, 400 Kernel FCM e 140 projeções. Os seis métodos com escolha de k mantiveram dois grupos nas duas escalas. Os resultados principais deste artigo permanecem separados dessas análises. A estabilidade por subamostragem continua como trabalho futuro.
+
 = Conclusão
 A principal conclusão dos agrupamentos é a distinção entre estrutura geométrica e classes conhecidas. Todos os métodos com escolha de k favoreceram dois grupos, separando setosa das demais espécies. Entretanto, GMM com três componentes teve concordância muito maior com os rótulos. O resultado não justifica substituir a seleção pela silhueta: ele esclarece o alcance da métrica exigida.
 
 As quatro projeções permitem visualizar a separação de setosa e a proximidade entre as outras espécies. PCA concentra 95,80% da variância nas duas primeiras componentes; t-SNE tem a maior preservação local pelo diagnóstico adotado. As figuras complementam os índices, sem provar que a estrutura visual corresponda a classes discretas perfeitamente recuperáveis.
 
 = Reprodutibilidade
-O código em Python separa os algoritmos (`algoritmos.py`), a execução das questões (`questoes.py`) e a interface (`main.py`). As versões utilizadas incluem NumPy 2.5.4, SciPy 1.18.1, scikit-learn 1.9.1, fuzzy-c-means 2.3.1, kmedoids 0.5.5 e umap-learn 0.5.12. As dependências completas são fixadas em `requirements.txt`.
+O código em Python separa os algoritmos (`codigo/algoritmos.py`), a execução das questões (`codigo/questoes.py`) e a interface (`codigo/main.py`). As versões utilizadas incluem NumPy 2.5.4, SciPy 1.18.1, scikit-learn 1.9.1, fuzzy-c-means 2.3.1, kmedoids 0.5.5 e umap-learn 0.5.12. As dependências completas são fixadas em `codigo/requirements.txt`.
 
 Os artefatos incluem rótulos por execução, objetivos, parâmetros, sementes, pertinências e probabilidades posteriores. As métricas por k, contingências, coordenadas das projeções, componentes e loadings foram exportados em CSV ou JSON. A auditoria verificou as 252 execuções principais, a seleção por objetivo, silhuetas e ARI recalculados, normalização e conversão crisp, além da finitude das quatro projeções. O hash dos dados e as versões foram registrados para rastreabilidade. A auditoria verifica consistência dos resultados, sem garantir otimalidade global.
 
@@ -372,6 +444,19 @@ Os artefatos incluem rótulos por execução, objetivos, parâmetros, sementes, 
 #block[
 #set par(first-line-indent: 0pt, hanging-indent: 1.2em)
 [1] F. de A. T. de Carvalho, “Projeto AM-NS 2026-2,” Centro de Informática, Universidade Federal de Pernambuco, Recife, Brasil, enunciado de projeto, 2026, pp. 2–7. Arquivo fornecido: `Projeto-AMG-NS-2026-2.pdf`.
+]
+
+#block[
+#set par(first-line-indent: 0pt, hanging-indent: 1.2em)
+[2] R. A. Fisher, “Iris,” UCI Machine Learning Repository, 1936. doi: 10.24432/C56C76. #link("https://archive.ics.uci.edu/dataset/53/iris")[Disponível online].
+
+[3] Scikit-learn developers, “Clustering: clustering performance evaluation.” #link("https://scikit-learn.org/stable/modules/clustering.html")[Documentação online]. Acesso: 13 nov. 2026.
+
+[4] Scikit-learn developers, “PCA.” #link("https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html")[Documentação online]. Acesso: 13 nov. 2026.
+
+[5] Scikit-learn developers, “TSNE.” #link("https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html")[Documentação online]. Acesso: 13 nov. 2026.
+
+[6] UMAP developers, “Basic UMAP Parameters.” #link("https://umap-learn.readthedocs.io/en/latest/parameters.html")[Documentação online]. Acesso: 13 nov. 2026.
 ]
 
 ]
