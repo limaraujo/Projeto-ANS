@@ -32,6 +32,7 @@ export function validateSpec(spec, profileOverride) {
     need(!('gridSpacing' in v) || (Number.isFinite(v.gridSpacing)&&v.gridSpacing>=.25&&v.gridSpacing<=2), 'visual.gridSpacing: 0,25–2 polegadas');
     need(!('duckPath' in v) || str(v.duckPath), 'visual.duckPath deve ser caminho local');
     need(!('lineNumbers' in v) || typeof v.lineNumbers==='boolean', 'visual.lineNumbers deve ser booleano');
+    need(!('logoInFooter' in v) || typeof v.logoInFooter==='boolean', 'visual.logoInFooter deve ser booleano');
   }
   need(Array.isArray(spec.slides) && spec.slides.length > 0 && spec.slides.length <= 200, 'slides: entre 1 e 200');
   need(Number.isInteger(p.slideCount) && p.slideCount === spec.slides.length, 'plan.slideCount difere do número de slides');
@@ -53,6 +54,7 @@ export function validateSpec(spec, profileOverride) {
       need(!('lineNumbers' in s)||typeof s.lineNumbers==='boolean',`${at}: lineNumbers deve ser booleano`);
       need(!('duck' in s)||typeof s.duck==='boolean',`${at}: duck deve ser booleano`);
       need(!s.duckPath||str(s.duckPath),`${at}: duckPath inválido`);
+      need(!('coverLogo' in s)||(s.layout==='title'&&str(s.coverLogo)),`${at}: coverLogo requer um caminho local na capa`);
       need(!s.mainFlow||(Array.isArray(s.mainFlow)&&s.mainFlow.every(n=>Number.isInteger(n)&&n>=0&&n<(s.steps?.length||0)-1)),`${at}: mainFlow inválido`);
       need(!('highlightIndex' in s)||(Number.isInteger(s.highlightIndex)&&s.highlightIndex>=0&&s.highlightIndex<(s.values?.length||0)),`${at}: highlightIndex inválido`);
     }

@@ -11,16 +11,15 @@ Duração estimada: 18 minutos. Notas de fala incluídas no PPTX e em notes.md.
 - source/assets/input/: imagens utilizadas; source/figuras-svg/: fontes vetoriais adicionais.
 - qa.json e visual-review.json: validação técnica e registro da inspeção visual.
 
-A apresentação sintetiza o artigo revisado e os resultados já existentes no
-projeto. Os experimentos não foram reexecutados. As figuras foram redesenhadas
-a partir das métricas, coordenadas e matriz de hierarquia armazenadas. As
-referências completas dos métodos permanecem no artigo revisado.
+A apresentação sintetiza a revisão do artigo de 18/11/2026 e os resultados
+registrados no projeto. Os gráficos usam as métricas, coordenadas e matriz de
+hierarquia armazenadas. As notas incluem os diagnósticos complementares de
+K-Means, GMM, UPGMA, DBSCAN e projeções. O artigo contém a bibliografia completa.
 
 Pixelify Sans e JetBrains Mono estavam indisponíveis; utilizou-se Liberation
 Mono. As fontes não estão embutidas. O PDF foi produzido pelo conversor nativo
-Cairo/Pango do subconjunto OOXML gerado pela skill, pois a conversão automática
-com LibreOffice falhou. A validação de ZIP/XML, texto editável, geometria e
-renderização passou; não foi testada a abertura no Microsoft PowerPoint.
+Cairo/Pango da skill. A validação cobre ZIP/XML, texto editável, geometria e
+renderização. A abertura no Microsoft PowerPoint permanece sem verificação.
 
 Para reproduzir PPTX, PDF e prévias a partir desta pasta:
 

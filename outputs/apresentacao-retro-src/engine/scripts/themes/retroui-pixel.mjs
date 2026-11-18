@@ -4,10 +4,13 @@ import {pixelContext,PixelCard,PixelWindow,PixelBadge,PixelDivider,PixelCodeBloc
 
 export function compileRetro(spec,baseDir,fontProbe) {
   const theme=profiles['retroui-pixel'], fonts=resolveFonts(theme,fontProbe), visual=spec.visual||{};
+  const footerLogo=visual.logoInFooter ? spec.slides.find(s=>s.coverLogo)?.coverLogo : undefined;
+  const logoAlt='Marcas do Centro de Informática e da UFPE em branco';
   const scene={...SIZE,profile:'retroui-pixel',title:spec.title,language:spec.plan.language,fonts,slides:[]};
   spec.slides.forEach((s,index)=>{
     const c=pixelContext(theme,fonts.resolved,baseDir), colors=theme.colors;
     const layout=canonicalLayout(s.layout,'retroui-pixel');
+    const showFooterLogo=footerLogo && layout!=='title';
     const head=(value,x,y,w,h,size=32,opts={})=>c.text(value,x,y,w,h,size,{font:fonts.resolved.heading,bold:true,role:'title',...opts});
     const text=(value,x,y,w,h,size=22,opts={})=>c.text(value,x,y,w,h,size,opts);
     const bullets=(items,area,size=22)=>{
@@ -19,7 +22,8 @@ export function compileRetro(spec,baseDir,fontProbe) {
     };
     PixelGridBackground(c,{enabled:s.grid??visual.grid??theme.grid.enabled,opacity:visual.gridOpacity??theme.grid.opacity,spacing:visual.gridSpacing??theme.grid.spacing});
     const foot=`${String(index+1).padStart(2,'0')} / ${spec.slides.length}  ${s.citations?.map(id=>`[${id}]`).join(' ')||'retroui-pixel'}`;
-    text(foot,.65,7.13,12,.24,12,{role:'footer',color:theme.readableMuted});
+    text(foot,.65,7.13,showFooterLogo?9.6:12,.24,12,{role:'footer',color:theme.readableMuted});
+    if(showFooterLogo) c.image(footerLogo,10.55,6.94,1.9,1.9*251/1120,logoAlt,'Footer');
     let top=2.18;
     if(layout!=='title'&&layout!=='section') {
       head(s.title,.65,.5,12,1.16);
@@ -33,6 +37,7 @@ export function compileRetro(spec,baseDir,fontProbe) {
     }
     if(layout==='title') {
       PixelBadge(c,{x:.85,y:.65,text:'SEMINÁRIO',highlight:true});
+      if(s.coverLogo) c.image(s.coverLogo,8.75,.46,3.7,3.7*251/1120,logoAlt,'CoverSlide');
       head(s.title,.85,1.7,11.4,2.1,40);
       text(s.subtitle,.9,4.05,10.9,1,24);
       text(`${spec.plan.audience} · ${spec.plan.minutes} min`,.9,5.65,8.4,.8,20,{color:theme.readableMuted});
@@ -87,12 +92,12 @@ export function compileRetro(spec,baseDir,fontProbe) {
       groups.forEach((g,j)=>text(g,9.6,top+.25+j*.65,2.75,.55,18,{role:'label',color:palette[j%3]}));
       text(s.yLabel,9.6,5.4,2.75,.7,18,{role:'label',color:theme.readableMuted});
       text(s.xLabel,1.1,6.38,11.1,.36,18,{role:'label',color:theme.readableMuted});
-      text(s.caption,1,6.82,11.3,.26,12,{role:'footer',color:theme.readableMuted});
+      text(s.caption,1,6.82,showFooterLogo?9.3:11.3,.26,12,{role:'footer',color:theme.readableMuted});
     } else if(layout==='figure') {
       PixelCard(c,{x:.8,y:top,w:11.7,h:5.7-top});
       c.image(s.path,1.15,top+.2,11,5.3-top,s.alt,'PixelWindow');
       text(s.caption,.85,5.98,11.6,.72,20);
-      text(s.attribution,.85,6.79,11.6,.24,12,{role:'footer',color:theme.readableMuted});
+      text(s.attribution,.85,6.79,showFooterLogo?9.45:11.6,.24,12,{role:'footer',color:theme.readableMuted});
     } else if(layout==='references') {
       const row=(6.8-top)/s.ids.length;
       s.ids.forEach((id,j)=>{

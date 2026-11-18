@@ -21,15 +21,15 @@
   ],
   "issues": [],
   "reviewer": "Codex",
-  "method": "Inspeção visual individual de todos os PNGs finais usando view_image; conferência com os CSVs, JSONs e artigo local.",
+  "method": "Inspeção visual de prévias representativas e comparação pixel a pixel das 17 páginas com a versão já inspecionada.",
   "observations": [
-    "Capa sem pato, conforme solicitação; nenhum elemento PixelDuck presente na cena.",
-    "Títulos, rodapés, acentos, última linha e contraste conferidos nas 17 páginas.",
-    "Legendas e rótulos de Kernel PCA, t-SNE e UMAP reposicionados após a inspeção inicial.",
-    "Curvas, GMM, árvore armazenada, projeções e barras conferidos; valores rastreados aos artefatos existentes.",
-    "Texto, cards, diagrama e barras editáveis; seis figuras PNG acompanhadas de fontes SVG.",
-    "Fontes ausentes substituídas por Liberation Mono. PDF convertido pelo subconjunto nativo; não estabelece validação no Microsoft PowerPoint."
+    "Conferidos títulos, fórmulas, barras, legendas, notas e rodapés.",
+    "Conferidos cortes do dendrograma, métricas de agrupamento e fração retida pela Kernel PCA com os registros locais.",
+    "Tema retrô em formato 16:9, com texto editável e figuras acompanhadas das fontes SVG.",
+    "PDF renderizado com Cairo/Pango. Compatibilidade com Microsoft PowerPoint permanece sem verificação.",
+    "Logo branco na capa, com transparência, detalhes do brasão e alinhamento no canto superior direito.",
+    "Nos slides 2 a 17, a alteração visual ficou restrita ao mesmo logotipo branco no canto inferior direito."
   ],
-  "fingerprint": "baec61956e29a49663ea88c0061d6da4a42bee35b4f586dbedfe021f30204e7d",
-  "reviewedAt": "2026-11-17T16:56:08.365Z"
+  "fingerprint": "47f957fd3891811eac863618728552ab7196860b386139186aaf03e68bf5aac8",
+  "reviewedAt": "2026-11-18T12:43:41.313Z"
 }

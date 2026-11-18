@@ -50,6 +50,16 @@ typst compile docs/artigo/artigo_ieee.typ docs/artigo/artigo_ieee.pdf --root doc
 
 O enunciado oficial está em `docs/Projeto-AMG-NS-2026-2.pdf`; `docs/requisitos.md` é material auxiliar.
 
+## Apresentação
+
+A apresentação da Equipe 08 tem 17 slides e acompanha a revisão do artigo de
+18/11/2026.
+
+- [PowerPoint editável](apresentacao_iris_retro.pptx)
+- [Apresentação em PDF](apresentacao_iris_retro.pdf)
+- [Notas de fala](outputs/apresentacao-iris-retro/notes.md)
+- [Guia de estudo e apresentação](GUIA_APRESENTACAO.md)
+
 ## Tunagem opcional
 
 ```sh

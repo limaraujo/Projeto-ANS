@@ -1,132 +1,127 @@
 --- Página 1 ---
 Agrupamento e redução de dimensionalidade na base
          Iris: uma avaliação comparativa
-                                                              Equipe 08
-                                  Centro de Informática — Universidade Federal de Pernambuco
-                                                         Recife, Brasil
-Resumo—Este artigo compara sete algoritmos de agrupamento e                       II. BASE DE DADOS E PREPARAÇÃO
-quatro técnicas de redução de dimensionalidade na base Iris padro­
-nizada. Foram realizados 250 ajustes particionais, uma hierarquia
-                                                                      Foi utilizado o arquivo local codigo/iris/iris.data, com 150
-UPGMA e uma execução DBSCAN. A melhor inicialização de cada           observações e quatro atributos em centímetros: comprimento e
-número de grupos foi selecionada pela função objetivo, e o número     largura de sépala e comprimento e largura de pétala. Há 50 ob­
-de grupos pela silhueta. Os seis métodos com seleção de k escolhe­    servações por espécie: Iris-setosa, Iris-versicolor e Iris-virginica.
-ram dois grupos, com silhueta de 0,5802 e índice de Rand ajustado     Linhas completamente vazias são ignoradas. A matriz numérica
-(ARI) de 0,5681. O DBSCAN encontrou dois grupos e quatro pon­         é separada dos rótulos antes dos ajustes; os rótulos servem apenas
-tos de ruído. Em análise complementar, a mistura gaussiana com        à avaliação externa e às cores e símbolos das figuras.
-três componentes atingiu ARI de 0,9039, evidenciando a diferença         Cada atributo foi padronizado em z-score, subtraindo-se a
-entre separação geométrica e concordância com espécies. As duas
-                                                                      média e dividindo-se pelo desvio-padrão populacional, conforme
+                        Fátima Araújo                                                            Rogrigo Gomes
+                   Centro de Informática                                                   Centro de Informática
+            Universidade Federal de Pernambuco                                      Universidade Federal de Pernambuco
+                       Recife, Brasil                                                           Recife, Brasil
+                     frqal@cin.ufpe.br                                                        rgar@cin.ufpe.br
+Resumo—Este artigo compara sete algoritmos de agrupamento e
+                                                                                      1 𝑛                  1 𝑛
+quatro técnicas de redução de dimensionalidade na base Iris padro­             𝜇𝑟 =     ∑𝑥 ,         𝜎𝑟 = √ ∑ (𝑥𝑖𝑟 − 𝜇𝑟 )2 ,                (2)
+nizada. Foram realizados 250 ajustes particionais, uma hierarquia                     𝑛 𝑖=1 𝑖𝑟             𝑛 𝑖=1
+UPGMA e uma execução DBSCAN. A melhor inicialização de cada
+número de grupos foi selecionada pela função objetivo, e o número     em que 𝑛 = 150, 𝜇𝑟 é a média do atributo e 𝜎𝑟 seu desvio-padrão
+de grupos pela silhueta. Os seis métodos com seleção de k escolhe­    populacional. Os valores de 𝜇𝑟 e 𝜎𝑟 utilizados na padronização
+ram dois grupos, com silhueta de 0,5802 e índice de Rand ajustado     estão na Tabela I.
+(ARI) de 0,5681. O DBSCAN encontrou dois grupos e quatro pon­            A padronização equilibra as escalas dos atributos; nos dados
+tos de ruído. Em análise complementar, a mistura gaussiana com        brutos, as distâncias, as silhuetas e o número de grupos seleci­
+três componentes atingiu ARI de 0,9039, evidenciando a diferença      onado podem mudar. Não foi feita divisão treino/teste, pois
+entre separação geométrica e concordância com espécies. As duas       o objetivo é a análise descritiva não supervisionada da base
 primeiras componentes da PCA retiveram 95,80% da variância.
+                                                                      fornecida, e não a estimação de desempenho preditivo em novos
 Kernel PCA, t-SNE e UMAP complementaram a análise visual; t-
-                                                                      o StandardScaler. Não foi feita divisão treino/teste, pois o obje­
--SNE apresentou a maior preservação local de vizinhanças na           tivo é a análise descritiva não supervisionada da base fornecida,
-configuração avaliada. Os resultados destacam os limites da seleção   e não a estimação de desempenho preditivo em novos dados. A
-interna e a necessidade de interpretar projeções em conjunto com      descrição da base e de seus atributos está disponível no reposi­
-métricas.                                                             tório UCI [2].
-Palavras-chave—agrupamento, Iris, silhueta, índice de Rand ajus­              TABELA I: Estatísticas dos atributos antes da padronização
-tado, redução de dimensionalidade.                                                       Atributo Média (cm) Escala (cm)
-                                                                                       Comp. sépala  5,8433    0,8253
-                       I. INTRODUÇÃO                                                   Larg. sépala  3,0540    0,4321
-O objetivo é investigar quais estruturas emergem das medidas das                       Comp. pétala  3,7587    1,7585
-flores quando as espécies não são utilizadas no ajuste. A análise                       Larg. pétala 1,1987    0,7606
-procura responder duas perguntas: qual número de grupos é
-favorecido pela geometria dos dados e quanto dessa organização                  III. FUNDAMENTAÇÃO DOS MÉTODOS
-pode ser representado em duas dimensões? As espécies conhe­
-cidas permitem uma avaliação posterior, sem determinar os             Os métodos de agrupamento adotam diferentes critérios para de­
-agrupamentos.                                                         finir uma partição. O K-Means minimiza a soma dos quadrados
-                                                                      das distâncias euclidianas entre as observações e os centroides
-   A análise não supervisionada pode revelar estruturas geomé­
-                                                                      dos respectivos grupos. O algoritmo alterna a atribuição ao
-tricas que não coincidem com classes conhecidas. Na base Iris,
-                                                                      centro mais próximo e o recálculo dos centroides, favorecendo
-essa distinção permite comparar a seleção interna de agrupamen­
-                                                                      grupos compactos. A dependência da inicialização pode levar a
-tos com sua concordância externa com espécies botânicas. Este
-                                                                      diferentes mínimos locais [3].
-artigo avalia sete algoritmos de agrupamento e quatro técnicas de
-redução de dimensionalidade, seguindo o protocolo atribuído à            O Fuzzy C-Means (FCM) representa cada observação por
-Equipe 08 no enunciado do projeto [1].                                graus de pertinência aos grupos, normalizados. Sua função
-                                                                      objetivo pondera as distâncias quadráticas aos centroides pelas
-   O objetivo é investigar quais partições são favorecidas pela
-                                                                      pertinências elevadas ao expoente m, que controla o grau de
-silhueta, como elas se relacionam com as três espécies e quais
-                                                                      difusividade da partição. Neste estudo, a partição exclusiva é
-estruturas são evidenciadas nas projeções bidimensionais. Foram
-                                                                      obtida pelo maior grau de pertinência, permitindo o cálculo da
-realizados 252 ajustes principais: 250 ajustes particionais, uma
-                                                                      silhueta e do ARI [4].
-hierarquia UPGMA e um DBSCAN. As projeções incluem PCA,
-Kernel PCA, t-SNE e UMAP. Os rótulos das espécies são utili­             O Kernel FCM utiliza uma distância induzida por kernel
-zados apenas após os ajustes, para interpretação e avaliação          para representar relações não lineares. As variantes discutidas
-externa.                                                              por Graves e Pedrycz diferem na representação dos protótipos
-                                                                      e na formulação do objetivo [5]. Na implementação adotada, os
-   As contribuições deste estudo são a comparação sob um
-                                                                      protótipos permanecem no espaço de entrada, e o kernel RBF
-protocolo comum, o registro completo das execuções e a interpre­
-                                                                      determina sua proximidade às observações. O parâmetro gamma
-tação conjunta de silhueta, índice de Rand ajustado e projeções.
-                                                                      controla a escala dessa relação e, portanto, influencia o ajuste.
-Padronização, sementes e hiperparâmetros são escolhas metodo­
-lógicas; os requisitos experimentais decorrem exclusivamente de          No K-Medoids, cada grupo é representado por uma observa­
-[1].                                                                  ção da própria base, chamada medoide. Neste estudo, o algoritmo
-                                                                      busca minimizar a soma das distâncias euclidianas entre as ob­
-                                                                      servações e os medoides aos quais estão associadas. Para isso, o
+-SNE apresentou a maior preservação local de vizinhanças na           dados. A descrição da base e de seus atributos está disponível no
+configuração avaliada. Os resultados destacam os limites da seleção   repositório UCI [3].
+interna e a necessidade de interpretar projeções em conjunto com        TABELA I: Médias e desvios-padrão populacionais utilizados no z-score
+métricas.                                                                                   Atributo 𝜇𝑟 (cm) 𝜎𝑟 (cm)
+Palavras-chave—agrupamento, Iris, silhueta, índice de Rand ajus­                          Comp. sépala 5,8433 0,8253
+tado, redução de dimensionalidade.                                                        Larg. sépala 3,0540 0,4321
+                                                                                          Comp. pétala 3,7587 1,7585
+                       I. INTRODUÇÃO                                                       Larg. pétala 1,1987 0,7606
+A análise não supervisionada pode revelar estruturas geométricas
+que não coincidem com classes conhecidas. Este artigo investiga                 III. FUNDAMENTAÇÃO DOS MÉTODOS
+quais partições da base Iris são favorecidas pela silhueta, como
+                                                                   Os métodos de agrupamento adotam diferentes critérios para de­
+elas se relacionam com as três espécies e quais estruturas
+                                                                   finir uma partição. O K-Means minimiza a soma dos quadrados
+aparecem nas projeções bidimensionais. São comparados sete
+                                                                   das distâncias euclidianas entre as observações e os centroides
+algoritmos de agrupamento e quatro técnicas de redução de
+                                                                   dos respectivos grupos. O algoritmo alterna a atribuição ao
+dimensionalidade, seguindo o protocolo da Equipe 08 [1].
+                                                                   centro mais próximo e o recálculo dos centroides, favorecendo
+   Foram realizados 252 ajustes principais: 250 ajustes partici­   grupos compactos. A dependência da inicialização pode levar a
+onais, uma hierarquia UPGMA e um DBSCAN. As projeções              diferentes mínimos locais [4].
+incluem PCA, Kernel PCA, t-SNE e UMAP. As espécies são
+                                                                      O Fuzzy C-Means (FCM) representa cada observação por
+utilizadas somente após os ajustes, para interpretação e avalia­
+                                                                   graus de pertinência aos grupos, normalizados. Sua função
+ção externa. A comparação combina funções objetivo, silhueta,
+                                                                   objetivo pondera as distâncias quadráticas aos centroides pelas
+índice de Rand ajustado e diagnóstico de preservação de vizi­
+                                                                   pertinências elevadas ao expoente m, que controla o grau de
+nhanças.
+                                                                   difusividade da partição. Neste estudo, a partição exclusiva é
+            II. BASE DE DADOS E PREPARAÇÃO                         obtida pelo maior grau de pertinência, permitindo o cálculo da
+                                                                   silhueta e do ARI [5].
+Foi utilizada a base Iris fornecida na atividade, com 150 obser­      O Kernel FCM utiliza uma distância induzida por kernel para
+vações e quatro atributos em centímetros: comprimento e largura representar relações não lineares. As variantes discutidas por
+de sépala e comprimento e largura de pétala. Há 50 observações Graves e Pedrycz diferem na representação dos protótipos e na
+por espécie: Iris-setosa, Iris-versicolor e Iris-virginica. Linhas formulação do objetivo [6]. Adotou-se a variante de Zhang e
+completamente vazias são ignoradas. A matriz numérica é sepa­ Chen com protótipos no espaço de entrada [7], e o kernel RBF
+rada dos rótulos antes dos ajustes; os rótulos servem apenas à determina sua proximidade às observações. O parâmetro gamma
+avaliação externa e às cores e símbolos das figuras.               controla a escala dessa relação e, portanto, influencia o ajuste.
+  Os quatro atributos foram padronizados pelo método z-score          No K-Medoids, cada grupo é representado por uma observa­
+com o StandardScaler [2]. Para cada observação i e atributo r, ção da própria base, chamada medoide. Neste estudo, o algoritmo
+aplicou-se a transformação                                         busca minimizar a soma das distâncias euclidianas entre as ob­
+                                𝑥 − 𝜇𝑟
+                         𝑧𝑖𝑟 = 𝑖𝑟        ,                     (1) servações e os medoides aos quais estão associadas. Para isso, o
+                                   𝜎𝑟                              procedimento PAM avalia trocas dos medoides por outras obser­
+                                                                   vações e mantém aquelas que reduzem o custo [8].
 
 
 --- Página 2 ---
-procedimento PAM avalia trocas dos medoides por outras obser­       cada chamada. No K-Medoids com k igual a 1, as dez chamadas
-vações e mantém aquelas que reduzem o custo [6].                    utilizaram a mesma busca exaustiva pelo medoide, cujo resultado
    A mistura gaussiana modela a distribuição dos dados por          independe da semente. As repetições permitem examinar a in­
 componentes definidos por médias, covariâncias e pesos. O           fluência da inicialização na mesma base; não representam novas
 algoritmo de expectativa-maximização (EM) alterna a estimação       amostras dos dados.
 das probabilidades posteriores de associação e a atualização dos       O UPGMA foi executado uma vez, e os cinco cortes, de um a
-parâmetros, buscando maximizar a verossimilhança [7]. As cova­      cinco grupos, foram extraídos da mesma hierarquia. O DBSCAN
+parâmetros, buscando maximizar a verossimilhança [9]. As cova­      cinco grupos, foram extraídos da mesma hierarquia. O DBSCAN
 riâncias completas permitem representar componentes elípticos       também teve uma única execução, completando os 252 ajustes
 com diferentes orientações. A inicialização e o condicionamento     principais. Para cada k dos métodos particionais, selecionou-se a
 das matrizes de covariância afetam a estimação.                     execução com o melhor valor da função objetivo. Em seguida, a
    Neste estudo, o UPGMA constrói uma hierarquia aglomera­          maior silhueta válida definiu o número de grupos, e o ARI mediu
 tiva, unindo a cada etapa os grupos com a menor média das           a concordância da partição selecionada com as espécies. As
-distâncias Manhattan entre seus pares de observações [8]. O         quatro técnicas de redução de dimensionalidade foram ajustadas
+distâncias Manhattan entre seus pares de observações [10]. O        quatro técnicas de redução de dimensionalidade foram ajustadas
 DBSCAN identifica agrupamentos por conectividade de regiões         separadamente sobre os mesmos atributos padronizados, uma
 densas e classifica como ruído as observações que não pertencem     vez cada. No t-SNE e no UMAP, utilizou-se a semente 42. As
 a esses agrupamentos. O parâmetro eps define o raio da vizi­        métricas de agrupamento foram calculadas no espaço de quatro
 nhança, enquanto min_samples estabelece a quantidade mínima         atributos.
 de observações nessa vizinhança para caracterizar um ponto             Os experimentos foram executados em Python 3.14.4, em
-central [9].                                                        ambiente virtual. A preparação dos dados utilizou NumPy 2.5.4
+central [11].                                                       ambiente virtual. A preparação dos dados utilizou NumPy 2.5.4
    A avaliação combina critérios internos e externos. A silhueta    e pandas 3.0.6. O scikit-learn 1.9.1 forneceu K-Means, GMM,
 compara a distância média de uma observação ao próprio grupo        DBSCAN, PCA, Kernel PCA, t-SNE e as métricas de avaliação,
 com a menor distância média a outro grupo, relacionando coesão      enquanto o SciPy 1.18.1 foi utilizado na construção da hierarquia
-e separação [10]. O índice de Rand ajustado (ARI) mede a con­       UPGMA. Os métodos FCM e Kernel FCM foram executados
+e separação [12]. O índice de Rand ajustado (ARI) mede a con­       UPGMA. Os métodos FCM e Kernel FCM foram executados
 cordância entre a partição estimada e uma partição de referência    com fuzzy-c-means 2.3.1, o PAM com kmedoids 0.5.5 e o
 a partir de pares de observações, com correção para a concor­       UMAP com umap-learn 0.5.12, em ambiente com Numba
-dância esperada ao acaso [11]. Neste estudo, as espécies definem    0.68.0.
+dância esperada ao acaso [13]. Neste estudo, as espécies definem    0.68.0.
 a referência externa. Uma partição favorecida pela silhueta pode    B. Parâmetros e seleção das execuções
-apresentar concordância limitada com essa referência.               A TABELA II reúne as configurações utilizadas e os critérios
+apresentar concordância limitada com essa referência.
+                                                                    A TABELA II reúne as configurações utilizadas e os critérios
    As técnicas de redução de dimensionalidade representam           de seleção das execuções dos sete agrupadores indicados para a
 diferentes aspectos da estrutura dos dados. A PCA identifica        Equipe 08 no enunciado [1].
 direções ortogonais que maximizam sucessivamente a variância           TABELA II: Configurações dos agrupadores e critérios de seleção por k
-projetada, formando componentes lineares dos atributos [12]. A
-                                                                       Método                 Configuração                  Critério de seleção
-Kernel PCA realiza uma decomposição espectral da matriz de
+projetada, formando componentes lineares dos atributos [14]. A
+Kernel PCA realiza uma decomposição espectral da matriz de             Método                 Configuração                  Critério de seleção
 kernel centralizada, estendendo a análise a relações não lineares     K-Means       Distância euclidiana; inicialização       Menor soma das
-                                                                                           aleatória; n_init=1.            distâncias quadráticas
-dependentes do kernel escolhido [13].                                                                                          aos centroides.
+dependentes do kernel escolhido [15].                                                      aleatória; n_init=1.            distâncias quadráticas
+                                                                                                                               aos centroides.
    O t-SNE ajusta uma representação de baixa dimensão pela
                                                                         FCM        Distância euclidiana quadrática; m =    Menor objetivo fuzzy.
 minimização da divergência KL entre as distribuições de afini­                      2; até 300 iterações; tolerância de
 dade no espaço original e no espaço projetado. A perplexidade                                     0,00001.
 controla a escala de vizinhança considerada, e a inicialização       Kernel FCM     Kernel RBF; gamma = 0,25; m = 2;       Menor objetivo fuzzy
-influencia a otimização [14]. O UMAP constrói uma represen­                          até 300 iterações; tolerância de         com distância
+influencia a otimização [16]. O UMAP constrói uma represen­                          até 300 iterações; tolerância de         com distância
 tação das relações de vizinhança e otimiza sua disposição em                                     0,00001.                  induzida pelo kernel.
 baixa dimensão. O número de vizinhos controla a escala local,        K-Medoids           PAM; distância euclidiana;          Menor soma das
 enquanto min_dist influencia a compactação da representação                            inicialização aleatória; até 300       distâncias aos
-[15]. A interpretação dessas projeções deve considerar possíveis                   iterações para k > 1. Busca exaustiva        medoides.
+[17]. A interpretação dessas projeções deve considerar possíveis                   iterações para k > 1. Busca exaustiva        medoides.
                                                                                                   para k = 1.
 distorções de distâncias globais e densidades.
                                                                       GMM/EM              Covariâncias completas;                Maior log-
-                                                                                     inicialização random_from_data;       -verossimilhança total
-         IV. METODOLOGIA DE AGRUPAMENTO                                              n_init=1; tolerância de 0,00001;         no modelo final.
+         IV. METODOLOGIA DE AGRUPAMENTO                                              inicialização random_from_data;       -verossimilhança total
+                                                                                     n_init=1; tolerância de 0,00001;         no modelo final.
 A. Desenho experimental e recursos utilizados                                            regularização de 0,000001.
 O estudo compara os métodos na base completa, com os quatro           UPGMA        Distância Manhattan; ligação média;     Sem reinicializações;
 atributos padronizados em z-score. Os rótulos das espécies foram                     uma hierarquia e cortes de 1 a 5      corte escolhido pela
@@ -140,398 +135,437 @@ valores de k em {1, 2, 3, 4, 5}.                                    A melhor exe
 execuções, uma para cada semente inteira entre 42 e 51, inclu­      a primeira execução na ordem das sementes. Nos métodos fuzzy,
 sive. Cada combinação de método, k e semente correspondeu a         os rótulos exclusivos são obtidos pela maior pertinência; no
 um único ajuste, totalizando 50 ajustes por método e 250 ajustes    GMM, pela maior probabilidade posterior. As funções objetivo
-particionais. No K-Means e no GMM, utilizou-se n_init=1 em
+particionais. No K-Means e no GMM, utilizou-se n_init=1 em          têm escalas e significados próprios e são comparadas apenas
+cada chamada. No K-Medoids com k igual a 1, as dez chamadas         entre execuções do mesmo método e do mesmo k.
+utilizaram a mesma busca exaustiva pelo medoide, cujo resultado
 
 
 --- Página 3 ---
-têm escalas e significados próprios e são comparadas apenas                                         V. RESULTADOS DE AGRUPAMENTO
-entre execuções do mesmo método e do mesmo k.                          A. Comparação das partições selecionadas
-   No Kernel FCM, utiliza-se K(x,v) = exp(−0,25‖x−v‖²), com                                          TABELA III: Resultados das partições selecionadas
-distância quadrática induzida igual a 2(1−K(x,v)). Os protótipos
-                                                                                                       Método k escolhido Silhueta ARI Ruído
-permanecem no espaço de entrada e são atualizados com pon­
-                                                                                                      K-Means      2       0,5802 0,5681 0
+   No Kernel FCM, utiliza-se K(x,v) = exp(−0,25‖x−v‖²), com                                      V. RESULTADOS DE AGRUPAMENTO
+distância quadrática induzida igual a 2(1−K(x,v)). Os protótipos      A. Comparação das partições selecionadas
+permanecem no espaço de entrada e são atualizados com pon­                                       TABELA III: Resultados das partições selecionadas
 deração pelo kernel, conforme a variante implementada pela
-                                                                                                        FCM        2       0,5802 0,5681 0
-biblioteca fcmeans. O objetivo registrado corresponde a essa
-                                                                                                     Kernel FCM    2       0,5802 0,5681 0
-formulação.
-                                                                                                     K-Medoids     2       0,5802 0,5681 0
+                                                                                                   Método k escolhido Silhueta ARI Ruído
+biblioteca fcmeans. O objetivo registrado corresponde a essa for­
+                                                                                                  K-Means       2      0,5802 0,5681 0
+mulação. Nos dois métodos fuzzy, m = 2 é a escolha convencional
+                                                                                                    FCM         2      0,5802 0,5681 0
+de difusividade. O valor gamma = 0,25 coincide com 1/número
+                                                                                                 Kernel FCM     2      0,5802 0,5681 0
+de atributos, padrão do kernel RBF do scikit-learn, e foi fixado
+                                                                                                 K-Medoids      2      0,5802 0,5681 0
+sem consultar as espécies.
+                                                                                                  GMM/EM        2      0,5802 0,5681 0
    No DBSCAN, min_samples inclui o próprio ponto na conta­
-                                                                                                      GMM/EM       2       0,5802 0,5681 0
-gem da vizinhança. Os parâmetros foram mantidos da configu­
-                                                                                                      UPGMA        2       0,5802 0,5681 0
-ração experimental existente, sem otimização orientada pelos
-                                                                                                      DBSCAN      auto.    0,5963 0,5518 4
-rótulos das espécies.
-                                                                       Todos os seis métodos com seleção de k escolheram dois grupos
-C. Avaliação                                                           e produziram a mesma partição, salvo permutação dos identifi­
-Os agrupamentos foram avaliados pela silhueta, que considera a         cadores: um grupo contém as 50 setosas e o outro reúne as 50
-coesão e a separação dos grupos, e pelo índice de Rand ajustado        versicolors e as 50 virginicas. Isso explica a igualdade das métri­
-(ARI), que mede a concordância com as espécies conhecidas. O           cas, sem implicar igualdade dos centros, pertinências ou funções
-cálculo das métricas seguiu as convenções do scikit-learn [17].        objetivo.
-   Para cada observação i, a silhueta é definida por                      O DBSCAN reteve 49 setosas em um grupo e 50 versicolors
-                                𝑏(𝑖) − 𝑎(𝑖)                            mais 47 virginicas no outro. O ruído contém uma setosa e três
-                      𝑠(𝑖) =
-                              max(𝑎(𝑖), 𝑏(𝑖))                          virginicas: quatro pontos, ou 2,67% da base. Sua silhueta de
-, em que a(i) é a distância média às demais observações do             0,5963 supera numericamente 0,5802, mas exclui esses quatro
-próprio grupo e b(i) é a menor distância média às observações de       pontos; portanto, não demonstra superioridade global. O ARI de
-outro grupo. Valores próximos de 1 indicam maior separação em          0,5518 é inferior ao dos demais resultados selecionados.
-relação aos demais grupos; valores próximos de zero sugerem            B. Silhuetas e comparação por k
-proximidade entre grupos, e valores negativos indicam que a            A tabela apresenta as silhuetas após a seleção pela função obje­
-observação está, em média, mais próxima de outro grupo. A              tivo. Para todos os métodos, k igual a 1 é indefinido.
-silhueta da partição corresponde à média desses valores e foi                                       TABELA IV: Silhueta das melhores execuções por k
-utilizada para selecionar k após a escolha da melhor execução                                                Método    k=2 k=3 k=4 k=5
-pela função objetivo [10].                                                                                  K-Means 0,5802 0,4584 0,3883 0,3477
-   Utilizou-se distância euclidiana no cálculo da silhueta de todos                                           FCM     0,5802 0,4574 0,4006 0,3342
-os métodos. No UPGMA, portanto, a avaliação considera uma                                                  Kernel FCM 0,5802 0,4574 0,3941 0,3285
-métrica diferente da distância Manhattan empregada na constru­                                             K-Medoids 0,5802 0,4497 0,4080 0,3421
-ção da hierarquia. A silhueta é indefinida quando há apenas um                                              GMM/EM 0,5802 0,3728 0,3455 0,1503
-grupo, como em k = 1, ou quando cada observação constitui um                                                UPGMA 0,5802 0,4517 0,3991 0,3824
+                                                                                                  UPGMA         2      0,5802 0,5681 0
+gem da vizinhança. Adotaram-se eps = 0,8 e min_samples = 5
+                                                                                                  DBSCAN    2 (auto.)  0,5963 0,5518 4
+como configuração exploratória. A varredura complementar de
+eps apresentada nos resultados examina sua sensibilidade sem          Todos os seis métodos com seleção de k escolheram dois grupos
+utilizar as espécies para seleção; ela não integra os 252 ajustes     e produziram a mesma partição, salvo permutação dos identifi­
+principais.                                                           cadores: um grupo contém as 50 setosas e o outro reúne as 50
+                                                                      versicolors e as 50 virginicas. Isso explica a igualdade das métri­
+C. Avaliação
+                                                                      cas, sem implicar igualdade dos centros, pertinências ou funções
+Os agrupamentos foram avaliados pela silhueta, que considera a
+                                                                      objetivo.
+coesão e a separação dos grupos, e pelo índice de Rand ajustado
+(ARI), que mede a concordância com as espécies conhecidas. O             O DBSCAN reteve 49 setosas em um grupo e 50 versicolors
+cálculo das métricas seguiu as convenções do scikit-learn [18].       mais 47 virginicas no outro. O ruído contém uma setosa e três
+                                                                      virginicas: quatro pontos, ou 2,67% da base. Sua silhueta de
+   Para cada observação i, a silhueta é definida por
+                                                                      0,5963 supera numericamente 0,5802, mas exclui esses quatro
+                                𝑏(𝑖) − 𝑎(𝑖)                           pontos; portanto, não demonstra superioridade global. O ARI de
+                      𝑠(𝑖) =                                    (3)
+                              max(𝑎(𝑖), 𝑏(𝑖))                         0,5518 é inferior ao dos demais resultados selecionados.
+, em que a(i) é a distância média às demais observações do            B. Silhuetas e comparação por k
+próprio grupo e b(i) é a menor distância média às observações de      A tabela apresenta as silhuetas após a seleção pela função obje­
+outro grupo. Valores próximos de 1 indicam maior separação em         tivo. Para todos os métodos, k igual a 1 é indefinido.
+relação aos demais grupos; valores próximos de zero sugerem                                      TABELA IV: Silhueta das melhores execuções por k
+proximidade entre grupos, e valores negativos indicam que a                                           Método    k=2 k=3 k=4 k=5
+observação está, em média, mais próxima de outro grupo. A                                            K-Means 0,5802 0,4584 0,3883 0,3477
+silhueta da partição corresponde à média desses valores e foi                                          FCM     0,5802 0,4574 0,4006 0,3342
+utilizada para selecionar k após a escolha da melhor execução
+                                                                                                    Kernel FCM 0,5802 0,4574 0,3941 0,3285
+pela função objetivo [12].
+                                                                                                    K-Medoids 0,5802 0,4497 0,4080 0,3421
+   Utilizou-se distância euclidiana no cálculo da silhueta de todos                                  GMM/EM 0,5802 0,3728 0,3455 0,1503
+os métodos. No UPGMA, portanto, a avaliação considera uma                                            UPGMA 0,5802 0,4517 0,3991 0,3824
+métrica diferente da distância Manhattan empregada na constru­
+ção da hierarquia. A silhueta é indefinida quando há apenas um
+grupo, como em k = 1, ou quando cada observação constitui um                           0,6
 grupo. Essas partições foram excluídas da seleção. Em partições
-válidas, a biblioteca atribui silhueta zero às observações que                                                                                           k* = 2
+válidas, a biblioteca atribui silhueta zero às observações que
 formam grupos unitários.
-                                                                                       0.55
-   O ARI compara pares de observações para verificar a concor­
-
+                                                                                       0,5
 
 
 
                                                                       Silhueta média
-dância entre a partição estimada e a partição de referência,
-definida pelas espécies, descontando a concordância esperada                           0.50
-ao acaso [11]. O índice assume valor 1 quando as partições
-são equivalentes, independentemente dos identificadores dos                            0.45
+   O ARI compara pares de observações para verificar a concor­
+dância entre a partição estimada e a partição de referência,                           0,4
+definida pelas espécies, descontando a concordância esperada
+ao acaso [13]. O índice assume valor 1 quando as partições
+são equivalentes, independentemente dos identificadores dos
+                                                                                       0,3
 grupos. Valores próximos de zero indicam concordância próxima
-
-                                                                                              indefinida
-à esperada ao acaso, e valores negativos indicam concordância                          0.40
-inferior a essa referência. O ARI foi utilizado apenas na avaliação
-externa, após a seleção da partição, sem orientar a escolha de                         0.35
-inicializações, hiperparâmetros ou k.
+à esperada ao acaso, e valores negativos indicam concordância                          0,2            K-Means              K-Medoids
+inferior a essa referência. O ARI foi utilizado apenas na avaliação                                   FCM                  GMM/EM
+externa, após a seleção da partição, sem orientar a escolha de                                        Kernel FCM           UPGMA
+inicializações, hiperparâmetros ou k.                                                  0,1
    No DBSCAN, a silhueta foi calculada apenas sobre as observa­
-                                                                                                1                  2             3             4             5
-ções não classificadas como ruído, desde que a partição restante                                                       Número de grupos (k)
-fosse válida para essa métrica. O ARI incluiu todas as observa­                    Fig. 1: Silhueta após seleção da execução por função objetivo: K-Means.
-ções, mantendo o rótulo −1 atribuído ao ruído. Assim, a silhueta
-do DBSCAN descreve um subconjunto da base, o que deve ser
-considerado ao compará-la aos valores dos demais métodos.
+                                                                                             1               2           3           4               5
+ções não classificadas como ruído, desde que a partição restante                                                 Número de grupos (k)
+fosse válida para essa métrica. O ARI incluiu todas as observa­       Fig. 1: Silhueta por k dos seis métodos. A linha tracejada indica k ótimo = 2 em
+ções, mantendo o rótulo −1 atribuído ao ruído. Assim, a silhueta                         todos eles; em k = 1, a silhueta é indefinida.
+do DBSCAN descreve um subconjunto da base, o que deve ser             A silhueta tende a cair quando se subdivide a estrutura que reúne
+considerado ao compará-la aos valores dos demais métodos.             versicolor e virginica em k = 2; os grupos obtidos em k = 3 não
+                                                                      correspondem necessariamente às espécies. Isso favorece k igual
+                                                                      a 2, apesar das três classes biológicas. O efeito é especialmente
 
 
 --- Página 4 ---
-                                                                           k* = 2
-                                                                                                       0.6
-                                                                                                                                                                       k* = 2
-                 0.55
-                                                                                                       0.5
+claro no GMM: a partição de três componentes tem menor              0,1319; 0,0604), com (20; 55; 45; 20; 10) atribuições exclusivas.
+silhueta, embora corresponda muito melhor às espécies. A tabela     A menor componente tem cerca de 6% do peso e covariância
+seguinte usa k igual a 3 apenas para interpretação posterior; ela   quase singular: autovalor mínimo de 0,00000381, próximo à re­
+não substitui a seleção exigida no enunciado.                       gularização de 0,000001. Isso é compatível com um ajuste muito
+          TABELA V: Avaliação complementar com três grupos          estreito e fragmentação, embora a silhueta baixa isoladamente
+               Método Silhueta em k = 3 ARI em k = 3                não diagnostique degeneração. O BIC, calculado nos melhores
+              K-Means      0,4584         0,6101                    ajustes por verossimilhança, foi 1051,2801; 797,6857; 804,5072;
+                FCM        0,4574         0,6303                    834,8324; 847,7804 para k de 1 a 5. Seu mínimo também ocorre
+             Kernel FCM    0,4574         0,6303                    em k = 2, sem substituir a seleção principal pela silhueta.
+             K-Medoids     0,4497         0,6765                       UPGMA. A hierarquia permite examinar cortes aninhados
+              GMM/EM       0,3728         0,9039                    sem novas inicializações. O corte em três grupos alcança ARI
+              UPGMA        0,4517         0,7184                    de 0,7184, mas o corte em dois mantém a maior silhueta tanto
+                                                                    euclidiana quanto Manhattan.
+O GMM obtém ARI de 0,9039 em k igual a 3, contra 0,5681
+na solução escolhida pela silhueta. A modelagem por covariân­          DBSCAN. Os quatro pontos de ruído ficam sem atribuição aos
+cias completas permite grupos com formas distintas, enquanto        dois grupos e não são forçados a integrar uma região densa. Para
+a silhueta euclidiana favorece separação compacta. UPGMA al­        min_samples = 5, a varredura complementar mostra dois grupos
+cança ARI de 0,7184 e K-Medoids 0,6765 em três grupos. Esses        em todo o intervalo examinado:
+                                                                        TABELA VII: Sensibilidade do DBSCAN a eps; silhueta sem ruído
+valores mostram que a avaliação interna e a recuperação das
+espécies respondem a perguntas diferentes. Não houve escolha                            eps Grupos Ruído Silhueta
+retroativa pelo melhor ARI.                                                             0,6   2     26    0,6405
+   A tabela de contingência da execução selecionada do GMM                              0,7   2      8    0,6104
+em k igual a 3 torna essa diferença explícita. Os identificadores                       0,8   2      4    0,5963
+dos grupos são arbitrários.                                                             0,9   2      4    0,5963
+     TABELA VI: Contingência da mistura gaussiana com três grupos                       1,0   2      3    0,5936
 
-
-
-Silhueta média                                                                        Silhueta média
-                 0.50
-                                                                                                       0.4
-                 0.45
-                                                                                                       0.3
-                 0.40
-
-                 0.35   indefinida                                                                     0.2   indefinida
-
-                          1          2           3               4               5                             1                     2            3             4          5
-                                         Número de grupos (k)                                                                             Número de grupos (k)
-   Fig. 2: Silhueta após seleção da execução por função objetivo: Fuzzy K-Means.                 Fig. 5: Silhueta após seleção da execução por função objetivo: GMM/EM.
-
-                                                                           k* = 2                                                                                      k* = 2
-                 0.55                                                                                  0.55
-
-
-
-Silhueta média                                                                        Silhueta média
-                 0.50
-                                                                                                       0.50
-                 0.45
-                                                                                                       0.45
-                 0.40
-                 0.35   indefinida                                                                     0.40     indefinida
-
-                          1          2           3               4               5                                1                   2            3             4         5
-                                         Número de grupos (k)                                                                             Número de grupos (k)
-  Fig. 3: Silhueta após seleção da execução por função objetivo: Kernel Fuzzy K-                        Fig. 6: Silhueta dos cinco cortes de uma única hierarquia UPGMA.
-                                      -Means.                                          A silhueta cai ao subdividir o bloco formado por versicolor
-                                                                                       e virginica. Isso favorece k igual a 2, apesar das três classes
-                                                                           k* = 2      biológicas. O efeito é especialmente claro no GMM: a partição
-                 0.55                                                                  de três componentes tem menor silhueta, embora corresponda
-
-
-
-
-Silhueta média
-                                                                                       muito melhor às espécies. A tabela seguinte usa k igual a 3 apenas
-                 0.50                                                                  para interpretação posterior; ela não substitui a seleção exigida
-                                                                                       no enunciado.
-                 0.45                                                                                               TABELA V: Avaliação complementar com três grupos
-                                                                                                                               Método Silhueta em k = 3 ARI em k = 3
-                 0.40
-                        indefinida
-                                                                                                                              K-Means      0,4584         0,6101
-                                                                                                                                FCM        0,4574         0,6303
-                 0.35                                                                                                        Kernel FCM    0,4574         0,6303
-                                                                                                                             K-Medoids     0,4497         0,6765
-                          1          2           3               4               5                                            GMM/EM       0,3728         0,9039
-                                         Número de grupos (k)                                                                 UPGMA        0,4517         0,7184
-          Fig. 4: Silhueta após seleção da execução por função objetivo: K-Medoids.    O GMM obtém ARI de 0,9039 em k igual a 3, contra 0,5681
-                                                                                       na solução escolhida pela silhueta. A modelagem por covariân­
-                                                                                       cias completas permite grupos com formas distintas, enquanto
-                                                                                       a silhueta euclidiana favorece separação compacta. UPGMA al­
-                                                                                       cança ARI de 0,7184 e K-Medoids 0,6765 em três grupos. Esses
-                                                                                       valores mostram que a avaliação interna e a recuperação das
-                                                                                       espécies respondem a perguntas diferentes. Não houve escolha
-                                                                                       retroativa pelo melhor ARI.
-                                                                                          A tabela de contingência da execução selecionada do GMM
-                                                                                       em k igual a 3 torna essa diferença explícita. Os identificadores
-                                                                                       dos grupos são arbitrários.
+                  Espécie     Grupo 0 Grupo 1 Grupo 2               O valor 0,8 situa-se em uma região localmente estável entre 0,8
+                 Iris-setosa    50       0       0                  e 0,9, com quatro pontos de ruído, e reduz a exclusão observada
+              Iris-versicolor    0      45       5                  nos raios menores. A maior silhueta em eps = 0,6 acompanha
+               Iris-virginica    0       0      50                  a exclusão de 26 observações e não é diretamente comparável
+                                                                    à avaliação sobre 146 pontos. A varredura oferece justificativa
+As 50 setosas formam um grupo exclusivo. Outro contém 45 ver­
+                                                                    geométrica posterior da configuração exploratória, sem compro­
+sicolors, e o terceiro contém as 50 virginicas e cinco versicolors.
+                                                                    var que seja ótima.
+Essa correspondência é observada após o ajuste e não representa
+acurácia preditiva em novas amostras. Em particular, ARI igual D. Dependência da inicialização
+a 0,9039 não significa que 90,39% das flores foram classificadas Para examinar a variação entre as dez sementes, a tabela apre­
+corretamente.                                                       senta o intervalo da função objetivo em k igual a 3. O melhor
+                                                                    extremo é o mínimo para K-Means, FCM, Kernel FCM e K-
+C. Interpretação por algoritmo e diagnósticos complementares
+                                                                    -Medoids, e o máximo para GMM/EM. Cada linha deve ser
+K-Means. A preferência por dois grupos expressa a separação
+                                                                    interpretada na escala do próprio algoritmo; objetivos de méto­
+compacta das setosas. Em três grupos, a partição recupera par­
+                                                                    dos diferentes não são diretamente comparáveis.
+cialmente as espécies e depende da inicialização; a análise de
+                                                                                    TABELA VIII: Faixa das funções objetivo
+sensibilidade abaixo quantifica essa dependência.
+                                                                                        Método     Mínimo Máximo
+   FCM. As pertinências permitem descrever transições entre
+                                                                                       K-Means 140,9684 192,0372
+grupos, mas sua conversão pela maior pertinência elimina essa
+                                                                                         FCM      101,2222 101,2222
+informação na silhueta e no ARI. Em k = 3, a partição exclusiva
+                                                                                      Kernel FCM 32,7858       32,7858
+coincide exatamente com a do Kernel FCM, salvo permutação
+                                                                                      K-Medoids 131,2703 132,3408
+dos rótulos.
+                                                                                       GMM/EM −318,3884 −292,0196
+   Kernel FCM. A igualdade das métricas em k = 3 decorre
+dessa coincidência de partição, verificada por ARI entre as duas K-Means e GMM exibem diferenças entre as soluções encon­
+soluções igual a 1. Os objetivos e as pertinências são distintos; o tradas. Fuzzy K-Means e Kernel Fuzzy K-Means apresentam
+kernel não produziu vantagem na partição exclusiva dessa confi­ objetivos praticamente iguais entre sementes na precisão exibida.
+guração.                                                            Essa concordância numérica não prova ótimo global. No GMM,
+   K-Medoids. A representação por observações reais e a soma as dez execuções com três componentes registraram convergên­
+de distâncias não quadráticas reduzem a influência de pontos cia pelo critério da biblioteca, embora tenham alcançado valores
+extremos em comparação ao objetivo quadrático do K-Means. distintos de log-verossimilhança. Convergir e atingir a melhor
+Essa propriedade não foi testada por contaminação nesta base; o solução possível são propriedades diferentes.
+ARI de 0,6765 em três grupos descreve apenas a configuração            Como análise de sensibilidade separada, executou-se K-Means
+avaliada.                                                           com  k = 3, inicialização aleatória, semente 42 e 100 inicializa­
+   GMM/EM. A alta concordância em três componentes con­             ções  internas. O objetivo foi 140,9658, contra 140,9684 no
+trasta com a silhueta de 0,1503 em cinco. No melhor ajuste de protocolo principal, com ARI de 0,6201 e silhueta de 0,4590. A
+cinco componentes, os pesos foram (0,1410; 0,3677; 0,2989; redução do objetivo foi de apenas 0,0018%, embora a nova par­
 
 
 --- Página 5 ---
-                          TABELA VI: Contingência da mistura gaussiana com três grupos   corte em dois grupos separa setosa das demais espécies. Cortes
-                                       Espécie     Grupo 0 Grupo 1 Grupo 2               mais finos aumentam a correspondência com as espécies em
-                                      Iris-setosa    50       0       0                  alguns casos, mas reduzem a silhueta euclidiana. A árvore repre­
-                                   Iris-versicolor    0      45       5                  senta relações de proximidade, e não uma filogenia ou evidência
-                                    Iris-virginica    0       0      50                  causal.
-As 50 setosas formam um grupo exclusivo. Outro contém 45 ver­                                     VI. REDUÇÃO DE DIMENSIONALIDADE
-sicolors, e o terceiro contém as 50 virginicas e cinco versicolors.
-Essa correspondência é observada após o ajuste e não representa                          As quatro técnicas receberam a mesma matriz padronizada de
-acurácia preditiva em novas amostras. Em particular, ARI igual                           quatro atributos, sem rótulos de espécie durante o ajuste. As
-a 0,9039 não significa que 90,39% das flores foram classificadas                         cores foram adicionadas posteriormente. PCA foi ajustada com
-corretamente.                                                                            quatro componentes para apresentar o espectro completo; seu
-                                                                                         gráfico usa apenas as duas primeiras. Os outros métodos foram
-C. Dependência da inicialização                                                          ajustados diretamente para duas dimensões. As 150 coordenadas
-Para examinar a variação entre as dez sementes, a tabela apre­                           de cada método foram exportadas em CSV, com identificador de
-senta o intervalo da função objetivo em k igual a 3. Cada linha                          observação e espécie.
-deve ser interpretada na escala do próprio algoritmo; objetivos
-de métodos diferentes não são diretamente comparáveis.                                   A. PCA
-                                    TABELA VII: Faixa das funções objetivo               As saídas de variância explicada, componentes e valores singula­
-                                                                                         res seguem as definições do estimador PCA do scikit-learn [18].
-                                         Método   Mínimo Máximo
-                                        K-Means 140,9684 192,0372
-                                                                                            A PCA utiliza decomposição SVD completa. As componentes
-                                          FCM     101,2222 101,2222
-                                                                                         são combinações lineares ortogonais dos atributos padronizados.
-                                       Kernel FCM 32,7858   32,7858
-                                                                                         A tabela mostra os autovalores da covariância amostral, as pro­
-                                       K-Medoids 131,2703 132,3408
-                                                                                         porções explicadas e a soma acumulada.
-                                                                                                   TABELA VIII: Espectro e variância explicada da PCA
-                                        GMM/EM −318,3884 −292,0196
-                                                                                                Componente Autovalor Variância (%) Acumulada (%)
-K-Means e GMM exibem diferenças entre as soluções encon­                                           PC1      2,9304      72,7705        72,7705
-tradas. Fuzzy K-Means e Kernel Fuzzy K-Means apresentam                                            PC2      0,9274      23,0305        95,8010
-objetivos praticamente iguais entre sementes na precisão exibida.                                  PC3      0,1483       3,6838        99,4848
-Essa concordância numérica não prova ótimo global. No GMM,                                         PC4      0,0207       0,5152       100,0000
-as dez execuções com três componentes registraram convergên­
-cia pelo critério da biblioteca, embora tenham alcançado valores                         As duas primeiras componentes retêm 95,80% da variância
-distintos de log-verossimilhança. Convergir e atingir a melhor                           da matriz padronizada. As duas omitidas representam 4,20%;
-solução possível são propriedades diferentes.                                            portanto, o gráfico bidimensional preserva a maior parte da vari­
-   As explorações posteriores de hiperparâmetros discutidas du­                          abilidade linear, mas não toda a informação.
-rante o desenvolvimento não foram incorporadas ao protocolo                                Coeficientes das componentes (autovetores):
-principal. Aumentar n_init para 10 dentro de cada uma das dez                                     TABELA IX: Coeficientes das componentes principais
-chamadas, por exemplo, representa cem inicializações internas                                          Atributo     PC1    PC2    PC3     PC4
-por configuração. Portanto, não se deve descrever esse experi­                                       Comp. sépala 0,5224 0,3723 0,7210 −0,2620
-mento como tendo o mesmo orçamento de dez inicializações                                             Larg. sépala −0,2634 0,9256 −0,2420 0,1241
-utilizado nesta entrega.                                                                             Comp. pétala 0,5813 0,0211 −0,1409 0,8012
-                                                                                                      Larg. pétala 0,5656 0,0654 −0,6338 −0,5235
-D. Hierarquia e dendrograma
-                      7
-                                                                                         PC1 atribui pesos positivos ao comprimento de sépala e às duas
-                                                                                         medidas de pétala, com peso negativo para largura de sépala.
-                      6                                                                  PC2 é dominada pela largura de sépala (coeficiente 0,9256). O
+tição tenha aumentado o ARI. A diferença de ARI para o FCM                                                                                TABELA X: Valores singulares da PCA
+diminuiu, mas permaneceu; o resultado principal foi preservado.                                                                                 Componente Valor singular
+Essa análise não demonstra otimalidade global.                                                                                                     PC1        20,8955
+E. Hierarquia e dendrograma                                                                                                                        PC2        11,7551
+                                                                                                                                                   PC3         4,7014
+                       7                                                                                                                           PC4         1,7582
+                                                                                           corte k = 2
+                                                                                           corte k = 3
+                       6                                                                                  Os valores de singular_values_ correspondem a √(149 ×
 
 
 
 
-Distância Manhattan
-                                                                                         sinal de um autovetor pode ser invertido sem alterar a solução; a
-                      5                                                                  interpretação depende dos pesos relativos.
-                                                                                            Adotou-se como convenção de loadings o autovetor multipli­
-                      4
-                                                                                         cado pela raiz do autovalor. Esses valores não são exatamente
-                      3                                                                  os coeficientes acima nem, sem ajuste de escala amostral, as
-                                                                                         correlações com os atributos, pois StandardScaler usa variância
-                      2                                                                  populacional e a PCA reporta covariância amostral.
-                                                                                                             TABELA X: Loadings da PCA
-                      1
-                                                                                                  Atributo Loading 1 Loading 2 Loading 3 Loading 4
-                      0                                                                         Comp. sépala 0,8942   0,3585    0,2777    −0,0377
-                                                   Observações                                  Larg. sépala −0,4508  0,8913    −0,0932    0,0179
-                                                                                                Comp. pétala 0,9950   0,0203    −0,0543    0,1154
-Fig. 7: Uma única árvore UPGMA, construída com distância Manhattan e ligação
-                                  média.                                                         Larg. pétala 0,9682  0,0630    −0,2441 −0,0754
-O dendrograma registra a sequência de fusões; a altura corres­
-ponde à distância de ligação média na escala padronizada. O
+ Distância Manhattan
+                                                                                                          autovalor). A saída mean_ sobre os atributos padronizados é apro­
+                       5                                                                                  ximadamente (0; 0; 0; 0), com resíduos numéricos em módulo
+                                                                                                          inferiores a 7 × 10⁻¹⁶. As médias dos atributos em centímetros
+                       4                                                                                  constam da Tabela I.
+                       3                                                                                     As duas primeiras componentes retêm 95,80% da variância
+                                                                                                          da matriz padronizada. As duas omitidas representam 4,20%;
+                       2                                                                                  portanto, o gráfico bidimensional preserva a maior parte da vari­
+                                                                                                          abilidade linear, mas não toda a informação.
+                       1                                                                                     Coeficientes das componentes (autovetores):
+                                                                                                                                    TABELA XI: Coeficientes das componentes principais
+                       0
+                                                                                                                                        Atributo     PC1    PC2    PC3     PC4
+                           (1)   (4)
+                                       (45)   (16)   (29)
+                                                            (4)   (1)
+                                                                        (15)
+                                                                               (3)   (8)     (1)
+                                                                                                   (23)                               Comp. sépala 0,5224 0,3723 0,7210 −0,2620
+                                 Subárvores (contagens entre parênteses)                                                              Larg. sépala −0,2634 0,9256 −0,2420 0,1241
+                                                                                                                                      Comp. pétala 0,5813 0,0211 −0,1409 0,8012
+Fig. 2: Árvore UPGMA com distância Manhattan e ligação média, truncada em
+12 subárvores. As contagens aparecem entre parênteses e as linhas indicam cortes                                                       Larg. pétala 0,5656 0,0654 −0,6338 −0,5235
+                             em dois e três grupos.                                                       PC1 atribui pesos positivos ao comprimento de sépala e às duas
+O dendrograma registra a sequência de fusões; a altura corres­                                            medidas de pétala, com peso negativo para largura de sépala.
+ponde à distância de ligação média na escala padronizada. O                                               PC2 é dominada pela largura de sépala (coeficiente 0,9256). O
+corte em dois grupos separa setosa das demais espécies. Cortes                                            sinal de um autovetor pode ser invertido sem alterar a solução; a
+mais finos aumentam a correspondência com as espécies em                                                  interpretação depende dos pesos relativos.
+alguns casos, mas reduzem a silhueta euclidiana. A árvore repre­                                             Adotou-se como loading o autovetor multiplicado pela raiz do
+senta relações de proximidade, e não uma filogenia ou evidência                                           autovalor. A correlação entre atributo e componente é igual ao
+causal. Como verificação na métrica de construção, as silhuetas                                           loading multiplicado por √(149/150).
+Manhattan foram 0,6192, 0,5024, 0,4084 e 0,3770 para k de 2 a                                                                                  TABELA XII: Loadings da PCA
+5, respectivamente, mantendo a escolha de k = 2.                                                                                 Atributo Loading 1 Loading 2 Loading 3 Loading 4
+                                                                                                                               Comp. sépala 0,8942   0,3585    0,2777    −0,0377
+                            VI. REDUÇÃO DE DIMENSIONALIDADE
+                                                                                                                               Larg. sépala −0,4508  0,8913    −0,0932    0,0179
+As quatro técnicas receberam a mesma matriz padronizada de                                                                     Comp. pétala 0,9950   0,0203    −0,0543    0,1154
+quatro atributos, sem rótulos de espécie durante o ajuste. As                                                                   Larg. pétala 0,9682  0,0630    −0,2441 −0,0754
+cores foram adicionadas posteriormente. PCA foi ajustada com
+quatro componentes para apresentar o espectro completo; seu
+gráfico usa apenas as duas primeiras. Os outros métodos foram
+ajustados diretamente para duas dimensões. As 150 coordenadas                                                             2
+de cada método foram exportadas em CSV, com identificador de
+
+
+
+                                                                                                           PC2 (23,03%)
+observação e espécie.                                                                                                     1
+
+A. PCA
+                                                                                                                          0
+As saídas de variância explicada, componentes e valores singula­
+res seguem as definições do estimador PCA do scikit-learn [19].
+                                                                                                                          -1
+   A PCA utiliza decomposição SVD completa. As componentes
+                                                                                                                                                                                     setosa
+são combinações lineares ortogonais dos atributos padronizados.
+                                                                                                                          -2                                                         versicolor
+A tabela mostra os autovalores da covariância amostral, as pro­
+                                                                                                                                                                                     virginica
+porções explicadas e a soma acumulada.
+                             TABELA IX: Espectro e variância explicada da PCA
+                                                                                                                               -3         -2        -1       0        1         2         3
+                           Componente Autovalor Variância (%) Acumulada (%)                                                                              PC1 (72,77%)
+                              PC1      2,9304      72,7705        72,7705
+                              PC2      0,9274      23,0305        95,8010                                                  Fig. 3: Projeção linear nas duas primeiras componentes principais.
+                              PC3      0,1483       3,6838        99,4848                                 A projeção destaca a separação de setosa e a maior proximidade
+                              PC4      0,0207       0,5152       100,0000                                 entre versicolor e virginica. A interpretação dos eixos pelos
+                                                                                                          atributos é uma vantagem da PCA neste conjunto pequeno. A
+                                                                                                          elevada variância retida não garante separação perfeita entre as
 
 
 --- Página 6 ---
-                                                                                               C. t-SNE
-                                                                                               Os parâmetros e as saídas de otimização são interpretados con­
-                   2                                                                           forme a documentação de t-SNE [19].
-                                                                                                  Foram usados perplexidade 30, inicialização por PCA, distân­
+espécies, pois variância e discriminação de classes não são o
+mesmo objetivo.                                                                                              setosa
+                                                                                                   3         versicolor
+B. Kernel PCA                                                                                                virginica
+Foi usado kernel RBF com gamma igual a 0,25 (1/4, corres­                                          2
 
 
+                                                                                   Componente 2
+pondente ao padrão 1/número de atributos), matriz de kernel
+centralizada, duas componentes e decomposição espectral densa.
+                                                                                                   1
+Essa escolha corresponde a uma escala característica de distância                                  0
+igual a 2 nas unidades padronizadas, pois o kernel vale exp(−1)
+nessa distância. O valor foi fixado, sem busca orientada pelas                                    -1
+espécies.
+                          TABELA XIII: Autovalores da Kernel PCA
+                                                                                                  -2
+                        Componente Autovalor do kernel centralizado                               -3
+                            1                  39,1321
+                            2                  17,7924
+                                                                                                       -30          -20         -10      0                10
+                                                                                                                              Componente 1
+                0,6                                                   setosa                           Fig. 5: Projeção t-SNE com perplexidade 30 e semente 42.
+                                                                      versicolor   Setosa aparece isolada à esquerda, enquanto versicolor e virgi­
+                0,4                                                   virginica    nica ocupam regiões próximas e parcialmente misturadas à
 
-   PC2 (23,03%)
-                   1                                                                           cia euclidiana, semente 42, exagero inicial 12, método Barnes-
-                                                                                               -Hut com ângulo 0,5 e limite de 1.000 iterações. A taxa de
-                   0                                                                           aprendizado automática efetiva foi 50. A perplexidade controla
-                                                                                               a escala de vizinhança, sem representar um número de grupos.
-                  −1                                                                                                           TABELA XII: Saídas do t-SNE
-                                                                                                                                      Saída          Valor
-                                                                               setosa
-                  −2                                                           versicolor
-                                                                                                                               Divergência KL final 0,1642
-                                                                               virginica                                        n_iter_ reportado     999
-                                                                                                                                   Taxa efetiva     50,0000
-                       −3       −2        −1         0          1         2         3
-                                               PC1 (72,77%)                                                              setosa
-                                                                                                              3          versicolor
-                   Fig. 8: Projeção linear nas duas primeiras componentes principais.                                    virginica
- A projeção destaca a separação de setosa e a maior proximidade                                               2
-
-
-
-                                                                                              Componente 2
- entre versicolor e virginica. A interpretação dos eixos pelos
- atributos é uma vantagem da PCA neste conjunto pequeno. A
-                                                                                                              1
- elevada variância retida não garante separação perfeita entre as                                             0
- espécies, pois variância e discriminação de classes não são o
- mesmo objetivo.                                                                                             −1
- B. Kernel PCA                                                                                               −2
- Foi usado kernel RBF com gamma igual a 0,25, matriz de kernel
- centralizada, duas componentes e decomposição espectral densa.                                              −3
- Essa escolha corresponde a uma escala característica de distância
- igual a 2 nas unidades padronizadas, pois o kernel vale exp(−1)                                                   −30         −20          −10           0           10
- nessa distância. O valor foi fixado, sem busca orientada pelas                                                                          Componente 1
- espécies.                                                                                                        Fig. 10: Projeção t-SNE com perplexidade 30 e semente 42.
-                               TABELA XI: Autovalores da Kernel PCA                            Setosa aparece isolada à esquerda, enquanto versicolor e virgi­
-                            Componente Autovalor do kernel centralizado                        nica ocupam regiões próximas e parcialmente misturadas à
-                                1                  39,1321                                     direita. A divergência KL final quantifica o objetivo de preser­
-                                2                  17,7924                                     vação de afinidades desse ajuste, não uma taxa de erro de
-                                                                                               classificação. O atributo n_iter_ reporta 999; não se toma o
-                   0.6                                                         setosa          esgotamento do orçamento como prova de ótimo global. Distân­
-                                                                               versicolor      cias entre ilhas, tamanhos e áreas não devem ser interpretados
-                   0.4                                                         virginica       como distâncias e densidades fiéis do espaço original. Os eixos
-                                                                                               não têm o significado de componentes lineares nem proporção
 
 
 
 Componente 2
-                   0.2                                                                         de variância explicada.
+                                                                                   direita. A divergência KL final quantifica o objetivo de preser­
+                0,2                                                                vação de afinidades desse ajuste, não uma taxa de erro de
+                                                                                   classificação. O atributo n_iter_ reporta 999; não se toma o
+                  0                                                                esgotamento do orçamento como prova de ótimo global. Distân­
+               -0,2                                                                cias entre ilhas, tamanhos e áreas não devem ser interpretados
+                                                                                   como distâncias e densidades fiéis do espaço original. Os eixos
+               -0,4                                                                não têm o significado de componentes lineares nem proporção
+                                                                                   de variância explicada.
+               -0,6
+                                                                     D. UMAP
+                      -0,6 -0,4 -0,2        0 0,2 0,4              0,6      0,8
+                                                                     O papel do número de vizinhos e da distância mínima segue a
+                                          Componente 1               documentação oficial do UMAP [21].
+    Fig. 4: Duas primeiras componentes da Kernel PCA com kernel RBF.
+                                                                        Foram usados 15 vizinhos, min_dist igual a 0,1, spread igual a
+                                                                     1, duas dimensões, distância euclidiana, inicialização espectral e
+Os autovalores acima pertencem à matriz de kernel centralizada,
+                                                                     semente 42. A execução foi limitada a uma thread para reprodu­
+não à covariância dos quatro atributos originais. O traço da
+                                                                     tibilidade. O número de épocas foi deixado no modo automático
+matriz de kernel centralizada é 98,2247, igual à soma de seu
+                                                                     da biblioteca, registrado como n_epochs nulo nos parâmetros;
+espectro completo de 150 autovalores. Dividindo cada autovalor
+                                                                     não se declara aqui um contador de épocas observado.
+por esse traço, obtêm-se 39,8394% e 18,1140%, ou 57,9533%
+                                                                            TABELA XV: Saídas do UMAP e parâmetros efetivos da curva
+acumulados, da variância no espaço de características induzido
+pelo RBF. Essas frações não medem a variância dos atributos                                 Saída               Valor
+originais. A transformação curva a organização dos pontos e evi­                    Formato de embedding_      150 × 2
+dencia relações não lineares, mas torna a interpretação por pesos                     Intervalo do eixo 1 −5,8964 a 10,1182
+dos atributos menos direta. A escolha de gamma altera a noção                         Intervalo do eixo 2  2,2188 a 9,0128
+de proximidade e não foi submetida a análise de sensibilidade.                                 a               1,5769
+                                                                                                                          b                0,8951
+C. t-SNE
+Os parâmetros e as saídas de otimização são interpretados con­                     Os parâmetros a e b foram recuperados pela função de ajuste da
+forme a documentação de t-SNE [20].                                                biblioteca a partir de spread = 1 e min_dist = 0,1; definem a curva
+                                                                                                         1
+   Foram usados perplexidade 30, inicialização por PCA, distân­                    de similaridade 1+𝑎𝑑    2𝑏 . Os intervalos foram calculados sobre
 
-                   0.0                                                                         D. UMAP
-                                                                                               O papel do número de vizinhos e da distância mínima segue a
-                  −0.2                                                                         documentação oficial do UMAP [20].
-                                                                                                  Foram usados 15 vizinhos, min_dist igual a 0,1, spread igual a
-                  −0.4                                                                         1, duas dimensões, distância euclidiana, inicialização espectral e
-                                                                                               semente 42. A execução foi limitada a uma thread para reprodu­
-                  −0.6                                                                         tibilidade. O número de épocas foi deixado no modo automático
-                      −0.6 −0.4 −0.2             0.0      0.2       0.4       0.6       0.8    da biblioteca, registrado como n_epochs nulo nos parâmetros;
-                                               Componente 1                                    não se declara aqui um contador de épocas observado.
-                  Fig. 9: Duas primeiras componentes da Kernel PCA com kernel RBF.
- Os autovalores acima pertencem à matriz de kernel centralizada,
- não à covariância dos quatro atributos originais. Como foram
- retidas apenas duas componentes, não se divide sua soma
- para declarar uma porcentagem de variância original explicada.
- A transformação curva a organização dos pontos e evidencia
- relações não lineares, mas torna a interpretação por pesos dos
- atributos menos direta. A escolha de gamma altera a noção de
- proximidade e não foi submetida a análise de sensibilidade.
+cia euclidiana, semente 42, exagero inicial 12, método Barnes-                     o embedding registrado. O tempo desse ajuste não foi medido,
+-Hut com ângulo 0,5 e limite de 1.000 iterações. A taxa de                         portanto não se compara seu custo computacional.
+aprendizado automática efetiva foi 50. A perplexidade controla
+a escala de vizinhança, sem representar um número de grupos.
+                               TABELA XIV: Saídas do t-SNE
+                                       Saída          Valor
+                                Divergência KL final 0,1642
+                                 n_iter_ reportado     999
+                                    Taxa efetiva     50,0000
 
 
 --- Página 7 ---
-                                                                                         registrada cobre a consistência de parte dos resultados principais;
-               9                                                                         não certifica a execução histórica de cada comando nem a corre­
-               8                                                                         ção de toda a metodologia.
-
-               7                                                                                                VIII. CONCLUSÃO
-
+                                                                                                               VIII. CONCLUSÃO
+               9
+                                                                                        A principal conclusão dos agrupamentos é a distinção entre
+               8                                                                        estrutura geométrica e classes conhecidas. Todos os métodos
+                                                                                        com escolha de k favoreceram dois grupos, separando setosa
+               7
 
 
 Componente 2
-               6                                                                         A principal conclusão dos agrupamentos é a distinção entre
-                                                                                         estrutura geométrica e classes conhecidas. Todos os métodos
-               5                                                                         com escolha de k favoreceram dois grupos, separando setosa
-                                                                                         das demais espécies. Entretanto, GMM com três componentes
-               4                                                                         teve concordância muito maior com os rótulos. O resultado não
-                           setosa                                                        justifica substituir a seleção pela silhueta: ele esclarece o alcance
-               3           versicolor
-                           virginica                                                     da métrica exigida.
-               2                                                                            As quatro projeções permitem visualizar a separação de setosa
-                     −6     −4      −2      0       2      4       6      8         10   e a proximidade entre as outras espécies. PCA concentra 95,80%
-                                            Componente 1                                 da variância nas duas primeiras componentes; t-SNE tem a
-                                                                                         maior preservação local pelo diagnóstico adotado. As figuras
-                   Fig. 11: Projeção UMAP com 15 vizinhos e min_dist igual a 0,1.        complementam os índices, sem provar que a estrutura visual
- Setosa forma uma região separada à esquerda. Versicolor e virgi­                        corresponda a classes discretas perfeitamente recuperáveis.
- nica aparecem à direita, com tendência de organização vertical e
- pontos misturados na transição. Os 15 vizinhos definem a escala                                                  REFERÊNCIAS
- da estrutura local; min_dist controla a compactação permitida
-                                                                   [1] F. de A. T. de Carvalho, “Projeto AM-NS 2026-2,” Centro
- na projeção. Distâncias entre regiões desconectadas e a orienta­
-                                                                       de Informática, Universidade Federal de Pernambuco, Recife,
- ção dos eixos não têm interpretação física direta. A presença de
-                                                                       Brasil, enunciado de projeto, 2026, pp. 2–7.
- subestruturas visuais não demonstra novas classes biológicas.
-                                                                   [2] R. A. Fisher, “Iris,” UCI Machine Learning Repository, 1936.
- E. Comparação complementar das projeções                              doi: 10.24432/C56C76.
- Como diagnóstico adicional, calculou-se trustworthiness com [3] J. MacQueen, “Some methods for classification and analysis
- dez vizinhos e distância euclidiana entre a matriz padronizada        of multivariate observations,” em Proc. 5th Berkeley Symp.
- e cada representação 2D. Essa medida penaliza vizinhos artifi­        Math. Statist. Probab., vol. 1, 1967. Online.
- ciais introduzidos pela projeção; valores mais próximos de 1 são [4] J. C. Bezdek, Pattern Recognition with Fuzzy
- melhores nesse critério [16]. Ela não utiliza espécies e não mede     Objective Function Algorithms. Springer, 1981. doi:
- toda a estrutura global, nem equivale a acurácia.                     10.1007/978-1-4757-0450-1.
-              TABELA XIII: Preservação local das projeções
-                                                                   [5] D. Graves e W. Pedrycz, “Kernel-based fuzzy clustering and
-                 Projeção   Trustworthiness (10 vizinhos)              fuzzy clustering: A comparative experimental study,” Fuzzy
-                   PCA                 0,9782                          Sets and Systems, 2010. Online.
-              KERNEL PCA               0,9322                      [6] L. Kaufman e P. J. Rousseeuw, Finding Groups in Data: An
-                  TSNE                 0,9888                          Introduction to Cluster Analysis. Wiley, 1990, cap. 2. doi:
-                  UMAP                 0,9783                          10.1002/9780470316801.
- Nesta execução, t-SNE apresentou o maior valor local (0,9888),    [7]  A. P. Dempster, N. M. Laird e D. B. Rubin, “Maximum like­
- seguido de UMAP (0,9783) e PCA (0,9782), muito próximos               lihood from incomplete data via the EM algorithm,” J. Roy.
- entre si. Kernel PCA obteve 0,9322. Essa ordenação é específica       Statist. Soc. B, vol. 39, no. 1, 1977. Online.
- dos hiperparâmetros, da semente e da vizinhança escolhida; [8] R. R. Sokal e C. D. Michener, “A statistical method for
- não constitui superioridade universal. PCA oferece interpretação      evaluating systematic relationships,” Univ. Kansas Sci. Bull.,
- direta e alta retenção de variância, enquanto t-SNE e UMAP            1958. Online.
- enfatizam relações locais. Não foram executados agrupamentos [9] M. Ester, H.-P. Kriegel, J. Sander e X. Xu, “A density-based
- sobre as projeções: as métricas da Questão 1 pertencem ao             algorithm for discovering clusters in large spatial databases
- espaço original padronizado.                                          with noise,” em Proc. KDD, 1996. Online.
-                                                                   [10] P. J. Rousseeuw, “Silhouettes: A graphical aid to
-               VII. DISCUSSÃO E LIMITAÇÕES                             the interpretation and validation of cluster analysis,” J.
- Os resultados se referem ao arquivo local Iris, a uma padroni­        Comput. Appl. Math., vol. 20, pp. 53–65, 1987. doi:
- zação e a um conjunto fixo de hiperparâmetros. Dez reinicializa­      10.1016/0377-0427(87)90125-7.
- ções reduzem a dependência da inicialização dos agrupamentos, [11] L. Hubert e P. Arabie, “Comparing partitions,” J. Classifi­
- mas não asseguram ótimo global. Houve uma execução de cada            cation, vol. 2, pp. 193–218, 1985. Online.
- projeção; não foram estimados intervalos de confiança ou estabi­ [12] H. Hotelling, “Analysis of a complex of statistical variables
- lidade entre sementes. A sensibilidade de gamma, perplexidade,        into principal components,” J. Educational Psychology, 1933.
- vizinhos e eps permanece fora desta análise.                          Online.
-    Não foram localizados os artefatos do complemento e das [13] B. Schölkopf, A. Smola e K.-R. Müller, “Nonlinear com­
- 840 execuções adicionais mencionadas no artigo anterior. Essas        ponent analysis as a kernel eigenvalue problem,” Neural
- análises não integram as conclusões desta versão. A auditoria         Computation, vol. 10, pp. 1299–1319, 1998. Online.
+                                                                                        das demais espécies. Entretanto, GMM com três componentes
+               6                                                                        teve concordância muito maior com os rótulos. O resultado não
+                                                                                        justifica substituir a seleção pela silhueta: ele esclarece o alcance
+               5                                                                        da métrica exigida.
+               4                                                                           As quatro projeções permitem visualizar a separação de setosa
+                           setosa                                                       e a proximidade entre as outras espécies. PCA concentra 95,80%
+               3           versicolor                                                   da variância nas duas primeiras componentes; t-SNE tem a
+                           virginica                                                    maior preservação local pelo diagnóstico adotado. As figuras
+               2                                                                        complementam os índices, sem provar que a estrutura visual
+                         -5      -2,5      0    2,5     5             7,5          10   corresponda a classes discretas perfeitamente recuperáveis.
+                                           Componente 1
+                                                                                                                 REFERÊNCIAS
+                   Fig. 6: Projeção UMAP com 15 vizinhos e min_dist igual a 0,1.
+Setosa forma uma região separada à esquerda. Versicolor e virgi­  [1] F. de A. T. de Carvalho, “Projeto AM-NS 2026-2,” Centro
+nica aparecem à direita, com tendência de organização vertical e      de Informática, Universidade Federal de Pernambuco, Recife,
+pontos misturados na transição. Os 15 vizinhos definem a escala       Brasil, enunciado de projeto, 2026, pp. 2–7.
+da estrutura local; min_dist controla a compactação permitida     [2] Scikit-learn developers, “StandardScaler,” documentação v.
+na projeção. Distâncias entre regiões desconectadas e a orienta­      1.9.1. Online.
+ção dos eixos não têm interpretação física direta. A presença de  [3] R. A. Fisher, “Iris,” UCI Machine Learning Repository, 1936.
+subestruturas visuais não demonstra novas classes biológicas.         doi: 10.24432/C56C76.
+                                                                  [4] J. MacQueen, “Some methods for classification and analysis
+E. Comparação complementar das projeções                              of multivariate observations,” em Proc. 5th Berkeley Symp.
+Como diagnóstico adicional, calculou-se trustworthiness com           Math. Statist. Probab., vol. 1, 1967. Online.
+dez vizinhos e distância euclidiana entre a matriz padronizada
+                                                                  [5] J. C. Bezdek, Pattern Recognition with Fuzzy
+e cada representação 2D. Essa medida penaliza vizinhos artifi­
+                                                                      Objective Function Algorithms. Springer, 1981. doi:
+ciais introduzidos pela projeção; valores mais próximos de 1 são
+                                                                      10.1007/978-1-4757-0450-1.
+melhores nesse critério [22]. Ela não utiliza espécies e não mede
+toda a estrutura global, nem equivale a acurácia.                 [6]  D. Graves e W. Pedrycz, “Kernel-based fuzzy clustering and
+             TABELA XVI: Preservação local das projeções
+                                                                      fuzzy  clustering: A comparative experimental study,” Fuzzy
+                                                                      Sets and Systems, 2010. Online.
+                Projeção Trustworthiness (10 vizinhos)
+                                                                  [7] D.-Q. Zhang e S.-C. Chen, “A novel kernelized fuzzy C-
+                  PCA               0,9782
+                                                                      -means algorithm with application in medical image segmen­
+               Kernel PCA           0,9322
+                                                                      tation,” Artificial Intelligence in Medicine, vol. 32, no. 1, pp.
+                 t-SNE              0,9888
+                                                                      37–50, 2004. Online.
+                 UMAP               0,9783
+                                                                  [8] L. Kaufman e P. J. Rousseeuw, Finding Groups in Data: An
+Nesta execução, t-SNE apresentou o maior valor local (0,9888),        Introduction to Cluster Analysis. Wiley, 1990, cap. 2. doi:
+seguido de UMAP (0,9783) e PCA (0,9782), muito próximos               10.1002/9780470316801.
+entre si. Kernel PCA obteve 0,9322. Essa ordenação é específica [9] A. P. Dempster, N. M. Laird e D. B. Rubin, “Maximum like­
+dos hiperparâmetros, da semente e da vizinhança escolhida;            lihood from incomplete data via the EM algorithm,” J. Roy.
+não constitui superioridade universal. PCA oferece interpretação      Statist. Soc. B, vol. 39, no. 1, 1977. Online.
+direta e alta retenção de variância, enquanto t-SNE e UMAP [10] R. R. Sokal e C. D. Michener, “A statistical method for
+enfatizam relações locais. Não foram executados agrupamentos          evaluating systematic relationships,” Univ. Kansas Sci. Bull.,
+sobre as projeções: as métricas da Questão 1 pertencem ao             1958. Online.
+espaço original padronizado.                                      [11] M. Ester, H.-P. Kriegel, J. Sander e X. Xu, “A density-based
+              VII. DISCUSSÃO E LIMITAÇÕES                             algorithm for discovering clusters in large spatial databases
+                                                                      with noise,” em Proc. KDD, 1996. Online.
+Os resultados se referem ao arquivo local Iris, a uma padroni­ [12] P. J. Rousseeuw, “Silhouettes: A graphical aid to
+zação e a um conjunto fixo de hiperparâmetros. Dez reinicializa­      the interpretation and validation of cluster analysis,” J.
+ções reduzem a dependência da inicialização dos agrupamentos,         Comput. Appl. Math., vol. 20, pp. 53–65, 1987. doi:
+mas não asseguram ótimo global. Houve uma execução de cada            10.1016/0377-0427(87)90125-7.
+projeção; não foram estimados intervalos de confiança ou estabi­ [13] L. Hubert e P. Arabie, “Comparing partitions,” J. Classifi­
+lidade entre sementes. A análise complementar abrangeu eps e          cation, vol. 2, pp. 193–218, 1985. Online.
+o orçamento de inicializações do K-Means; a sensibilidade de
+                                                                  [14] H. Hotelling, “Analysis of a complex of statistical variables
+gamma, perplexidade e número de vizinhos permanece fora do
+                                                                      into principal components,” J. Educational Psychology, 1933.
+escopo.
+                                                                      Online.
 
 
 --- Página 8 ---
-[14] L. van der Maaten e G. Hinton, “Visualizing data using t-
+[15] B. Schölkopf, A. Smola e K.-R. Müller, “Nonlinear com­
+   ponent analysis as a kernel eigenvalue problem,” Neural
+   Computation, vol. 10, pp. 1299–1319, 1998. Online.
+[16] L. van der Maaten e G. Hinton, “Visualizing data using t-
    -SNE,” J. Mach. Learn. Res., vol. 9, pp. 2579–2605, 2008.
    Online.
-[15] L. McInnes, J. Healy e J. Melville, “UMAP: Uniform mani­
+[17] L. McInnes, J. Healy e J. Melville, “UMAP: Uniform mani­
    fold approximation and projection for dimension reduction,”
    arXiv:1802.03426, preprint, 2018. Online.
-[16] J. Venna e S. Kaski, “Neighborhood preservation in nonli­
+[18] Scikit-learn developers, “Clustering performance evalua­
+   tion,” documentação v. 1.9.1. Online.
+[19] Scikit-learn developers, “PCA,” documentação v. 1.9.1.
+   Online.
+[20] Scikit-learn developers, “TSNE,” documentação v. 1.9.1.
+   Online.
+[21] UMAP developers, “Basic UMAP parameters,” documen­
+   tação online. Online.
+[22] J. Venna e S. Kaski, “Neighborhood preservation in nonli­
    near projection methods: An experimental study,” em Proc.
    ICANN, pp. 485–491, 2001. Online.
-[17] Scikit-learn developers, “Clustering performance evalua­
-   tion,” documentação v. 1.9.1. Online.
-[18] Scikit-learn developers, “PCA,” documentação v. 1.9.1.
-   Online.
-[19] Scikit-learn developers, “TSNE,” documentação v. 1.9.1.
-   Online.
-[20] UMAP developers, “Basic UMAP parameters,” documen­
-   tação online. Online.

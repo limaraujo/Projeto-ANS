@@ -74,13 +74,17 @@ function bundle(spec, base, out, engine) {
     fs.mkdirSync(path.join(target,'assets/input'),{recursive:true});
     fs.copyFileSync(src,path.join(target,'assets/input',name)); s.path=`assets/input/${name}`;
   });
-  const mascot=(obj,name)=>{
-    if(!obj?.duckPath) return;
-    const src=path.resolve(base,obj.duckPath),dest=`assets/input/${name}${path.extname(src)}`;
+  const copyImage=(obj,key,name)=>{
+    if(!obj?.[key]) return;
+    const src=path.resolve(base,obj[key]),dest=`assets/input/${name}${path.extname(src)}`;
     fs.mkdirSync(path.join(target,'assets/input'),{recursive:true});
-    fs.copyFileSync(src,path.join(target,dest));obj.duckPath=dest;
+    fs.copyFileSync(src,path.join(target,dest));obj[key]=dest;
   };
-  mascot(copy.visual,'mascot');copy.slides.forEach((s,i)=>mascot(s,`mascot-${i+1}`));
+  copyImage(copy.visual,'duckPath','mascot');
+  copy.slides.forEach((s,i)=>{
+    copyImage(s,'duckPath',`mascot-${i+1}`);
+    copyImage(s,'coverLogo',`cover-logo-${i+1}`);
+  });
   json(path.join(target,'deck.json'),copy);
   fs.writeFileSync(path.join(target,'reproduce.txt'),`A partir desta pasta:\nnode scripts/cli.mjs build --spec deck.json --out ../reproduced --backend ooxml --pdf-engine ${engine==='native-subset'?'native':'auto'}\n\nPara PptxGenJS: npm install --no-audit --no-fund e omita --backend.\n`);
 }
