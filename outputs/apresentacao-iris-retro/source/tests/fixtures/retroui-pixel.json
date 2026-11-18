@@ -1,0 +1,30 @@
+{
+  "title":"Ciência em modo pixel",
+  "plan":{
+    "objective":"Demonstrar componentes e layouts do tema retroui-pixel em PowerPoint editável",
+    "audience":"Docentes e pesquisadores", "minutes":15,"slideCount":12,
+    "depth":"intermediária","language":"pt-BR","profile":"retroui-pixel",
+    "narrative":"Identidade, componentes, código, diagramas, comparação, resultados ilustrativos e conclusão",
+    "assumptions":["Fontes solicitadas usam fallback se ausentes.","Valores do gráfico são sintéticos, sem resultado experimental.","O pato é um placeholder original discreto, sem mascote de terceiros."],
+    "analysis":{"centralTheme":"Uma identidade retro pode preservar a clareza técnica.","concepts":["Hierarquia","Componentes nativos","Tipografia legível"],"arguments":["Aplicar decoração somente quando ajuda a organizar o conteúdo"],"results":[],"visualOpportunities":["Janelas e cards","Fluxo de revisão","Barras ilustrativas"]}
+  },
+  "visual":{"grid":true,"gridOpacity":0.35,"gridSpacing":0.4,"lineNumbers":true},
+  "slides":[
+    {"layout":"CoverSlide","title":"Ciência em modo pixel","subtitle":"RetroUI como inspiração; precisão como prioridade.","notes":"A apresentação demonstra uma adaptação visual, sem importar componentes React nem afirmar vínculo com a biblioteca."},
+    {"layout":"SectionSlide","section":"01 / IDENTIDADE","title":"Uma linguagem visual modular","subtitle":"Preto, branco e amarelo: estrutura, leitura e destaque.","notes":"Observe a grade discreta, o separador em blocos e o destaque reservado ao marcador de seção."},
+    {"layout":"ContentSlide","title":"Cards e janelas modulares","badges":["NATIVO","EDITÁVEL"],"windowTitle":"CONCEITOS","bullets":["Cards delimitam conceitos relacionados.","Janelas separam título e conteúdo.","Bordas em degraus mantêm cantos retos."],"citations":["CARD"],"notes":"A inspiração vem dos cards pixelados da RetroUI. Bordas e sombras são composições de retângulos nativos, adaptadas para o slide."},
+    {"layout":"TwoColumnSlide","title":"Hierarquia sem excesso visual","columns":[{"title":"LEITURA","bullets":["Títulos curtos e grandes.","Conteúdo técnico monoespaçado.","Espaço livre entre ideias."]},{"title":"ESTRUTURA","bullets":["Margens consistentes.","Cartões alinhados à grade.","Amarelo em poucos destaques."]}],"notes":"Pixelify Sans é solicitada para títulos; JetBrains Mono para conteúdo e código. As famílias efetivamente disponíveis são registradas no relatório."},
+    {"layout":"CodeSlide","title":"Código com sintaxe e numeração","codeTitle":"PYTHON / EXEMPLO","code":"def normalizar(valores):\n    total = sum(valores)\n    if total == 0:\n        return valores\n    # Exemplo didático, sem benchmark\n    return [v / total for v in valores]","caption":"Palavras-chave recebem destaque; comentários mantêm contraste.","lineNumbers":true,"notes":"A coloração é lexical e ilustrativa. Cada trecho de código permanece texto editável; não é captura de um editor."},
+    {"layout":"DiagramSlide","title":"Do documento à apresentação","steps":["Ler fontes","Definir tese","Compor slides","Revisar saída"],"mainFlow":[0],"takeaway":"Fluxo principal em amarelo; demais conectores em branco.","notes":"Nós, conectores e setas são retângulos nativos. O primeiro vínculo destaca o fluxo principal sem colorir todo o diagrama."},
+    {"layout":"ComparisonSlide","title":"Escolher o elemento adequado","columns":[{"title":"TEXTO E FORMAS","bullets":["Ajustar palavras no PowerPoint.","Mover cada nó de um diagrama.","Manter bordas vetoriais."]},{"title":"IMAGEM LOCAL","bullets":["Preservar a aparência do mascote.","Usar SVG ou PNG com origem.","Manter legenda e contexto."]}],"notes":"Imagens locais continuam objetos independentes. A apresentação inteira nunca é transformada em uma imagem."},
+    {"layout":"ResultsSlide","title":"Destacar um resultado relevante","labels":["Etapa A","Etapa B","Etapa C"],"values":[4,8,12],"highlightIndex":2,"unit":"Itens ilustrativos","caption":"Dados sintéticos para demonstrar o layout. Não representam medições.","notes":"Somente a terceira barra recebe amarelo. Com PptxGenJS, o gráfico possui dados nativos; no fallback OOXML as barras e os números são formas e textos editáveis."},
+    {"layout":"equation","title":"Precisão acima da decoração","equation":"média = soma(x) / n","bullets":["Explicitar variáveis e unidades.","Preservar hipóteses e condições.","Manter a notação legível."],"notes":"A equação é texto Unicode editável. Notação mais complexa pode usar um objeto SVG acompanhado da expressão-fonte nas notas."},
+    {"layout":"ContentSlide","title":"Um mascote usado com moderação","duck":true,"windowTitle":"PIXELDUCK","bullets":["SVG ou PNG local é opcional.","Sem arquivo: placeholder discreto.","O conteúdo ocupa o espaço principal."],"notes":"Nenhum mascote foi fornecido. O placeholder usa quadrados editáveis e aparece apenas na capa e neste exemplo dedicado."},
+    {"layout":"ConclusionSlide","title":"O conteúdo continua no centro","windowTitle":"CONCLUSÕES","bullets":["Identidade visual consistente.","Texto, formas e relações editáveis.","Revisão de cada slide renderizado."],"notes":"Retome a ideia principal: o estilo retro organiza o conteúdo e não substitui a argumentação ou a verificação científica."},
+    {"layout":"ReferencesSlide","title":"Referências da adaptação","ids":["RETRO","CARD"],"notes":"A biblioteca é referência estética. Componentes para slides, grade, badges, código, diagramas e placeholder são implementações próprias desta skill."}
+  ],
+  "references":[
+    {"id":"RETRO","text":"Dksie09. RetroUI: biblioteca de interfaces pixeladas. Repositório oficial; consultado em 16 nov. 2026.","url":"https://github.com/Dksie09/RetroUI"},
+    {"id":"CARD","text":"RetroUI. Card: apresentação e parâmetros de cor, borda e sombra. Documentação oficial; consultada em 16 nov. 2026.","url":"https://retroui.io/card"}
+  ]
+}

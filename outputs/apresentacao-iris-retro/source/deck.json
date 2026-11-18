@@ -1,0 +1,408 @@
+{
+  "title": "Iris: agrupamento e redução de dimensionalidade",
+  "plan": {
+    "objective": "Apresentar protocolo, resultados e limites da comparação na Iris.",
+    "audience": "Turma de Aprendizado não Supervisionado",
+    "minutes": 18,
+    "slideCount": 17,
+    "depth": "intermediária",
+    "language": "pt-BR",
+    "profile": "retroui-pixel",
+    "narrative": "Pergunta → métodos → protocolo → evidências → projeções → limites → conclusão.",
+    "assumptions": [
+      "Tema retro solicitado: retroui-pixel, 16:9, pt-BR.",
+      "Assumiu-se que a apresentação é sobre o projeto local e o artigo revisado mais recente.",
+      "17 slides, cerca de 18 minutos; notas de apresentação incluídas.",
+      "Artefatos existentes são a evidência; nenhum ajuste foi reexecutado.",
+      "Fontes Pixelify Sans e JetBrains Mono podem usar Liberation Mono como fallback.",
+      "Texto, diagramas e barras permanecem editáveis; figuras são imagens com SVG-fonte adicional."
+    ],
+    "analysis": {
+      "centralTheme": "Separação geométrica e classes biológicas respondem a critérios diferentes.",
+      "concepts": [
+        "Silhueta interna",
+        "ARI externo",
+        "Seleção por função objetivo",
+        "Padronização",
+        "Projeções 2D"
+      ],
+      "arguments": [
+        "k deve ser selecionado após a melhor execução por objetivo.",
+        "Silhueta maior não implica maior ARI.",
+        "A projeção não é prova de novas classes."
+      ],
+      "results": [
+        "252 ajustes nos registros.",
+        "Seis métodos selecionam k=2, Sil=0,5802 e ARI=0,5681.",
+        "GMM em k=3 atinge ARI=0,9039.",
+        "PCA 2D retém 95,80%; t-SNE tem trustworthiness=0,9888."
+      ],
+      "visualOpportunities": [
+        "Fluxo de seleção",
+        "Curvas por k",
+        "Contraste GMM",
+        "Árvore armazenada",
+        "Quatro projeções com cores e símbolos",
+        "Barras de preservação local"
+      ]
+    },
+    "sources": [
+      {
+        "path": "docs/artigo/artigo_ieee_revisado.pdf",
+        "author": "Equipe 08",
+        "consulted": true,
+        "sections": "Texto extraído; fonte Typst integral; seções de métodos, resultados e discussão."
+      },
+      {
+        "path": "resultados/",
+        "consulted": true,
+        "sections": "Métricas Q1, metadados, contingências, árvore e coordenadas Q2."
+      }
+    ],
+    "limitations": [
+      "Referências teóricas consultadas por meio do artigo local; sem nova revisão externa.",
+      "Revisão da apresentação verifica fidelidade aos registros; não substitui auditoria dos experimentos."
+    ]
+  },
+  "visual": {
+    "grid": true,
+    "gridOpacity": 0.28,
+    "gridSpacing": 0.4
+  },
+  "slides": [
+    {
+      "layout": "CoverSlide",
+      "title": "Iris: grupos e projeções",
+      "duck": false,
+      "subtitle": "Agrupamento e redução de dimensionalidade\nEquipe 08 · CIn / UFPE · 2026.2",
+      "notes": "Abertura (30 s). O estudo compara sete agrupadores e quatro projeções. Pergunta guia: a separação geométrica coincide com as três espécies? A apresentação sintetiza o artigo revisado e os artefatos existentes; os ajustes não foram reexecutados."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "Três espécies; quantos grupos?",
+      "columns": [
+        {
+          "title": "BASE IRIS",
+          "bullets": [
+            "150 flores; 50 por espécie.",
+            "Quatro medidas em centímetros.",
+            "Sépalas e pétalas: comprimento e largura."
+          ]
+        },
+        {
+          "title": "PREPARAÇÃO",
+          "bullets": [
+            "Atributos em z-score.",
+            "Espécies fora do ajuste.",
+            "Rótulos apenas na avaliação e nas cores."
+          ]
+        }
+      ],
+      "citations": [
+        "ART",
+        "EXP"
+      ],
+      "notes": "Tempo: 1 min. Usou-se codigo/iris/iris.data. A padronização subtrai a média e divide pelo desvio-padrão populacional. A análise é descritiva da base completa, sem treino/teste. As espécies conhecidas fornecem uma referência posterior, não uma resposta usada durante o treinamento."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "Sete métodos, cinco perspectivas",
+      "columns": [
+        {
+          "title": "PARTIÇÕES",
+          "bullets": [
+            "K-Means: centroides.",
+            "FCM e Kernel FCM: pertinências.",
+            "K-Medoids: flores como representantes."
+          ]
+        },
+        {
+          "title": "OUTRAS ESTRUTURAS",
+          "bullets": [
+            "GMM/EM: mistura probabilística.",
+            "UPGMA: hierarquia de grupos.",
+            "DBSCAN: densidade e ruído."
+          ]
+        }
+      ],
+      "citations": [
+        "ART"
+      ],
+      "notes": "Tempo: 1 min. K-Means minimiza distâncias quadráticas; FCM usa m=2. Kernel FCM utiliza RBF, gamma=0,25, e protótipos no espaço de entrada. K-Medoids usa PAM e distância euclidiana. GMM usa covariâncias completas. UPGMA usa ligação média com Manhattan. DBSCAN usa distância euclidiana. As explicações teóricas são sínteses da fundamentação citada no artigo local, não novas verificações bibliográficas."
+    },
+    {
+      "layout": "DiagramSlide",
+      "title": "O protocolo separa ajuste e avaliação",
+      "steps": [
+        "Padronizar X",
+        "10 sementes por k",
+        "Selecionar pelo objetivo",
+        "Escolher k por silhueta"
+      ],
+      "takeaway": "5 métodos × 5 valores de k × 10 ajustes + UPGMA + DBSCAN = 252.",
+      "mainFlow": [
+        0,
+        1,
+        2
+      ],
+      "citations": [
+        "EXP",
+        "ART"
+      ],
+      "notes": "Tempo: 1,5 min. k varia de 1 a 5, sementes de 42 a 51. Há um único ajuste por chamada; K-Means e GMM usam n_init=1. Para cada método e k seleciona-se o menor objetivo, ou a maior log-verossimilhança no GMM. Objetivos não são comparados entre métodos. Fuzzy vira crisp pelo argmax das pertinências; GMM pela maior probabilidade posterior. UPGMA tem uma árvore e cinco cortes, não cinco novos ajustes. Após escolher k pela silhueta, calcula-se ARI com as espécies."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "Silhueta e ARI respondem a perguntas distintas",
+      "columns": [
+        {
+          "title": "SILHUETA",
+          "bullets": [
+            "Coesão e separação geométrica.",
+            "Define k após selecionar o ajuste.",
+            "k = 1: valor indefinido."
+          ]
+        },
+        {
+          "title": "ARI",
+          "bullets": [
+            "Concordância com as espécies.",
+            "Desconta o acordo ao acaso.",
+            "Avaliação externa; não escolhe k."
+          ]
+        }
+      ],
+      "citations": [
+        "ART",
+        "EXP"
+      ],
+      "notes": "Tempo: 1 min. Silhueta s(i)=(b(i)−a(i))/max(a(i),b(i)): a é distância média ao próprio grupo; b é a menor distância média a outro grupo. Usa-se distância euclidiana para todos, inclusive para avaliar a árvore Manhattan. ARI=1 indica partições equivalentes; próximo de zero, acordo esperado ao acaso; pode ser negativo. ARI não é percentual de acerto."
+    },
+    {
+      "layout": "figure",
+      "title": "A silhueta favorece dois grupos",
+      "path": "assets/input/figure-6.png",
+      "alt": "Os seis métodos atingem o máximo em k = 2; k = 1 é indefinido.",
+      "caption": "Os seis métodos atingem o máximo em k = 2; k = 1 é indefinido.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "citations": [
+        "EXP"
+      ],
+      "notes": "Tempo: 1 min. Cada ponto corresponde à melhor execução do método naquele k, escolhida primeiro por sua função objetivo. Todas as séries coincidem em k=2 (0,580184). A subdivisão do bloco versicolor/virginica reduz a silhueta. Valores extraídos diretamente de metricas_por_k.csv."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "Seis métodos chegam à mesma partição",
+      "columns": [
+        {
+          "title": "ESTRUTURA COMUM",
+          "bullets": [
+            "Grupo A: 50 setosas.",
+            "Grupo B: 50 versicolors + 50 virginicas.",
+            "Mesmos grupos; identificadores podem mudar."
+          ]
+        },
+        {
+          "title": "RESULTADO EM k = 2",
+          "bullets": [
+            "Silhueta: 0,5802.",
+            "ARI: 0,5681.",
+            "Separação geométrica difere das três espécies."
+          ]
+        }
+      ],
+      "citations": [
+        "EXP",
+        "ART"
+      ],
+      "notes": "Tempo: 1 min. K-Means, FCM, Kernel FCM, K-Medoids, GMM e UPGMA produzem a mesma partição selecionada, salvo permutações. As contingências confirmam 50/100. Isso explica a igualdade das métricas, sem implicar centros, pertinências ou funções objetivo iguais."
+    },
+    {
+      "layout": "figure",
+      "title": "No GMM, três grupos elevam o ARI",
+      "path": "assets/input/figure-8.png",
+      "alt": "Em k = 3, o ARI sobe para 0,9039 e a silhueta cai para 0,3728.",
+      "caption": "Em k = 3, o ARI sobe para 0,9039 e a silhueta cai para 0,3728.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "citations": [
+        "EXP",
+        "ART"
+      ],
+      "notes": "Tempo: 1,5 min. Esta é uma análise posterior do mesmo protocolo, sem mudar a seleção oficial k=2. Para k=2, silhueta 0,580184 e ARI 0,568116; para k=3, silhueta 0,372773 e ARI 0,903874. Em três componentes: um grupo com 50 setosas, outro com 45 versicolors e outro com 50 virginicas + cinco versicolors. ARI de 0,9039 não significa 90,39% de acurácia preditiva."
+    },
+    {
+      "layout": "figure",
+      "title": "Uma árvore permite vários cortes",
+      "path": "assets/input/figure-9.png",
+      "alt": "UPGMA: ligação média e Manhattan; 12 subárvores finais em exibição.",
+      "caption": "UPGMA: ligação média e Manhattan; 12 subárvores finais em exibição.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "citations": [
+        "EXP"
+      ],
+      "notes": "Tempo: 1 min. O dendrograma é redesenhado a partir da matriz de ligações armazenada em execucoes_questao_1.json, não recalculada. A exibição é truncada às 12 subárvores finais; parênteses indicam a quantidade de folhas agregadas. A linha amarela é um corte ilustrativo entre as duas últimas alturas, resultando em dois grupos. Cinco cortes de uma árvore contam como uma execução no protocolo. A silhueta da partição usa distância euclidiana."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "DBSCAN encontra dois grupos e ruído",
+      "columns": [
+        {
+          "title": "CONFIGURAÇÃO",
+          "bullets": [
+            "eps = 0,8; min_samples = 5.",
+            "Dois grupos e quatro ruídos (2,67%).",
+            "Ruído: uma setosa e três virginicas."
+          ]
+        },
+        {
+          "title": "MÉTRICAS",
+          "bullets": [
+            "Silhueta: 0,5963, sem o ruído.",
+            "ARI: 0,5518, com toda a base.",
+            "Silhuetas usam amostras diferentes."
+          ]
+        }
+      ],
+      "citations": [
+        "EXP",
+        "ART"
+      ],
+      "notes": "Tempo: 1 min. Os grupos têm 49 setosas e 97 flores (50 versicolors + 47 virginicas). O próprio ponto conta em min_samples. A silhueta do DBSCAN exclui quatro ruídos e descreve 146 pontos; os demais métodos usam os 150. Portanto a maior silhueta numérica não demonstra superioridade global. O ARI inclui o rótulo −1 do ruído. Não houve otimização orientada pelas espécies."
+    },
+    {
+      "layout": "figure",
+      "title": "PCA retém 95,80% em dois eixos",
+      "path": "assets/input/figure-11.png",
+      "alt": "Setosa se separa; versicolor e virginica mantêm uma região de sobreposição.",
+      "caption": "Setosa se separa; versicolor e virginica mantêm uma região de sobreposição.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "citations": [
+        "PROJ",
+        "ART"
+      ],
+      "notes": "Tempo: 1,5 min. A PCA foi ajustada com quatro componentes e SVD completa, exibindo aqui as duas primeiras. PC1 explica 72,7705% e PC2 23,0305%. Os maiores loadings da PC1 estão em comprimento e largura de pétala (0,9950 e 0,9682); PC2 enfatiza largura de sépala (0,8913). Loadings são autovetores multiplicados pela raiz do autovalor. Variância alta não equivale a separação perfeita das espécies. Cores e símbolos representam rótulos posteriores; não são clusters ajustados na projeção."
+    },
+    {
+      "layout": "figure",
+      "title": "Kernel PCA muda a geometria",
+      "path": "assets/input/figure-12.png",
+      "alt": "Os autovalores do kernel não são percentuais da variância original.",
+      "caption": "Os autovalores do kernel não são percentuais da variância original.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "citations": [
+        "PROJ",
+        "ART"
+      ],
+      "notes": "Tempo: 1 min. Usa-se kernel RBF gamma=0,25, matriz centralizada, duas componentes e solver denso. Autovalores: 39,132080 e 17,792370. São do kernel centralizado, não da covariância original. Não se divide apenas sua soma para anunciar variância original explicada. A escala gamma foi fixa; não houve análise de sensibilidade. Cores e símbolos indicam espécies."
+    },
+    {
+      "layout": "figure",
+      "title": "t-SNE e UMAP enfatizam vizinhanças",
+      "path": "assets/input/figure-13.png",
+      "alt": "Setosa permanece isolada; a posição entre ilhas não mede distância original.",
+      "caption": "Setosa permanece isolada; a posição entre ilhas não mede distância original.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "citations": [
+        "PROJ",
+        "ART"
+      ],
+      "notes": "Tempo: 1,5 min. t-SNE: perplexidade 30, inicialização PCA, seed 42, máximo de 1.000 iterações, KL final 0,164197, taxa efetiva 50; n_iter_ reportado 999. UMAP: 15 vizinhos, min_dist=0,1, spread=1, inicialização espectral, seed 42 e uma thread. Uma execução por técnica. Eixos sem unidade física; orientação, distâncias entre ilhas e densidades não são reproduções fiéis do espaço original. Não foram feitos agrupamentos nestas projeções."
+    },
+    {
+      "layout": "ResultsSlide",
+      "title": "t-SNE preservou mais vizinhos locais",
+      "labels": [
+        "PCA",
+        "Kernel PCA",
+        "t-SNE",
+        "UMAP"
+      ],
+      "values": [
+        0.9782,
+        0.9322,
+        0.9888,
+        0.9783
+      ],
+      "unit": "Trustworthiness · 10 vizinhos",
+      "caption": "Diagnóstico desta configuração; não é acurácia nem avaliação global.",
+      "highlightIndex": 2,
+      "citations": [
+        "PROJ",
+        "ART"
+      ],
+      "notes": "Tempo: 1 min. Trustworthiness penaliza vizinhos artificiais introduzidos pela projeção comparando o espaço padronizado 4D com o 2D, usando dez vizinhos e distância euclidiana. PCA=0,978156, Kernel PCA=0,932238, t-SNE=0,988813 e UMAP=0,978349. PCA e UMAP são muito próximos neste índice. Os valores não demonstram superioridade universal nem estabilidade entre sementes. O gráfico tem origem zero e valores numéricos explícitos."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "O alcance das conclusões é descritivo",
+      "columns": [
+        {
+          "title": "O QUE SUSTENTA",
+          "bullets": [
+            "Mesma base e mesma padronização.",
+            "Dez sementes por método e k.",
+            "Parâmetros e resultados registrados."
+          ]
+        },
+        {
+          "title": "O QUE LIMITA",
+          "bullets": [
+            "Uma execução por projeção.",
+            "Sem intervalos de confiança.",
+            "Hiperparâmetros fixos; uma única base."
+          ]
+        }
+      ],
+      "citations": [
+        "ART",
+        "EXP",
+        "PROJ"
+      ],
+      "notes": "Tempo: 1 min. Repetir sementes não cria novas amostras nem garante ótimo global. O artigo revisado não inclui as alegadas 840 execuções complementares do artigo anterior por ausência de artefatos. A apresentação usa os resultados existentes, sem reexecutar ajustes ou certificar a execução histórica. As métricas de agrupamento são do espaço original padronizado, não das projeções."
+    },
+    {
+      "layout": "ConclusionSlide",
+      "title": "Grupos geométricos diferem de espécies",
+      "windowTitle": "CONCLUSÕES",
+      "bullets": [
+        "A silhueta selecionou dois grupos nos seis métodos.",
+        "GMM em k = 3 recuperou melhor as espécies pelo ARI.",
+        "PCA explica a variância; t-SNE destaca a vizinhança local.",
+        "Interprete métrica, projeção e objetivo em conjunto."
+      ],
+      "citations": [
+        "ART",
+        "EXP",
+        "PROJ"
+      ],
+      "notes": "Fechamento (45 s). Responder à pergunta inicial: a geometria favoreceu setosa versus demais, enquanto a referência botânica tem três espécies. Essa diferença explica o contraste silhueta/ARI. Projeções complementam a leitura, preservando aspectos diferentes da estrutura. Abrir para perguntas."
+    },
+    {
+      "layout": "ReferencesSlide",
+      "title": "Fontes e rastreabilidade",
+      "ids": [
+        "ART",
+        "EXP",
+        "PROJ"
+      ],
+      "notes": "Material de apoio. ART: artigo revisado da Equipe 08, com fundamentação e bibliografia original. EXP: CSV e execuções Q1/metadados/contingências. PROJ: execuções Q2 e CSV de coordenadas. As figuras foram redesenhadas a partir desses artefatos. Todos os dados já estavam no projeto. Consulte o artigo para as referências primárias dos algoritmos e métricas."
+    }
+  ],
+  "references": [
+    {
+      "id": "ART",
+      "text": "Equipe 08. Agrupamento e redução de dimensionalidade na base Iris: uma avaliação comparativa. Artigo revisado, UFPE, 2026, pp. 1–7.",
+      "url": "file:docs/artigo/artigo_ieee_revisado.pdf"
+    },
+    {
+      "id": "EXP",
+      "text": "Equipe 08. Resultados Q1: métricas por k, partições, parâmetros, contingências e hierarquia. Artefatos locais, 2026.",
+      "url": "file:resultados/metricas_por_k.csv"
+    },
+    {
+      "id": "PROJ",
+      "text": "Equipe 08. Resultados Q2: parâmetros, coordenadas PCA, Kernel PCA, t-SNE e UMAP; preservação local. Artefatos locais, 2026.",
+      "url": "file:resultados/execucoes_questao_2.json"
+    }
+  ]
+}

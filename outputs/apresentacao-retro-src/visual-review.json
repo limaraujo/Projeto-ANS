@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+  "issues": [],
+  "reviewer": "Codex",
+  "method": "Inspeção visual individual de todos os PNGs finais usando view_image; conferência com os CSVs, JSONs e artigo local.",
+  "observations": [
+    "Capa sem pato, conforme solicitação; nenhum elemento PixelDuck presente na cena.",
+    "Títulos, rodapés, acentos, última linha e contraste conferidos nas 17 páginas.",
+    "Legendas e rótulos de Kernel PCA, t-SNE e UMAP reposicionados após a inspeção inicial.",
+    "Curvas, GMM, árvore armazenada, projeções e barras conferidos; valores rastreados aos artefatos existentes.",
+    "Texto, cards, diagrama e barras editáveis; seis figuras PNG acompanhadas de fontes SVG.",
+    "Fontes ausentes substituídas por Liberation Mono. PDF convertido pelo subconjunto nativo; não estabelece validação no Microsoft PowerPoint."
+  ]
+}

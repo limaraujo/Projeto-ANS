@@ -1,0 +1,65 @@
+{
+  "title": "Iris: agrupamento e redução de dimensionalidade",
+  "objective": "Apresentar protocolo, resultados e limites da comparação na Iris.",
+  "audience": "Turma de Aprendizado não Supervisionado",
+  "minutes": 18,
+  "slideCount": 17,
+  "depth": "intermediária",
+  "language": "pt-BR",
+  "profile": "retroui-pixel",
+  "narrative": "Pergunta → métodos → protocolo → evidências → projeções → limites → conclusão.",
+  "assumptions": [
+    "Tema retro solicitado: retroui-pixel, 16:9, pt-BR.",
+    "Assumiu-se que a apresentação é sobre o projeto local e o artigo revisado mais recente.",
+    "17 slides, cerca de 18 minutos; notas de apresentação incluídas.",
+    "Artefatos existentes são a evidência; nenhum ajuste foi reexecutado.",
+    "Fontes Pixelify Sans e JetBrains Mono podem usar Liberation Mono como fallback.",
+    "Texto, diagramas e barras permanecem editáveis; figuras são imagens com SVG-fonte adicional."
+  ],
+  "analysis": {
+    "centralTheme": "Separação geométrica e classes biológicas respondem a critérios diferentes.",
+    "concepts": [
+      "Silhueta interna",
+      "ARI externo",
+      "Seleção por função objetivo",
+      "Padronização",
+      "Projeções 2D"
+    ],
+    "arguments": [
+      "k deve ser selecionado após a melhor execução por objetivo.",
+      "Silhueta maior não implica maior ARI.",
+      "A projeção não é prova de novas classes."
+    ],
+    "results": [
+      "252 ajustes nos registros.",
+      "Seis métodos selecionam k=2, Sil=0,5802 e ARI=0,5681.",
+      "GMM em k=3 atinge ARI=0,9039.",
+      "PCA 2D retém 95,80%; t-SNE tem trustworthiness=0,9888."
+    ],
+    "visualOpportunities": [
+      "Fluxo de seleção",
+      "Curvas por k",
+      "Contraste GMM",
+      "Árvore armazenada",
+      "Quatro projeções com cores e símbolos",
+      "Barras de preservação local"
+    ]
+  },
+  "sources": [
+    {
+      "path": "docs/artigo/artigo_ieee_revisado.pdf",
+      "author": "Equipe 08",
+      "consulted": true,
+      "sections": "Texto extraído; fonte Typst integral; seções de métodos, resultados e discussão."
+    },
+    {
+      "path": "resultados/",
+      "consulted": true,
+      "sections": "Métricas Q1, metadados, contingências, árvore e coordenadas Q2."
+    }
+  ],
+  "limitations": [
+    "Referências teóricas consultadas por meio do artigo local; sem nova revisão externa.",
+    "Revisão da apresentação verifica fidelidade aos registros; não substitui auditoria dos experimentos."
+  ]
+}

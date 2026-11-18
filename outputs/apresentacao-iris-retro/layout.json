@@ -1,0 +1,7 @@
+{
+  "issues": [],
+  "method": "Bounding boxes, contrast and conservative line metrics",
+  "autoCorrections": [
+    "Word wrapping applied before measuring; font sizes never reduced"
+  ]
+}
