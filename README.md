@@ -67,3 +67,20 @@ O código complementar é organizado em etapas: `estabilidade`, `comparar_escala
 A grade DBSCAN e o ajuste Kernel FCM usados na tunagem são compartilhados em
 `codigo/tunagem.py`; os dois métodos fuzzy principais compartilham o ajuste em
 `codigo/algoritmos.py`.
+
+### Versão revisada do artigo
+
+A versão atual é `docs/artigo/artigo_ieee_revisado.typ` e seu PDF correspondente.
+A redação dessa versão é mantida diretamente no arquivo Typst; o gerador anterior
+`gerar_artigo_ieee.py` produz somente a versão histórica `artigo_ieee.typ`.
+Para reproduzir os diagnósticos complementares e as figuras da revisão:
+
+```sh
+.venv/bin/python docs/artigo/analisar_revisao.py
+typst compile docs/artigo/artigo_ieee_revisado.typ docs/artigo/artigo_ieee_revisado.pdf --root docs/artigo
+```
+
+Os diagnósticos são gravados em `docs/artigo/diagnosticos_revisao.json`, sem
+substituir os resultados do protocolo principal. Incluem cinco ajustes DBSCAN,
+um K-Means com 100 inicializações, reconstrução dos cinco GMM selecionados,
+silhuetas Manhattan do UPGMA, espectro completo do kernel e saídas das projeções.

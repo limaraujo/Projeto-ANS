@@ -48,3 +48,26 @@ As páginas editoriais ou institucionais e, onde disponíveis, textos dos trabal
 ## Fases 3–5 — redação e revisão final
 
 O artigo novo preserva `artigo_ieee.typ` e `artigo_ieee.pdf`. Foi acrescentada fundamentação citada e removida a alegação sem suporte sobre o complemento. Foram mantidas as seis curvas, o dendrograma e quatro projeções. O PDF revisado compilou com Typst: A4, duas colunas, sete páginas. A extração textual confirmou seções e referências; não houve inspeção visual página a página nem reexecução dos 252 ajustes ou das quatro projeções. A conformidade com um template oficial IEEE não foi certificada.
+
+## Revisão de 18/11/2026 — correções e diagnósticos complementares
+
+Esta seção atualiza o estado da versão `artigo_ieee_revisado.typ/pdf` descrito acima.
+
+- Autoria: Fátima Araújo (`frqal@cin.ufpe.br`) e Rogrigo Gomes (`rgar@cin.ufpe.br`), com grafia fornecida pelo usuário.
+- Removidas notas de bastidores e repetição da introdução. Acrescentados comentários específicos dos sete métodos, justificativas de m, gamma e escala, e extremos preferidos dos objetivos.
+- Referências renumeradas por primeira citação; a variante de Kernel FCM recebeu a publicação de Zhang e Chen de **2004**, verificada na editora (a sugestão mencionava 2003): https://www.sciencedirect.com/science/article/pii/S0933365704000351.
+- PCA: valores singulares e média incluídos; loadings simplificados. Kernel PCA: traço completo 98,2247 e frações de 39,8394% e 18,1140% no espaço de características.
+- UMAP: formato e limites calculados das coordenadas persistidas; a e b recalculados com `find_ab_params`. O ajuste original não foi cronometrado e nenhum tempo foi inventado.
+- DBSCAN: varredura eps = 0,6–1,0 em passos de 0,1, mantendo min_samples = 5. A escolha original está em patamar localmente estável, sem alegação de seleção prospectiva pela varredura.
+- UPGMA: silhueta Manhattan para os cortes de 2 a 5; mesma preferência por dois grupos. Dendrograma truncado com contagens e linhas de corte.
+- FCM e Kernel FCM: ARI entre partições em k = 3 igual a 1, confirmando coincidência exata salvo nomes dos grupos.
+- K-Means: análise separada com 100 inicializações aleatórias e semente 42: objetivo 140,9658166, ARI 0,6201352, silhueta 0,4589718. O objetivo próximo de 139,8 não foi encontrado nesta análise; não se afirma ótimo global.
+- GMM: os cinco melhores modelos foram reconstruídos com seus parâmetros e sementes, e suas log-verossimilhanças foram conferidas com os registros. Pesos, contagens, autovalores mínimos das covariâncias e BIC estão no JSON. O BIC mínimo foi em k = 2. Em k = 5, há componente de peso 0,0604 e autovalor mínimo de 0,00000381.
+- Curvas de silhueta consolidadas; todos os gráficos atuais usam vírgula decimal. O protocolo principal e os respectivos CSV/JSON permanecem preservados.
+
+Reprodução: `analisar_revisao.py` gera `diagnosticos_revisao.json` e as figuras; a redação revisada é mantida diretamente em Typst. PDF compilado com Typst e páginas inspecionadas por rasterização. Não foram reexecutados os 252 ajustes nem as quatro projeções; os diagnósticos novos têm escopo explícito acima.
+
+
+## Ajuste de fórmulas — 18/11/2026
+
+Conforme a orientação final, a versão anterior foi restaurada e apenas a expressão do z-score foi acrescentada à preparação dos dados, com as definições da média e do desvio-padrão populacional.
