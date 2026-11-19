@@ -107,19 +107,67 @@ for linha in resumo.to_dict('records'):
             f'{fmt(candidatas_k3.ari.min())} a {fmt(candidatas_k3.ari.max())}',
         ])
 
+grade_kernel = particionais[particionais.algoritmo.eq('kernel-fuzzy-k-means')]
+kernel_selecionado = grade_kernel[grade_kernel.configuracao_selecionada].sort_values('k')
+kernel_referencia = grade_kernel[grade_kernel.referencia].iloc[0]
+g['selecao_kernel_fcm'] = {
+    'perfis': int(grade_kernel.configuracao.nunique()),
+    'm': fmt(kernel_selecionado.m.iloc[0], 1).removesuffix(',0'),
+    'gamma': fmt(kernel_selecionado.gamma.iloc[0], 2),
+    'silhuetas': [fmt(valor) for valor in kernel_selecionado.silhueta],
+    'media': fmt(kernel_selecionado.silhueta_media.iloc[0]),
+    'gamma_referencia': fmt(kernel_referencia.gamma, 2),
+    'media_referencia': fmt(kernel_referencia.silhueta_media),
+}
+
+comparacoes = [
+    ('k-means', 3, 'init', 'Inicialização', {}),
+    ('fuzzy-k-means', 4, 'm', 'm', {}),
+    ('kernel-fuzzy-k-means', 4, 'm', 'm', {'gamma': 0.05}),
+    ('kernel-fuzzy-k-means', 4, 'gamma', 'γ', {'m': 2}),
+    ('k-medoids', 3, 'init', 'Inicialização', {}),
+    ('gaussian-mixture', 3, 'covariance_type', 'Covariância', {'reg_covar': 1e-2}),
+    ('gaussian-mixture', 3, 'reg_covar', 'Regularização', {'covariance_type': 'full'}),
+]
+nomes_parametros = {'gamma': 'γ', 'm': 'm', 'reg_covar': 'reg.', 'covariance_type': 'cov.'}
+g['sensibilidade_particionais'] = []
+for nome, k, parametro, rotulo, fixos in comparacoes:
+    linhas = particionais[particionais.algoritmo.eq(nome) & particionais.k.eq(k)]
+    for chave, valor in fixos.items():
+        linhas = linhas[linhas[chave].eq(valor)]
+    if parametro in {'m', 'gamma', 'reg_covar'}:
+        linhas = linhas.sort_values(parametro)
+        valores = [f'{valor:g}'.replace('.', ',') for valor in linhas[parametro]]
+    else:
+        valores = linhas[parametro].tolist()
+    condicoes = [f'k = {k}']
+    for chave, valor in fixos.items():
+        valor_formatado = f'{valor:g}'.replace('.', ',') if isinstance(valor, (int, float)) else valor
+        condicoes.append(f'{nomes_parametros[chave]} = {valor_formatado}')
+    g['sensibilidade_particionais'].append([
+        NOMES[nome], ', '.join(condicoes), rotulo, valores,
+        [fmt(valor) for valor in linhas.silhueta],
+        [fmt(valor) for valor in linhas.ari],
+    ])
+
 escolhida = dbscan[dbscan.selecionado].iloc[0]
 mais_alta = dbscan.dropna(subset=['silhueta']).sort_values(
     ['silhueta', 'cobertura_pct'], ascending=False).iloc[0]
 base_dbscan = dbscan[np.isclose(dbscan.eps, .8) & dbscan.min_samples.eq(5)].iloc[0]
+raio_relativo = dbscan[dbscan.fator.eq(1.5)]
+mais_vizinhos = raio_relativo[raio_relativo.min_samples.eq(5)].iloc[0]
+raio_maior = dbscan[dbscan.eps.eq(.8) & dbscan.min_samples.eq(3)].iloc[0]
 g['dbscan'] = {
     'eps': fmt(escolhida.eps, 3), 'min_samples': int(escolhida.min_samples),
     'cobertura': fmt(escolhida.cobertura_pct, 2), 'n': int(escolhida.amostras_avaliadas),
     'ruido': int(escolhida.ruido), 'grupos': int(escolhida.grupos),
     'silhueta': fmt(escolhida.silhueta), 'ari': fmt(escolhida.ari),
-    'tabela': [[nome, fmt(linha.eps, 3), str(linha.min_samples), str(linha.grupos),
+    'tabela': [[nome, fmt(linha.eps, 6 if linha.regra == 'eps_relativo' else 1),
+                str(linha.min_samples), str(linha.grupos),
                 fmt(linha.cobertura_pct, 2), fmt(linha.silhueta), fmt(linha.ari)]
                for nome, linha in [('Escolhida', escolhida), ('Referência', base_dbscan),
-                                  ('Maior Sil', mais_alta)]],
+                                  ('Maior Sil', mais_alta), ('Mesmo raio', mais_vizinhos),
+                                  ('Mesmo mínimo', raio_maior)]],
 }
 g['amostra_igual'] = bool(mesma_amostra.ari_com_dbscan.eq(1).all())
 g['particao_comum'] = all(

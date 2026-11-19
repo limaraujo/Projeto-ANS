@@ -1691,11 +1691,11 @@ Para n = 150, `n²=22.500` e o vetor condensado tem 11.175 entradas. Essas quant
 
 | Método | Configuração principal |
 |---|---|
-| K-Means | `random`, uma inicialização por chamada |
+| K-Means | `k-means++`, uma inicialização por chamada |
 | FCM | m = 2, 300 iterações, tolerância 10⁻⁵ |
-| Kernel FCM | RBF gamma = 0,25; m = 2; protótipos no espaço de entrada |
-| K-Medoids | PAM, euclidiana, inicialização aleatória; k = 1 por busca exaustiva |
-| GMM/EM | Full, `random_from_data`, tolerância 10⁻⁵, regularização 10⁻⁶ |
+| Kernel FCM | RBF com gamma = 0,05, m = 2 e protótipos no espaço de entrada |
+| K-Medoids | PAM euclidiano com `build`. Busca exaustiva em k = 1 |
+| GMM/EM | Covariância `spherical`, `random_from_data`, tolerância 10⁻⁵ e regularização 10⁻² |
 | UPGMA | Average linkage, Manhattan, uma árvore |
 | DBSCAN | Euclidiana, eps = 0,6943, min_samples = 3 |
 | PCA | Quatro componentes, SVD completa; figura usa duas |
@@ -1703,13 +1703,13 @@ Para n = 150, `n²=22.500` e o vetor condensado tem 11.175 entradas. Essas quant
 | t-SNE | Perplexidade 30, init PCA, seed 42, Barnes-Hut |
 | UMAP | 15 vizinhos, min_dist 0,1, spread 1, init espectral, seed 42 |
 
-Os parâmetros dos agrupadores foram escolhidos pelas silhuetas obtidas na Iris e nas grades avaliadas. Nos cinco métodos particionais, as configurações de referência empataram com outras configurações em k = 2 e foram selecionadas pelo desempate.
+Cada configuração particional foi avaliada pela média das silhuetas em k de 2 a 5. Em caso de empate, a configuração de referência tinha prioridade. O FCM manteve m = 2, o perfil de maior média do método.
 
 ### 16.2. Orçamento e seleção
 
-O conjunto final inclui 250 ajustes particionais, uma árvore UPGMA e uma configuração DBSCAN. A busca avaliou 1.120 ajustes particionais em k de 2 a 5 e 24 configurações DBSCAN. Com os 50 ajustes de k = 1 e a árvore UPGMA, o total executado foi de 1.195 ajustes. As quatro projeções foram executadas separadamente.
+O piloto fez 1.120 ajustes particionais em k de 2 a 5 e testou 24 pares no DBSCAN. A rodada oficial executou 250 novos ajustes particionais, uma árvore UPGMA e um ajuste do DBSCAN, totalizando 252 execuções oficiais e 1.396 nas duas rodadas. As sementes do piloto foram 42–51 e as da rodada oficial foram 52–61.
 
-Para cada método, configuração e k, a função objetivo selecionou a semente. Usou-se o menor custo nos quatro primeiros métodos e a maior log-verossimilhança no GMM. Os hiperparâmetros e o k foram escolhidos pela maior silhueta válida. No DBSCAN, a escolha também exigiu pelo menos 95% de cobertura. O ARI foi calculado depois da seleção.
+Para cada método, configuração e k, a função objetivo selecionou a semente. Usou-se o menor custo nos quatro primeiros métodos e a maior log-verossimilhança no GMM. Na rodada oficial, os parâmetros escolhidos no piloto ficaram fixos e a maior silhueta válida definiu k. O DBSCAN usou o par de maior silhueta no piloto com pelo menos 95% de cobertura. O ARI foi calculado depois da seleção.
 
 Operações auxiliares internas, como a inicialização do KFCM por FCM, e iterações não são novas chamadas principais na contagem do protocolo.
 
@@ -1717,7 +1717,7 @@ Operações auxiliares internas, como a inicialização do KFCM por FCM, e itera
 
 Os seis métodos com seleção de k produziram a mesma partição em k = 2: 50 setosas de um lado, 50 versicolors e 50 virginicas do outro. A silhueta 0,580184 favorece essa separação geométrica, enquanto o ARI 0,568116 indica correspondência incompleta com as três espécies.
 
-GMM com k = 3 atingiu ARI 0,903874 e silhueta 0,372773. A capacidade de covariâncias completas é compatível com maior flexibilidade para a organização das espécies, mas o experimento não isolou causalmente esse mecanismo. Esse caso foi interpretado posteriormente; não substituiu k = 2 na seleção oficial.
+Em k = 3, o GMM com covariância esférica atingiu ARI 0,619924 e silhueta 0,456830. O UPGMA atingiu ARI 0,718358 no mesmo número de grupos. Em ambos os métodos, a maior silhueta ocorreu em k = 2.
 
 O DBSCAN cobriu 144 pontos e classificou seis como ruído. Nesse subconjunto, os sete métodos obtiveram partições equivalentes, com silhueta 0,603455 e ARI 0,576048 em relação às espécies.
 

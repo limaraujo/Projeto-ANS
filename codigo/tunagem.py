@@ -22,7 +22,7 @@ from algoritmos import (
     sns,
 )
 
-SEMENTES = range(42, 52)
+SEMENTES_PILOTO = range(42, 52)
 VALORES_K = range(2, 6)
 COBERTURA_MINIMA_DBSCAN = 95.0
 PADRAO_DBSCAN = (0.8, 5)
@@ -38,8 +38,9 @@ NOMES_METODOS = {
 
 @dataclass
 class ResultadoBusca:
-    particionais: dict[str, dict[int, list[ResultadoAgrupamento]]]
-    dbscan: ResultadoAgrupamento
+    particionais: pd.DataFrame
+    dbscan: pd.DataFrame
+    execucoes: dict[str, Any]
     metadados: dict[str, Any]
 
 
@@ -83,7 +84,7 @@ def grade_dbscan(dados: np.ndarray) -> tuple[float, list[tuple]]:
 def _ajustar_perfil(nome, dados, parametros):
     execucoes = {k: [] for k in VALORES_K}
     registros = {k: [] for k in VALORES_K}
-    for k, seed in product(VALORES_K, SEMENTES):
+    for k, seed in product(VALORES_K, SEMENTES_PILOTO):
         registro = dict(
             seed=seed,
             objetivo=None,
@@ -114,19 +115,18 @@ def _ajustar_perfil(nome, dados, parametros):
     return execucoes, registros, melhores
 
 
-def _buscar_particionais(dados, rotulos_verdadeiros):
-    escolhas, selecionados, registros = {}, {}, {}
+def _buscar_particionais(dados):
+    selecionados, registros = {}, {}
     linhas = []
     for nome, perfis in grade_particionais().items():
         print(f"Testando {len(perfis)} perfis de {NOMES_METODOS[nome]}...")
         registros[nome] = []
-        perfis_ajustados = {}
-        linhas_metodo = []
+        medias = {}
+        linhas_perfis = {}
         for configuracao, parametros in enumerate(perfis, start=1):
             execucoes, registros_perfil, melhores = _ajustar_perfil(
                 nome, dados, parametros
             )
-            perfis_ajustados[configuracao] = (execucoes, melhores)
             registros[nome].append(
                 {
                     "configuracao": configuracao,
@@ -135,6 +135,7 @@ def _buscar_particionais(dados, rotulos_verdadeiros):
                     "execucoes": registros_perfil,
                 }
             )
+            linhas_perfil = []
             for k in VALORES_K:
                 melhor = melhores.get(k)
                 convergencias = [
@@ -142,7 +143,7 @@ def _buscar_particionais(dados, rotulos_verdadeiros):
                     for r in registros_perfil[k]
                     if r["convergiu"] is not None
                 ]
-                linhas_metodo.append(
+                linhas_perfil.append(
                     {
                         "algoritmo": nome,
                         "configuracao": configuracao,
@@ -157,44 +158,37 @@ def _buscar_particionais(dados, rotulos_verdadeiros):
                             else np.nan
                         ),
                         "convergidas": sum(convergencias) if convergencias else None,
-                        "falhas": len(SEMENTES) - len(execucoes[k]),
+                        "falhas": len(SEMENTES_PILOTO) - len(execucoes[k]),
                         "referencia": configuracao == 1,
                     }
                 )
-        candidatas = [
-            linha for linha in linhas_metodo if np.isfinite(linha["silhueta"])
-        ]
-        if not candidatas:
-            raise ValueError(f"Nenhum perfil de {nome} produziu uma silhueta válida.")
-        melhor_linha = max(
-            candidatas,
-            key=lambda linha: (linha["silhueta"], -linha["k"], -linha["configuracao"]),
-        )
-        configuracao = melhor_linha["configuracao"]
-        escolhidos, _ = perfis_ajustados[configuracao]
-        escolhas[nome] = escolhidos
+            linhas_perfis[configuracao] = linhas_perfil
+            silhuetas = [linha["silhueta"] for linha in linhas_perfil]
+            if np.isfinite(silhuetas).all():
+                medias[configuracao] = float(np.mean(silhuetas))
+
+        if not medias:
+            raise ValueError(
+                f"Nenhum perfil de {nome} tem silhuetas válidas em todos os k."
+            )
+        # A primeira configuração na ordem da grade é a referência.
+        configuracao = max(medias, key=medias.__getitem__)
         selecionados[nome] = {
             "configuracao": configuracao,
             "parametros": perfis[configuracao - 1],
-            "k": melhor_linha["k"],
+            "silhueta_media": medias[configuracao],
         }
-        for linha in linhas_metodo:
-            _, melhores = perfis_ajustados[linha["configuracao"]]
-            melhor = melhores.get(linha["k"])
-            linha.update(
-                ari=(
-                    calcular_ari(rotulos_verdadeiros, melhor.rotulos)
-                    if melhor
-                    else np.nan
-                ),
-                configuracao_selecionada=linha["configuracao"] == configuracao,
-                selecionado=linha is melhor_linha,
-            )
-        linhas.extend(linhas_metodo)
-    return escolhas, selecionados, registros, pd.DataFrame(linhas)
+        for id_perfil, linhas_perfil in linhas_perfis.items():
+            for linha in linhas_perfil:
+                linha.update(
+                    silhueta_media=medias.get(id_perfil, np.nan),
+                    configuracao_selecionada=id_perfil == configuracao,
+                )
+            linhas.extend(linhas_perfil)
+    return selecionados, registros, pd.DataFrame(linhas)
 
 
-def _buscar_dbscan(dados, rotulos_verdadeiros, parametros_manuais):
+def _buscar_dbscan(dados, parametros_manuais):
     referencia, configuracoes = grade_dbscan(dados)
     if parametros_manuais and all(
         (eps, min_samples) != parametros_manuais
@@ -251,23 +245,13 @@ def _buscar_dbscan(dados, rotulos_verdadeiros, parametros_manuais):
             ),
         )
 
-    for linha, resultado in zip(linhas, resultados, strict=True):
-        linha.update(
-            ari=calcular_ari(
-                rotulos_verdadeiros, resultado.rotulos, ignorar_ruido=True
-            ),
-            selecionado=linha is melhor,
-        )
+    for linha in linhas:
+        linha["selecionado"] = linha is melhor
     registros = [
         {"configuracao": linha["configuracao"], "rotulos": resultado.rotulos}
         for linha, resultado in zip(linhas, resultados, strict=True)
     ]
-    return (
-        resultados[melhor["configuracao"] - 1],
-        melhor,
-        registros,
-        pd.DataFrame(linhas),
-    )
+    return melhor, registros, pd.DataFrame(linhas)
 
 
 def comparar_amostra_dbscan(
@@ -318,9 +302,10 @@ def _plotar_particionais(diretorio, tabela):
     with sns.axes_style("whitegrid"):
         for nome, linhas in tabela.groupby("algoritmo", sort=False):
             caminho = diretorio / f"sensibilidade_{nome.replace('-', '_')}"
-            selecionada = linhas.loc[linhas["selecionado"]].iloc[0]
+            selecionadas = linhas.loc[linhas["configuracao_selecionada"]]
             if nome in cruzados:
                 linha, coluna = cruzados[nome]
+                selecionada = selecionadas.iloc[0]
                 fig, eixos = plt.subplots(2, 2, figsize=(8, 5), layout="constrained")
                 limites = (linhas["silhueta"].min(), linhas["silhueta"].max())
                 for k, eixo in zip(VALORES_K, eixos.flat, strict=True):
@@ -338,18 +323,17 @@ def _plotar_particionais(diretorio, tabela):
                         vmax=limites[1],
                         linewidths=0.5,
                     )
-                    if k == selecionada["k"]:
-                        y = matriz.index.get_loc(selecionada[linha])
-                        x = matriz.columns.get_loc(selecionada[coluna])
-                        eixo.scatter(
-                            x + 0.5,
-                            y + 0.5,
-                            s=250,
-                            marker="s",
-                            facecolor="none",
-                            edgecolor="#c43c39",
-                            linewidth=1.5,
-                        )
+                    y = matriz.index.get_loc(selecionada[linha])
+                    x = matriz.columns.get_loc(selecionada[coluna])
+                    eixo.scatter(
+                        x + 0.5,
+                        y + 0.5,
+                        s=250,
+                        marker="s",
+                        facecolor="none",
+                        edgecolor="#c43c39",
+                        linewidth=1.5,
+                    )
                     eixo.set_title(f"k = {k}")
                 fig.suptitle(f"{NOMES_METODOS[nome]} · Silhueta por configuração")
             else:
@@ -359,8 +343,8 @@ def _plotar_particionais(diretorio, tabela):
                     linhas, x="k", y="silhueta", hue=chave, marker="o", ax=eixo
                 )
                 eixo.scatter(
-                    selecionada["k"],
-                    selecionada["silhueta"],
+                    selecionadas["k"],
+                    selecionadas["silhueta"],
                     s=120,
                     facecolor="none",
                     edgecolor="#c43c39",
@@ -411,52 +395,82 @@ def _plotar_dbscan(diretorio, tabela):
 
 def buscar_hiperparametros(
     dados: np.ndarray,
-    rotulos_verdadeiros: np.ndarray,
-    diretorio: Path,
     parametros_dbscan: tuple[float, int] | None = None,
 ) -> ResultadoBusca:
-    """Escolhe configurações pela silhueta e salva os resultados de sensibilidade."""
+    """Avalia as grades piloto e escolhe uma configuração por algoritmo."""
     with threadpool_limits(limits=1):
-        escolhas, selecionados, registros_particionais, tabela_particionais = (
-            _buscar_particionais(dados, rotulos_verdadeiros)
+        selecionados, registros_particionais, tabela_particionais = (
+            _buscar_particionais(dados)
         )
-        resultado_dbscan, escolha_dbscan, registros_dbscan, tabela_dbscan = (
-            _buscar_dbscan(dados, rotulos_verdadeiros, parametros_dbscan)
+        escolha_dbscan, registros_dbscan, tabela_dbscan = _buscar_dbscan(
+            dados, parametros_dbscan
         )
 
-    diretorio_figuras = diretorio / "figuras"
-    diretorio_figuras.mkdir(parents=True, exist_ok=True)
-    tabela_particionais.to_csv(diretorio / "particionais.csv", index=False)
-    tabela_dbscan.to_csv(diretorio / "dbscan.csv", index=False)
-    salvar_json(
-        diretorio / "execucoes.json",
-        {"particionais": registros_particionais, "dbscan": registros_dbscan},
-    )
-    _plotar_particionais(diretorio_figuras, tabela_particionais)
-    _plotar_dbscan(diretorio_figuras, tabela_dbscan)
     return ResultadoBusca(
-        escolhas,
-        resultado_dbscan,
+        tabela_particionais,
+        tabela_dbscan,
+        {"particionais": registros_particionais, "dbscan": registros_dbscan},
         {
             "valores_k": list(VALORES_K),
-            "sementes": list(SEMENTES),
+            "sementes": list(SEMENTES_PILOTO),
             "cobertura_minima_dbscan_pct": COBERTURA_MINIMA_DBSCAN,
             "criterio_particionais": (
                 "Melhor objetivo finito entre as sementes, com empate pela menor semente. "
-                "Maior silhueta entre configurações e k, com empate pelo menor k e pela "
-                "primeira configuração na grade, iniciada pelo perfil de referência."
+                "Maior média aritmética das quatro silhuetas em k de 2 a 5. "
+                "Empates favorecem o perfil de referência e depois a ordem da grade."
             ),
             "criterio_dbscan": (
                 "Maior silhueta válida com ao menos 95% de cobertura, com empate pela "
                 "maior cobertura e pela primeira configuração na grade."
             ),
-            "ajustes_particionais": len(tabela_particionais) * len(SEMENTES),
+            "ajustes_particionais": len(tabela_particionais) * len(SEMENTES_PILOTO),
             "ajustes_dbscan": len(tabela_dbscan),
             "selecionados": selecionados,
             "dbscan": escolha_dbscan,
             "dbscan_modo": "manual" if parametros_dbscan else "automatico",
         },
     )
+
+
+def salvar_busca(
+    busca: ResultadoBusca, rotulos_verdadeiros: np.ndarray, diretorio: Path
+) -> None:
+    """Acrescenta o ARI descritivo ao registro piloto após a rodada oficial."""
+    rotulos_particionais = {
+        (nome, perfil["configuracao"], k, rodada["seed"]): rodada["rotulos"]
+        for nome, perfis in busca.execucoes["particionais"].items()
+        for perfil in perfis
+        for k, rodadas in perfil["execucoes"].items()
+        for rodada in rodadas
+    }
+    tabela_particionais = busca.particionais.assign(
+        ari=[
+            (
+                calcular_ari(
+                    rotulos_verdadeiros,
+                    rotulos_particionais[
+                        (linha.algoritmo, linha.configuracao, linha.k, linha.seed)
+                    ],
+                )
+                if pd.notna(linha.seed)
+                else np.nan
+            )
+            for linha in busca.particionais.itertuples(index=False)
+        ]
+    )
+    tabela_dbscan = busca.dbscan.assign(
+        ari=[
+            calcular_ari(rotulos_verdadeiros, rodada["rotulos"], ignorar_ruido=True)
+            for rodada in busca.execucoes["dbscan"]
+        ]
+    )
+    diretorio_figuras = diretorio / "figuras"
+    diretorio_figuras.mkdir(parents=True, exist_ok=True)
+    tabela_particionais.to_csv(diretorio / "particionais.csv", index=False)
+    tabela_dbscan.to_csv(diretorio / "dbscan.csv", index=False)
+    salvar_json(diretorio / "execucoes.json", busca.execucoes)
+    _plotar_particionais(diretorio_figuras, tabela_particionais)
+    _plotar_dbscan(diretorio_figuras, tabela_dbscan)
 
 
 if __name__ == "__main__":

@@ -1,14 +1,25 @@
 # Verificação do artigo revisado
 
-## Atualização da Questão 1 — 19/11/2026
+## Separação das etapas e adaptação ao PDF de referência — 19/11/2026
 
-Os arquivos canônicos são `artigo_ieee_revisado.typ` e `artigo_ieee_revisado.pdf`. O script `analisar_revisao.py` lê os resultados oficiais da Questão 1 e da Questão 2 e gera as tabelas, as figuras e `diagnosticos_revisao.json` usados nesta versão.
+O artigo foi reorganizado tomando `Downloads/artigo_teste.pdf` como referência de estrutura. A versão atual tem sete páginas A4, com protocolo em duas etapas, tabela conjunta da grade e dos perfis escolhidos, seis figuras de sensibilidade da rodada piloto e uma seção separada para o experimento final. O texto explica que a tunagem particional escolheu hiperparâmetros pela média das silhuetas em k = 2–5, sem selecionar k final; no experimento, a melhor execução por objetivo de cada k concorreu à escolha pela silhueta. DBSCAN e UPGMA têm procedimentos próprios explicitados.
+
+Foram mantidas as sementes e as métricas dos registros locais: 42–51 na tunagem, 52–61 no experimento, 24 pares DBSCAN, 144 flores retidas e trustworthiness do t-SNE de 0,9888. O PDF de referência contém números diferentes, usados apenas como referência de organização. A grafia Rodrigo Gomes foi adotada conforme a autoria do PDF fornecido nesta etapa.
+
+O script `gerar_figuras_tunagem_artigo.py` gera seis figuras `figuras/ieee/tunagem_*.pdf` e `resumo_etapas.json`, a partir dos CSV e JSON existentes, sem executar agrupadores. As tabelas novas apresentam as métricas em k = 3 e os intervalos das funções objetivo nas dez chamadas finais. Não se infere ótimo global da proximidade dos objetivos. Os artefatos experimentais foram preservados.
+
+Reprodução dos novos artefatos: `.venv/bin/python docs/artigo/gerar_figuras_tunagem_artigo.py`, seguido de `typst compile docs/artigo/artigo_ieee_revisado.typ docs/artigo/artigo_ieee_revisado.pdf --root docs/artigo`. Compilação sem avisos; as sete páginas foram rasterizadas e inspecionadas visualmente.
+
+## Tunagem e experimento da Questão 1 — 19/11/2026
+
+Os arquivos canônicos são `artigo_ieee_revisado.typ` e `artigo_ieee_revisado.pdf`. O script `analisar_revisao.py` lê os resultados da Questão 1 e da Questão 2 e gera as tabelas, as figuras e `diagnosticos_revisao.json` usados nesta versão.
 
 | Verificação | Resultado | Evidência |
 |---|---|---|
-| Protocolo final | 252 registros, dentro de 1.195 ajustes executados incluindo a busca | `resultados/metadados_questao_1.json` e `resultados/validacao.json` |
-| Seleção e sensibilidade | 1.120 ajustes particionais na grade, 24 candidatos DBSCAN, 50 chamadas de k = 1 e uma árvore UPGMA | `resultados/tunagem/particionais.csv` e `resultados/tunagem/dbscan.csv` |
+| Tunagem | 1.120 ajustes particionais com sementes 42–51 e 24 candidatos DBSCAN. A média das quatro silhuetas definiu um perfil por método particional | `resultados/tunagem/particionais.csv` e `resultados/tunagem/dbscan.csv` |
+| Experimento | 250 ajustes particionais com sementes 52–61, uma árvore UPGMA e um ajuste DBSCAN. A tunagem e o experimento somaram 1.396 ajustes | `resultados/metadados_questao_1.json` e `resultados/validacao.json` |
 | Silhueta em k = 1 | Indefinida e fora da seleção | `resultados/metricas_por_k.csv` |
+| ARI do experimento em k = 3 | UPGMA obteve 0,7184 e GMM com covariância esférica obteve 0,6199 | `resultados/metricas_por_k.csv` |
 | DBSCAN sem ruído | Dois grupos, seis pontos de ruído e cobertura de 96%. Silhueta de 0,6035 e ARI de 0,5760 em 144 flores | `resultados/resumo_agrupamentos.csv` |
 | Comparação na mesma amostra | As sete partições coincidem nas 144 flores retidas | `resultados/tunagem/comparacao_mesma_amostra.csv` |
 | Artigo canônico | PDF A4, seis páginas, com tabelas de grade, métricas e cobertura | `artigo_ieee_revisado.pdf` |

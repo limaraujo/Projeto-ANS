@@ -18,7 +18,7 @@ def main() -> None:
         "--min-samples", type=int, help="Fixa o min_samples final do DBSCAN."
     )
     parser.add_argument(
-        "--seed", type=int, default=42, help="Semente das projeções; Q1 usa 42–51"
+        "--seed", type=int, default=42, help="Semente das projeções da Questão 2."
     )
     parser.add_argument("--gamma", type=float, default=0.25, help="Gamma da Kernel PCA")
     parser.add_argument("--perplexidade", type=float, default=30)

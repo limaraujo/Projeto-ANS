@@ -74,7 +74,7 @@ A silhueta **não é definida para k = 1**; nesse caso registrar `NaN` (ou equiv
 
 Para o DBSCAN, calcular **ARI e silhueta apenas nas observações atribuídas a grupos**, excluindo `-1`. Reportar cobertura e ruído e apresentar uma comparação complementar em que todos os métodos são avaliados no mesmo subconjunto retido pelo DBSCAN.
 
-A **função objetivo** seleciona uma inicialização dentro de cada combinação de hiperparâmetros e `k`. A **silhueta** seleciona a combinação e o número de grupos. No DBSCAN, a busca maximiza a silhueta com pelo menos 95% de cobertura, como critério experimental. O ARI é calculado para a avaliação externa depois da seleção.
+A **função objetivo** seleciona uma inicialização dentro de cada combinação de hiperparâmetros e `k`. O piloto escolhe uma combinação por método pela média das silhuetas em `k=2..5`, com prioridade para a referência em caso de empate. A rodada oficial fixa essa combinação e escolhe `k*` pela maior silhueta válida. No DBSCAN, o piloto escolhe a maior silhueta com pelo menos 95% de cobertura. O ARI avalia as partições depois da seleção.
 
 ## 6. Requisitos funcionais — visualização e síntese
 

@@ -28,9 +28,11 @@ def _ler_csv(caminho: Path, indice: str | list[str]) -> pd.DataFrame:
 
 def _metricas(X, y, rotulos) -> tuple[float, float]:
     return (
-        silhouette_score(X, rotulos)
-        if 2 <= len(np.unique(rotulos)) < len(X)
-        else np.nan,
+        (
+            silhouette_score(X, rotulos)
+            if 2 <= len(np.unique(rotulos)) < len(X)
+            else np.nan
+        ),
         adjusted_rand_score(y, rotulos) if len(X) >= 2 else np.nan,
     )
 
@@ -53,19 +55,22 @@ def _conferir_metricas(linha, X, y, rotulos) -> None:
     assert np.isclose(linha.ari, ari, equal_nan=True)
 
 
-def _validar_particionais(X, y, q1, metricas, metadados, diretorio):
+def _validar_particionais(X, y, busca, diretorio):
     grade = _ler_csv(diretorio / "particionais.csv", ["algoritmo", "configuracao", "k"])
     execucoes = _ler_json(diretorio / "execucoes.json")
-    busca = metadados["tunagem"]
     ks = list(range(2, 6))
     sementes = list(range(42, 52))
     assert busca["valores_k"] == ks
     assert busca["sementes"] == sementes
     assert list(grade.index.unique("algoritmo")) == list(execucoes["particionais"])
+    assert set(busca["selecionados"]) == set(execucoes["particionais"])
 
     vistas = set()
     contagem = 0
     for nome, perfis in execucoes["particionais"].items():
+        medias = {}
+        linhas_metodo = grade.loc[nome]
+        assert [p["configuracao"] for p in perfis if p["referencia"]] == [1], nome
         for perfil in perfis:
             id_perfil = perfil["configuracao"]
             assert set(perfil["execucoes"]) == set(map(str, ks))
@@ -77,9 +82,8 @@ def _validar_particionais(X, y, q1, metricas, metadados, diretorio):
                 contagem += len(rodadas)
                 linha = grade.loc[chave]
                 assert linha.referencia == perfil["referencia"]
-                assert linha.falhas == sum(r["erro"] is not None for r in rodadas), (
-                    chave
-                )
+                falhas = sum(r["erro"] is not None for r in rodadas)
+                assert linha.falhas == falhas, chave
                 convergencias = [
                     r["convergiu"] for r in rodadas if r["convergiu"] is not None
                 ]
@@ -98,32 +102,26 @@ def _validar_particionais(X, y, q1, metricas, metadados, diretorio):
                 assert linha.grupos == len(np.unique(rotulos)), chave
                 _conferir_metricas(linha, X, y, rotulos)
 
-        linhas = grade.loc[nome].dropna(subset=["silhueta"]).reset_index()
-        vencedora = linhas.sort_values(
-            ["silhueta", "k", "configuracao"], ascending=[False, True, True]
-        ).iloc[0]
+            linhas_perfil = linhas_metodo.loc[id_perfil].loc[ks]
+            silhuetas = linhas_perfil.silhueta.to_numpy()
+            media = np.mean(silhuetas) if np.isfinite(silhuetas).all() else np.nan
+            assert np.allclose(linhas_perfil.silhueta_media, media, equal_nan=True), (
+                nome,
+                id_perfil,
+            )
+            if np.isfinite(media):
+                medias[id_perfil] = media
+
+        vencedora = max(medias, key=lambda perfil: (medias[perfil], -perfil))
         selecao = busca["selecionados"][nome]
-        assert vencedora.configuracao == selecao["configuracao"], nome
-        assert vencedora.k == selecao["k"], nome
-        marcado = grade.loc[nome]
-        assert list(marcado[marcado.selecionado].index) == [
-            (selecao["configuracao"], selecao["k"])
-        ], nome
-        assert list(marcado[marcado.configuracao_selecionada].index) == [
+        assert vencedora == selecao["configuracao"], nome
+        assert np.isclose(medias[vencedora], selecao["silhueta_media"]), nome
+        assert list(linhas_metodo[linhas_metodo.configuracao_selecionada].index) == [
             (selecao["configuracao"], k) for k in ks
         ], nome
 
         perfil = next(p for p in perfis if p["configuracao"] == selecao["configuracao"])
         assert perfil["parametros"] == selecao["parametros"], nome
-        for k in ks:
-            for final, candidata in zip(
-                q1[nome][str(k)], perfil["execucoes"][str(k)], strict=True
-            ):
-                assert final["parametros"]["seed"] == candidata["seed"], (nome, k)
-                assert final["rotulos"] == candidata["rotulos"], (nome, k)
-                assert np.isclose(final["objetivo"], candidata["objetivo"]), (nome, k)
-
-        assert metricas.loc[(nome, selecao["k"])].selecionado, nome
 
     assert vistas == set(grade.index)
     assert contagem == busca["ajustes_particionais"]
@@ -164,6 +162,8 @@ def _validar_dbscan(X, y, resultado, execucoes, busca, diretorio):
         assert vencedora.configuracao == escolhida.name
     assert np.isclose(escolhida.eps, resultado["parametros"]["eps"])
     assert escolhida.min_samples == resultado["parametros"]["min_samples"]
+    assert np.isclose(escolhida.eps, busca["dbscan"]["eps"])
+    assert escolhida.min_samples == busca["dbscan"]["min_samples"]
     assert resultado["rotulos"] == next(
         r["rotulos"] for r in execucoes if r["configuracao"] == escolhida.name
     )
@@ -171,11 +171,18 @@ def _validar_dbscan(X, y, resultado, execucoes, busca, diretorio):
     return len(grade)
 
 
-def _validar_protocolo(X, y, q1, metricas, resumo):
+def _validar_protocolo(X, y, q1, metricas, resumo, metadados):
     particoes = {}
-    total = 2
+    ajustes_particionais = 0
     ks = list(range(1, 6))
-    sementes = list(range(42, 52))
+    sementes = list(range(52, 62))
+    oficial = metadados["rodada_oficial"]
+    piloto = metadados["tunagem"]
+    assert oficial["sementes"] == sementes
+    assert set(sementes).isdisjoint(piloto["sementes"])
+    assert metadados["valores_k"] == ks
+    assert metadados["execucoes_por_algoritmo_particional"] == len(sementes)
+    assert set(q1) == set(piloto["selecionados"]) | {"upgma", "dbscan"}
     for nome, por_k in q1.items():
         if nome == "dbscan":
             continue
@@ -194,13 +201,23 @@ def _validar_protocolo(X, y, q1, metricas, resumo):
             else:
                 rodadas = por_k[str(k)]
                 assert [r["parametros"]["seed"] for r in rodadas] == sementes, (nome, k)
-                total += len(rodadas)
+                ajustes_particionais += len(rodadas)
                 melhor = _melhor(nome, rodadas)
                 assert melhor is not None, (nome, k)
                 assert linha.seed == melhor["parametros"]["seed"], (nome, k)
                 assert np.isclose(linha.objetivo, melhor["objetivo"]), (nome, k)
+                parametros = piloto["selecionados"][nome]["parametros"]
+                if nome == "k-medoids" and k == 1:
+                    parametros = parametros | {"init": "exhaustive"}
                 for r in rodadas:
                     assert len(r["rotulos"]) == len(X), (nome, k)
+                    assert r["parametros"]["k"] == k, (nome, k)
+                    assert r["objetivo"] is not None and np.isfinite(r["objetivo"]), (
+                        nome,
+                        k,
+                    )
+                    for parametro, valor in parametros.items():
+                        assert r["parametros"][parametro] == valor, (nome, k, parametro)
                     for chave in ("pertinencias", "probabilidades"):
                         if r[chave] is not None:
                             pesos = np.array(r[chave])
@@ -228,7 +245,10 @@ def _validar_protocolo(X, y, q1, metricas, resumo):
 
     particoes["dbscan"] = np.array(q1["dbscan"]["rotulos"])
     assert len(particoes) == 7
-    assert total == 252
+    assert ajustes_particionais == oficial["ajustes_particionais"] == 250
+    assert oficial["ajustes_upgma"] == oficial["ajustes_dbscan"] == 1
+    total = ajustes_particionais + 2
+    assert total == oficial["ajustes_totais"] == 252
     assert len(metricas) == 30
     return particoes, total
 
@@ -285,29 +305,21 @@ def validar(raiz: Path = DIRETORIO_RESULTADOS) -> None:
     metricas = _ler_csv(raiz / "metricas_por_k.csv", ["algoritmo", "k"])
     resumo = _ler_csv(raiz / "resumo_agrupamentos.csv", "Algoritmo")
     pasta_tunagem = raiz / "tunagem"
-    particoes, total = _validar_protocolo(X, y, q1, metricas, resumo)
-    execucoes, ajustes_particionais = _validar_particionais(
-        X, y, q1, metricas, metadados, pasta_tunagem
-    )
     busca = metadados["tunagem"]
+    execucoes, ajustes_particionais = _validar_particionais(X, y, busca, pasta_tunagem)
+    particoes, total = _validar_protocolo(X, y, q1, metricas, resumo, metadados)
     ajustes_dbscan = _validar_dbscan(
         X, y, q1["dbscan"], execucoes["dbscan"], busca, pasta_tunagem
     )
     _validar_resumos(X, y, resumo, particoes, pasta_tunagem)
-    assert busca["ajustes_k1"] == 50
-    assert busca["ajustes_upgma"] == 1
-    total_real = (
-        ajustes_particionais
-        + ajustes_dbscan
-        + busca["ajustes_k1"]
-        + busca["ajustes_upgma"]
-    )
+    total_real = ajustes_particionais + ajustes_dbscan + total
     assert total_real == busca["ajustes_totais"]
 
     tecnicas = _validar_q2(raiz)
     verificacoes = [
-        "sementes e contagens da grade e do protocolo final",
-        "ótimos por função objetivo e seleção por silhueta",
+        "sementes distintas e contagens da rodada piloto e da oficial",
+        "escolha piloto pela média das quatro silhuetas e hiperparâmetros fixos na rodada oficial",
+        "ótimos por função objetivo e seleção oficial de k pela silhueta",
         "normalização e argmax das pertinências e probabilidades",
         "árvore UPGMA Manhattan e cinco cortes",
         "silhuetas, ARI e cobertura do DBSCAN recalculados sem ruído",

@@ -39,6 +39,25 @@
     "silhueta": "pontos de ruído (-1) removidos",
     "ari": "pontos de ruído (-1) removidos"
   },
+  "rodada_oficial": {
+    "sementes": [
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61
+    ],
+    "ajustes_particionais": 250,
+    "ajustes_upgma": 1,
+    "ajustes_dbscan": 1,
+    "ajustes_totais": 252,
+    "criterio_k": "Maior silhueta válida, com empate pelo menor k."
+  },
   "tunagem": {
     "valores_k": [
       2,
@@ -59,47 +78,47 @@
       51
     ],
     "cobertura_minima_dbscan_pct": 95.0,
-    "criterio_particionais": "Melhor objetivo finito entre as sementes, com empate pela menor semente. Maior silhueta entre configurações e k, com empate pelo menor k e pela primeira configuração na grade, iniciada pelo perfil de referência.",
+    "criterio_particionais": "Melhor objetivo finito entre as sementes, com empate pela menor semente. Maior média aritmética das quatro silhuetas em k de 2 a 5. Empates favorecem o perfil de referência e depois a ordem da grade.",
     "criterio_dbscan": "Maior silhueta válida com ao menos 95% de cobertura, com empate pela maior cobertura e pela primeira configuração na grade.",
     "ajustes_particionais": 1120,
     "ajustes_dbscan": 24,
     "selecionados": {
       "k-means": {
-        "configuracao": 1,
+        "configuracao": 2,
         "parametros": {
-          "init": "random"
+          "init": "k-means++"
         },
-        "k": 2
+        "silhueta_media": 0.44427896403459793
       },
       "fuzzy-k-means": {
         "configuracao": 1,
         "parametros": {
           "m": 2.0
         },
-        "k": 2
+        "silhueta_media": 0.44310819059403406
       },
       "kernel-fuzzy-k-means": {
-        "configuracao": 1,
+        "configuracao": 2,
         "parametros": {
           "m": 2.0,
-          "gamma": 0.25
+          "gamma": 0.05
         },
-        "k": 2
+        "silhueta_media": 0.44189722726841957
       },
       "k-medoids": {
-        "configuracao": 1,
+        "configuracao": 2,
         "parametros": {
-          "init": "random"
+          "init": "build"
         },
-        "k": 2
+        "silhueta_media": 0.4514298330625303
       },
       "gaussian-mixture": {
-        "configuracao": 1,
+        "configuracao": 12,
         "parametros": {
-          "covariance_type": "full",
-          "reg_covar": 1e-06
+          "covariance_type": "spherical",
+          "reg_covar": 0.01
         },
-        "k": 2
+        "silhueta_media": 0.45029047538962963
       }
     },
     "dbscan": {
@@ -115,13 +134,10 @@
       "cobertura_pct": 96.0,
       "silhueta": 0.6034547527923034,
       "elegivel": true,
-      "ari": 0.5760482515266581,
       "selecionado": true
     },
     "dbscan_modo": "automatico",
-    "ajustes_k1": 50,
-    "ajustes_upgma": 1,
-    "ajustes_totais": 1195
+    "ajustes_totais": 1396
   },
   "versoes": {
     "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",

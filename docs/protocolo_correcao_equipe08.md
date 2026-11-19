@@ -1,5 +1,7 @@
 # Protocolo de correção da entrega da Equipe 08
 
+Este registro documenta a revisão anterior à rodada oficial com hiperparâmetros fixados pela média piloto. O [README](../README.md) descreve o protocolo vigente.
+
 Use o [artigo revisado](artigo/artigo_ieee_revisado.pdf) e a [apresentação em PDF](../apresentacao_iris_retro.pdf) como referência da entrega. As correções abaixo partem dos resultados já registrados. A prioridade é explicar as escolhas experimentais, demonstrar o efeito dos parâmetros e alinhar o texto do artigo, dos slides, do notebook e do guia.
 
 ## 1. Justificar a cobertura mínima do DBSCAN

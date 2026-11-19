@@ -13,9 +13,9 @@ from sklearn.manifold import TSNE, trustworthiness
 from threadpoolctl import threadpool_limits
 from tunagem import (
     PADRAO_DBSCAN,
-    SEMENTES,
     buscar_hiperparametros,
     comparar_amostra_dbscan,
+    salvar_busca,
 )
 from umap import UMAP
 
@@ -24,6 +24,7 @@ from algoritmos import (
     calcular_ari,
     carregar_iris,
     condensar_resultados,
+    dbscan,
     executar_todas_por_k,
     plotar_dendrograma,
     plotar_silhuetas,
@@ -37,6 +38,7 @@ from algoritmos import (
 
 ROOT = Path(__file__).resolve().parent.parent
 CODIGO = Path(__file__).resolve().parent
+SEMENTES_OFICIAIS = range(52, 62)
 
 
 def executar_questao_1(
@@ -46,7 +48,7 @@ def executar_questao_1(
     *,
     diretorio_resultados: str | Path = ROOT / "resultados",
 ) -> pd.DataFrame:
-    """Executa a busca e consolida os sete agrupamentos da Questão 1."""
+    """Executa a busca piloto e a rodada oficial de agrupamentos da Questão 1."""
     diretorio_resultados = Path(diretorio_resultados)
     diretorio_tunagem = diretorio_resultados / "tunagem"
     diretorio_figuras = diretorio_resultados / "figuras"
@@ -58,30 +60,37 @@ def executar_questao_1(
             PADRAO_DBSCAN[0] if eps_dbscan is None else eps_dbscan,
             PADRAO_DBSCAN[1] if min_samples_dbscan is None else min_samples_dbscan,
         )
-    busca = buscar_hiperparametros(X, y, diretorio_tunagem, parametros_dbscan)
+    print("Rodada piloto (k de 2 a 5)...")
+    busca = buscar_hiperparametros(X, parametros_dbscan)
 
     todas_execucoes: dict[str, Any] = {}
     melhores: dict[str, dict[int, ResultadoAgrupamento]] = {}
-    ajustes_k1 = 0
+    ajustes_particionais = 0
+    print("Rodada oficial (k de 1 a 5, sementes 52–61)...")
     with threadpool_limits(limits=1):
-        for nome, execucoes in busca.particionais.items():
-            parametros = busca.metadados["selecionados"][nome]["parametros"]
-            execucoes_k1 = executar_todas_por_k(
-                nome, X, range(1, 2), seed_inicial=SEMENTES.start, **parametros
+        for nome, escolha in busca.metadados["selecionados"].items():
+            parametros = escolha["parametros"]
+            print(f"Executando {nome} com {parametros}...")
+            execucoes = executar_todas_por_k(
+                nome, X, valores_k, seed_inicial=SEMENTES_OFICIAIS.start, **parametros
             )
-            ajustes_k1 += len(execucoes_k1[1])
-            todas_execucoes[nome] = execucoes_k1 | execucoes
-            melhores[nome] = selecionar_melhores_por_k(
-                nome,
-                {k: ajustes for k, ajustes in todas_execucoes[nome].items() if ajustes},
-            )
+            ajustes_particionais += sum(len(rodadas) for rodadas in execucoes.values())
+            todas_execucoes[nome] = execucoes
+            melhores[nome] = selecionar_melhores_por_k(nome, execucoes)
 
-    print("Executando upgma (uma hierarquia e cinco cortes)...")
-    resultados_upgma = upgma(X, valores_k=tuple(valores_k))
-    melhores["upgma"] = resultados_upgma
-    todas_execucoes["upgma"] = resultados_upgma
+        print("Executando upgma (uma hierarquia e cinco cortes)...")
+        resultados_upgma = upgma(X, valores_k=tuple(valores_k))
+        melhores["upgma"] = resultados_upgma
+        todas_execucoes["upgma"] = resultados_upgma
 
-    resultado_dbscan = busca.dbscan
+        escolha_dbscan = busca.metadados["dbscan"]
+        print(
+            f"Executando dbscan com eps={escolha_dbscan['eps']:.9g} "
+            f"e min_samples={escolha_dbscan['min_samples']}..."
+        )
+        resultado_dbscan = dbscan(
+            X, eps=escolha_dbscan["eps"], min_samples=escolha_dbscan["min_samples"]
+        )
     todas_execucoes["dbscan"] = resultado_dbscan
 
     plotar_dendrograma(resultados_upgma[2], diretorio_figuras)
@@ -121,18 +130,17 @@ def executar_questao_1(
     )
     resumo.to_csv(diretorio_resultados / "resumo_agrupamentos.csv", index=False)
     salvar_json(diretorio_resultados / "execucoes_questao_1.json", todas_execucoes)
+    salvar_busca(busca, y, diretorio_tunagem)
     comparar_amostra_dbscan(X, y, selecionados, resultado_dbscan).to_csv(
         diretorio_tunagem / "comparacao_mesma_amostra.csv", index=False
     )
-    metadados_tunagem = busca.metadados | {
-        "ajustes_k1": ajustes_k1,
+    rodada_oficial = {
+        "sementes": list(SEMENTES_OFICIAIS),
+        "ajustes_particionais": ajustes_particionais,
         "ajustes_upgma": 1,
-        "ajustes_totais": (
-            busca.metadados["ajustes_particionais"]
-            + busca.metadados["ajustes_dbscan"]
-            + ajustes_k1
-            + 1
-        ),
+        "ajustes_dbscan": 1,
+        "ajustes_totais": ajustes_particionais + 2,
+        "criterio_k": "Maior silhueta válida, com empate pelo menor k.",
     }
     salvar_json(
         diretorio_resultados / "metadados_questao_1.json",
@@ -140,7 +148,7 @@ def executar_questao_1(
             "base": "codigo/iris/iris.data (UCI Iris)",
             "preprocessamento": preprocessamento,
             "valores_k": list(valores_k),
-            "execucoes_por_algoritmo_particional": len(SEMENTES),
+            "execucoes_por_algoritmo_particional": len(SEMENTES_OFICIAIS),
             "silhueta": {"metrica": "euclidean", "k_1": "indefinida (NaN)"},
             "dbscan": {
                 "eps": resultado_dbscan.parametros["eps"],
@@ -148,7 +156,15 @@ def executar_questao_1(
                 "silhueta": "pontos de ruído (-1) removidos",
                 "ari": "pontos de ruído (-1) removidos",
             },
-            "tunagem": metadados_tunagem,
+            "rodada_oficial": rodada_oficial,
+            "tunagem": busca.metadados
+            | {
+                "ajustes_totais": (
+                    busca.metadados["ajustes_particionais"]
+                    + busca.metadados["ajustes_dbscan"]
+                    + rodada_oficial["ajustes_totais"]
+                ),
+            },
             "versoes": {
                 "python": sys.version,
                 **{
