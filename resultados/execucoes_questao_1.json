@@ -156,12 +156,13 @@
           0,
           0
         ],
-        "objetivo": 600.0,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 42,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -331,12 +332,13 @@
           0,
           0
         ],
-        "objetivo": 600.0000000000001,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 43,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -506,12 +508,13 @@
           0,
           0
         ],
-        "objetivo": 600.0000000000001,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 44,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -681,12 +684,13 @@
           0,
           0
         ],
-        "objetivo": 600.0,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 45,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -856,12 +860,13 @@
           0,
           0
         ],
-        "objetivo": 600.0000000000001,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 46,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -1031,12 +1036,13 @@
           0,
           0
         ],
-        "objetivo": 600.0,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 47,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -1206,12 +1212,13 @@
           0,
           0
         ],
-        "objetivo": 600.0,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 48,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -1381,12 +1388,13 @@
           0,
           0
         ],
-        "objetivo": 600.0,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 49,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -1556,12 +1564,13 @@
           0,
           0
         ],
-        "objetivo": 600.0000000000001,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 50,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -1731,12 +1740,13 @@
           0,
           0
         ],
-        "objetivo": 600.0,
+        "objetivo": 600.0000000000003,
         "parametros": {
           "k": 1,
           "seed": 51,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -1908,12 +1918,13 @@
           1,
           1
         ],
-        "objetivo": 223.73200573676348,
+        "objetivo": 223.73200573676343,
         "parametros": {
           "k": 2,
           "seed": 42,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 4
         },
         "centros": [
           [
@@ -2089,12 +2100,13 @@
           1,
           1
         ],
-        "objetivo": 223.73200573676348,
+        "objetivo": 223.73200573676343,
         "parametros": {
           "k": 2,
           "seed": 43,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -2270,12 +2282,13 @@
           0,
           0
         ],
-        "objetivo": 223.73200573676348,
+        "objetivo": 223.73200573676343,
         "parametros": {
           "k": 2,
           "seed": 44,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -2456,7 +2469,8 @@
           "k": 2,
           "seed": 45,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 7
         },
         "centros": [
           [
@@ -2637,7 +2651,8 @@
           "k": 2,
           "seed": 46,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 7
         },
         "centros": [
           [
@@ -2813,12 +2828,13 @@
           1,
           1
         ],
-        "objetivo": 223.73200573676348,
+        "objetivo": 223.73200573676343,
         "parametros": {
           "k": 2,
           "seed": 47,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -2999,7 +3015,8 @@
           "k": 2,
           "seed": 48,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -3180,7 +3197,8 @@
           "k": 2,
           "seed": 49,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 3
         },
         "centros": [
           [
@@ -3361,7 +3379,8 @@
           "k": 2,
           "seed": 50,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 3
         },
         "centros": [
           [
@@ -3542,7 +3561,8 @@
           "k": 2,
           "seed": 51,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 2
         },
         "centros": [
           [
@@ -3720,12 +3740,13 @@
           2,
           1
         ],
-        "objetivo": 141.15417813388652,
+        "objetivo": 141.15417813388655,
         "parametros": {
           "k": 3,
           "seed": 42,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 6
         },
         "centros": [
           [
@@ -3907,12 +3928,13 @@
           1,
           1
         ],
-        "objetivo": 192.03717409190028,
+        "objetivo": 192.03717409190025,
         "parametros": {
           "k": 3,
           "seed": 43,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 5
         },
         "centros": [
           [
@@ -4094,12 +4116,13 @@
           0,
           2
         ],
-        "objetivo": 141.1541781338865,
+        "objetivo": 141.15417813388655,
         "parametros": {
           "k": 3,
           "seed": 44,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 6
         },
         "centros": [
           [
@@ -4281,12 +4304,13 @@
           0,
           1
         ],
-        "objetivo": 141.14145998036577,
+        "objetivo": 141.1414599803658,
         "parametros": {
           "k": 3,
           "seed": 45,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 4
         },
         "centros": [
           [
@@ -4468,12 +4492,13 @@
           0,
           1
         ],
-        "objetivo": 141.15417813388652,
+        "objetivo": 141.15417813388655,
         "parametros": {
           "k": 3,
           "seed": 46,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 7
         },
         "centros": [
           [
@@ -4655,12 +4680,13 @@
           2,
           1
         ],
-        "objetivo": 141.15417813388652,
+        "objetivo": 141.15417813388655,
         "parametros": {
           "k": 3,
           "seed": 47,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 7
         },
         "centros": [
           [
@@ -4842,12 +4868,13 @@
           1,
           1
         ],
-        "objetivo": 192.03717409190028,
+        "objetivo": 192.03717409190025,
         "parametros": {
           "k": 3,
           "seed": 48,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 4
         },
         "centros": [
           [
@@ -5029,12 +5056,13 @@
           2,
           2
         ],
-        "objetivo": 142.11063713104193,
+        "objetivo": 142.11063713104195,
         "parametros": {
           "k": 3,
           "seed": 49,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 11
         },
         "centros": [
           [
@@ -5216,12 +5244,13 @@
           0,
           0
         ],
-        "objetivo": 192.03717409190028,
+        "objetivo": 192.03717409190025,
         "parametros": {
           "k": 3,
           "seed": 50,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 4
         },
         "centros": [
           [
@@ -5403,12 +5432,13 @@
           2,
           0
         ],
-        "objetivo": 140.96837895511078,
+        "objetivo": 140.96837895511072,
         "parametros": {
           "k": 3,
           "seed": 51,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 4
         },
         "centros": [
           [
@@ -5592,12 +5622,13 @@
           2,
           1
         ],
-        "objetivo": 114.57790500611007,
+        "objetivo": 114.57790500611009,
         "parametros": {
           "k": 4,
           "seed": 42,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 8
         },
         "centros": [
           [
@@ -5785,12 +5816,13 @@
           1,
           1
         ],
-        "objetivo": 115.19028485119945,
+        "objetivo": 115.1902848511995,
         "parametros": {
           "k": 4,
           "seed": 43,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 15
         },
         "centros": [
           [
@@ -5978,12 +6010,13 @@
           0,
           2
         ],
-        "objetivo": 115.62481336964905,
+        "objetivo": 115.62481336964906,
         "parametros": {
           "k": 4,
           "seed": 44,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 7
         },
         "centros": [
           [
@@ -6171,12 +6204,13 @@
           0,
           1
         ],
-        "objetivo": 114.60278879607733,
+        "objetivo": 114.60278879607732,
         "parametros": {
           "k": 4,
           "seed": 45,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 6
         },
         "centros": [
           [
@@ -6364,12 +6398,13 @@
           0,
           1
         ],
-        "objetivo": 115.73518623594575,
+        "objetivo": 115.7351862359458,
         "parametros": {
           "k": 4,
           "seed": 46,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 8
         },
         "centros": [
           [
@@ -6562,7 +6597,8 @@
           "k": 4,
           "seed": 47,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 13
         },
         "centros": [
           [
@@ -6750,12 +6786,13 @@
           1,
           1
         ],
-        "objetivo": 114.96770313827635,
+        "objetivo": 114.96770313827642,
         "parametros": {
           "k": 4,
           "seed": 48,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 12
         },
         "centros": [
           [
@@ -6948,7 +6985,8 @@
           "k": 4,
           "seed": 49,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 8
         },
         "centros": [
           [
@@ -7136,12 +7174,13 @@
           0,
           0
         ],
-        "objetivo": 114.68221609937966,
+        "objetivo": 114.6822160993797,
         "parametros": {
           "k": 4,
           "seed": 50,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 7
         },
         "centros": [
           [
@@ -7329,12 +7368,13 @@
           2,
           0
         ],
-        "objetivo": 115.51538076409027,
+        "objetivo": 115.51538076409035,
         "parametros": {
           "k": 4,
           "seed": 51,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 11
         },
         "centros": [
           [
@@ -7524,12 +7564,13 @@
           0,
           1
         ],
-        "objetivo": 104.64407590908695,
+        "objetivo": 104.64407590908696,
         "parametros": {
           "k": 5,
           "seed": 42,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 11
         },
         "centros": [
           [
@@ -7723,12 +7764,13 @@
           1,
           1
         ],
-        "objetivo": 105.7523146954963,
+        "objetivo": 105.75231469549635,
         "parametros": {
           "k": 5,
           "seed": 43,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 15
         },
         "centros": [
           [
@@ -7922,12 +7964,13 @@
           0,
           3
         ],
-        "objetivo": 106.16919586723394,
+        "objetivo": 106.16919586723398,
         "parametros": {
           "k": 5,
           "seed": 44,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 4
         },
         "centros": [
           [
@@ -8126,7 +8169,8 @@
           "k": 5,
           "seed": 45,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 6
         },
         "centros": [
           [
@@ -8325,7 +8369,8 @@
           "k": 5,
           "seed": 46,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 10
         },
         "centros": [
           [
@@ -8519,12 +8564,13 @@
           3,
           3
         ],
-        "objetivo": 105.7343785683636,
+        "objetivo": 105.73437856836362,
         "parametros": {
           "k": 5,
           "seed": 47,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 15
         },
         "centros": [
           [
@@ -8718,12 +8764,13 @@
           4,
           1
         ],
-        "objetivo": 91.7759523494461,
+        "objetivo": 91.77595234944614,
         "parametros": {
           "k": 5,
           "seed": 48,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 13
         },
         "centros": [
           [
@@ -8917,12 +8964,13 @@
           4,
           2
         ],
-        "objetivo": 91.13730688271086,
+        "objetivo": 91.1373068827108,
         "parametros": {
           "k": 5,
           "seed": 49,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 8
         },
         "centros": [
           [
@@ -9121,7 +9169,8 @@
           "k": 5,
           "seed": 50,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 7
         },
         "centros": [
           [
@@ -9315,12 +9364,13 @@
           2,
           0
         ],
-        "objetivo": 91.06677122728536,
+        "objetivo": 91.06677122728537,
         "parametros": {
           "k": 5,
           "seed": 51,
           "n_init": 1,
-          "init": "random"
+          "init": "random",
+          "n_iter": 10
         },
         "centros": [
           [
@@ -9524,7 +9574,8 @@
           "seed": 42,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -10151,7 +10202,8 @@
           "seed": 43,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -10778,7 +10830,8 @@
           "seed": 44,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -11405,7 +11458,8 @@
           "seed": 45,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -12032,7 +12086,8 @@
           "seed": 46,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -12659,7 +12714,8 @@
           "seed": 47,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -13286,7 +13342,8 @@
           "seed": 48,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -13913,7 +13970,8 @@
           "seed": 49,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -14540,7 +14598,8 @@
           "seed": 50,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -15167,7 +15226,8 @@
           "seed": 51,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -15796,7 +15856,8 @@
           "seed": 42,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -16579,7 +16640,8 @@
           "seed": 43,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -17362,7 +17424,8 @@
           "seed": 44,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -18145,7 +18208,8 @@
           "seed": 45,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -18928,7 +18992,8 @@
           "seed": 46,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -19711,7 +19776,8 @@
           "seed": 47,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -20494,7 +20560,8 @@
           "seed": 48,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -21277,7 +21344,8 @@
           "seed": 49,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -22060,7 +22128,8 @@
           "seed": 50,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -22843,7 +22912,8 @@
           "seed": 51,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -23628,7 +23698,8 @@
           "seed": 42,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -24567,7 +24638,8 @@
           "seed": 43,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -25506,7 +25578,8 @@
           "seed": 44,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -26445,7 +26518,8 @@
           "seed": 45,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -27384,7 +27458,8 @@
           "seed": 46,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -28323,7 +28398,8 @@
           "seed": 47,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -29262,7 +29338,8 @@
           "seed": 48,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -30201,7 +30278,8 @@
           "seed": 49,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -31140,7 +31218,8 @@
           "seed": 50,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -32079,7 +32158,8 @@
           "seed": 51,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -33020,7 +33100,8 @@
           "seed": 42,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -34115,7 +34196,8 @@
           "seed": 43,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -35210,7 +35292,8 @@
           "seed": 44,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -36305,7 +36388,8 @@
           "seed": 45,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -37400,7 +37484,8 @@
           "seed": 46,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -38495,7 +38580,8 @@
           "seed": 47,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -39590,7 +39676,8 @@
           "seed": 48,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -40685,7 +40772,8 @@
           "seed": 49,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -41780,7 +41868,8 @@
           "seed": 50,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -42875,7 +42964,8 @@
           "seed": 51,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -43972,7 +44062,8 @@
           "seed": 42,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -45223,7 +45314,8 @@
           "seed": 43,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -46474,7 +46566,8 @@
           "seed": 44,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -47725,7 +47818,8 @@
           "seed": 45,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -48976,7 +49070,8 @@
           "seed": 46,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -50227,7 +50322,8 @@
           "seed": 47,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -51478,7 +51574,8 @@
           "seed": 48,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -52729,7 +52826,8 @@
           "seed": 49,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -53980,7 +54078,8 @@
           "seed": 50,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -55231,7 +55330,8 @@
           "seed": 51,
           "m": 2.0,
           "max_iter": 300,
-          "error": 1e-05
+          "error": 1e-05,
+          "n_init": 1
         },
         "centros": [
           [
@@ -56487,6 +56587,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -57116,6 +57217,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -57745,6 +57847,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -58374,6 +58477,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -59003,6 +59107,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -59632,6 +59737,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -60261,6 +60367,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -60890,6 +60997,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -61519,6 +61627,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -62148,6 +62257,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -62779,6 +62889,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -63564,6 +63675,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -64349,6 +64461,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -65127,13 +65240,14 @@
           1,
           1
         ],
-        "objetivo": 55.12757704072979,
+        "objetivo": 55.12757704072978,
         "parametros": {
           "k": 2,
           "seed": 45,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -65912,13 +66026,14 @@
           0,
           0
         ],
-        "objetivo": 55.12757704072978,
+        "objetivo": 55.12757704072979,
         "parametros": {
           "k": 2,
           "seed": 46,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -66704,6 +66819,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -67482,13 +67598,14 @@
           0,
           0
         ],
-        "objetivo": 55.12757704072978,
+        "objetivo": 55.12757704072979,
         "parametros": {
           "k": 2,
           "seed": 48,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -68274,6 +68391,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -69052,13 +69170,14 @@
           0,
           0
         ],
-        "objetivo": 55.12757704072978,
+        "objetivo": 55.12757704072979,
         "parametros": {
           "k": 2,
           "seed": 50,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -69844,6 +69963,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -70631,6 +70751,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -71572,6 +71693,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -72513,6 +72635,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -73447,13 +73570,14 @@
           1,
           0
         ],
-        "objetivo": 32.785800360591075,
+        "objetivo": 32.78580036059107,
         "parametros": {
           "k": 3,
           "seed": 45,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -74395,6 +74519,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -75336,6 +75461,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -76270,13 +76396,14 @@
           2,
           0
         ],
-        "objetivo": 32.785800360591075,
+        "objetivo": 32.78580036059108,
         "parametros": {
           "k": 3,
           "seed": 48,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -77218,6 +77345,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -78152,13 +78280,14 @@
           2,
           0
         ],
-        "objetivo": 32.78580036059104,
+        "objetivo": 32.78580036059103,
         "parametros": {
           "k": 3,
           "seed": 50,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -79100,6 +79229,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -80043,6 +80173,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -81133,13 +81264,14 @@
           0,
           2
         ],
-        "objetivo": 23.96888818371821,
+        "objetivo": 23.968888183718214,
         "parametros": {
           "k": 4,
           "seed": 43,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -82237,6 +82369,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -83334,6 +83467,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -84431,6 +84565,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -85521,13 +85656,14 @@
           0,
           2
         ],
-        "objetivo": 24.141702234191307,
+        "objetivo": 24.14170223419131,
         "parametros": {
           "k": 4,
           "seed": 47,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -86625,6 +86761,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -87722,6 +87859,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -88819,6 +88957,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -89916,6 +90055,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -91015,6 +91155,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -92268,6 +92409,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -93521,6 +93663,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -94767,13 +94910,14 @@
           1,
           4
         ],
-        "objetivo": 19.25671525115572,
+        "objetivo": 19.256715251155715,
         "parametros": {
           "k": 5,
           "seed": 45,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -96020,13 +96164,14 @@
           2,
           1
         ],
-        "objetivo": 17.993026493288557,
+        "objetivo": 17.99302649328856,
         "parametros": {
           "k": 5,
           "seed": 46,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -97280,6 +97425,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -98533,6 +98679,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -99779,13 +99926,14 @@
           4,
           1
         ],
-        "objetivo": 19.25671525115571,
+        "objetivo": 19.25671525115572,
         "parametros": {
           "k": 5,
           "seed": 49,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -101032,13 +101180,14 @@
           3,
           4
         ],
-        "objetivo": 17.993026493288554,
+        "objetivo": 17.993026493288557,
         "parametros": {
           "k": 5,
           "seed": 50,
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -102292,6 +102441,7 @@
           "m": 2.0,
           "max_iter": 300,
           "error": 1e-05,
+          "n_init": 1,
           "gamma": 0.25,
           "kernel": "rbf"
         },
@@ -103550,6 +103700,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -103730,6 +103881,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -103910,6 +104062,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -104090,6 +104243,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -104270,6 +104424,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -104450,6 +104605,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -104630,6 +104786,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -104810,6 +104967,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -104990,6 +105148,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -105170,6 +105329,7 @@
           "method": "pam",
           "init": "exhaustive",
           "max_iter": null,
+          "n_iter": null,
           "medoid_indices": [
             61
           ]
@@ -105352,6 +105512,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             126,
             7
@@ -105539,6 +105700,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             126,
             7
@@ -105726,6 +105888,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             126,
             7
@@ -105913,6 +106076,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             7,
             126
@@ -106100,6 +106264,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             7,
             126
@@ -106287,6 +106452,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             126,
             7
@@ -106474,6 +106640,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             7,
             126
@@ -106661,6 +106828,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             7,
             126
@@ -106848,6 +107016,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             7,
             126
@@ -107035,6 +107204,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             126,
             7
@@ -107224,6 +107394,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             55,
             7,
@@ -107418,6 +107589,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             94,
             7,
@@ -107612,6 +107784,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 4,
           "medoid_indices": [
             147,
             7,
@@ -107806,6 +107979,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 6,
           "medoid_indices": [
             7,
             55,
@@ -108000,6 +108174,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             7,
             55,
@@ -108194,6 +108369,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             147,
             7,
@@ -108388,6 +108564,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 4,
           "medoid_indices": [
             55,
             7,
@@ -108582,6 +108759,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 3,
           "medoid_indices": [
             94,
             147,
@@ -108776,6 +108954,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 4,
           "medoid_indices": [
             94,
             147,
@@ -108970,6 +109149,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 4,
           "medoid_indices": [
             147,
             7,
@@ -109166,6 +109346,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             7,
             69,
@@ -109367,6 +109548,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 4,
           "medoid_indices": [
             30,
             48,
@@ -109568,6 +109750,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 6,
           "medoid_indices": [
             139,
             7,
@@ -109769,6 +109952,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             7,
             78,
@@ -109970,6 +110154,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 6,
           "medoid_indices": [
             48,
             55,
@@ -110171,6 +110356,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             112,
             48,
@@ -110372,6 +110558,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 6,
           "medoid_indices": [
             78,
             139,
@@ -110573,6 +110760,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             69,
             139,
@@ -110774,6 +110962,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 7,
           "medoid_indices": [
             69,
             78,
@@ -110975,6 +111164,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 4,
           "medoid_indices": [
             78,
             139,
@@ -111178,6 +111368,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             49,
             5,
@@ -111386,6 +111577,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             30,
             48,
@@ -111594,6 +111786,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 7,
           "medoid_indices": [
             48,
             30,
@@ -111802,6 +111995,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 6,
           "medoid_indices": [
             48,
             78,
@@ -112010,6 +112204,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 8,
           "medoid_indices": [
             48,
             78,
@@ -112218,6 +112413,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 8,
           "medoid_indices": [
             139,
             48,
@@ -112426,6 +112622,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 9,
           "medoid_indices": [
             5,
             49,
@@ -112634,6 +112831,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 7,
           "medoid_indices": [
             69,
             139,
@@ -112842,6 +113040,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             94,
             105,
@@ -113050,6 +113249,7 @@
           "method": "pam",
           "init": "random",
           "max_iter": 300,
+          "n_iter": 5,
           "medoid_indices": [
             78,
             30,
@@ -165635,6 +165835,7 @@
       1,
       1,
       1,
+      -1,
       1,
       1,
       1,
@@ -165680,8 +165881,7 @@
       1,
       1,
       1,
-      1,
-      1,
+      -1,
       1,
       1,
       -1,
@@ -165728,14 +165928,14 @@
     ],
     "objetivo": null,
     "parametros": {
-      "eps": 0.8,
-      "min_samples": 5,
+      "eps": 0.6942927963744061,
+      "min_samples": 3,
       "metric": "euclidean"
     },
     "centros": null,
     "pertinencias": null,
     "probabilidades": null,
     "hierarquia": null,
-    "ruido": 4
+    "ruido": 6
   }
 }

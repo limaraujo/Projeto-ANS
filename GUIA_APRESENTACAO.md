@@ -55,20 +55,20 @@ A conclusão que conecta tudo:
 |---|---|
 | Dados | 150 flores, quatro atributos, três espécies com 50 flores cada |
 | Pré-processamento | Atributos padronizados por z-score |
-| Ajustes principais da Q1 | 252: 250 particionais + uma hierarquia + um DBSCAN |
+| Ajustes da Q1 | 1.195 ao todo. O protocolo final reúne 252 registros |
 | Valores de k | 1, 2, 3, 4 e 5 |
-| Reinicializações particionais | Dez por método e k; sementes de 42 a 51 |
+| Reinicializações particionais | Dez por perfil e k, com sementes de 42 a 51 |
 | Melhor k dos seis métodos com seleção | 2 |
 | Silhueta desses seis métodos | 0,5802 |
 | ARI desses seis métodos | 0,5681 |
-| DBSCAN | Dois grupos e quatro ruídos: 2,67% |
-| GMM com k = 3, análise posterior | ARI = 0,9039; silhueta = 0,3728 |
+| DBSCAN | Dois grupos, seis pontos de ruído e cobertura de 96%. Silhueta 0,6035 e ARI 0,5760 em 144 flores |
+| Perfil escolhido do GMM, avaliado em k = 3 | ARI 0,9039 e silhueta 0,3728 |
 | PCA nas duas primeiras componentes | 95,80% da variância |
 | Maior trustworthiness nesta configuração | t-SNE: 0,9888, com dez vizinhos |
 
 ### 1.2. Apresentação do projeto em aproximadamente um minuto
 
-> “Nós estudamos a base Iris, que tem 150 flores descritas por quatro medidas. Aplicamos sete agrupadores sem usar os rótulos das espécies durante o ajuste. Para os métodos particionais, repetimos cada configuração dez vezes e escolhemos a melhor execução pela função objetivo. Depois escolhemos k pela silhueta e avaliamos a concordância com as espécies pelo ARI. Os seis métodos com escolha de k selecionaram dois grupos. Porém, ao observar o GMM com três componentes, encontramos um ARI maior, mostrando que boa separação geométrica e recuperação das espécies são critérios diferentes. Também comparamos quatro projeções: a PCA reteve 95,80% da variância em dois eixos, e o t-SNE teve a maior preservação local pelo diagnóstico utilizado.”
+> “Nós estudamos a base Iris, que tem 150 flores descritas por quatro medidas. Aplicamos sete agrupadores sem usar os rótulos das espécies durante o ajuste. Para os métodos particionais, repetimos cada configuração dez vezes e escolhemos a melhor execução pela função objetivo. Depois escolhemos os perfis e k pela silhueta e avaliamos a concordância com as espécies pelo ARI. Os seis métodos com escolha de k selecionaram dois grupos. Porém, ao observar o GMM com três componentes, encontramos um ARI maior, mostrando que boa separação geométrica e recuperação das espécies são critérios diferentes. Também comparamos quatro projeções: a PCA reteve 95,80% da variância em dois eixos, e o t-SNE teve a maior preservação local pelo diagnóstico utilizado.”
 
 ## 2. Dados, padronização e distâncias
 
@@ -203,34 +203,34 @@ Um **grafo** representa observações por nós e relações por arestas. Uma viz
 
 ## 4. O protocolo experimental
 
-### 4.1. De onde vêm os 252 ajustes
+### 4.1. Quantos ajustes foram executados
 
-Os cinco métodos particionais são K-Means, FCM, Kernel FCM, K-Medoids e GMM/EM. Para cada um:
+A busca cruza 28 perfis dos cinco métodos particionais com quatro valores de k e dez sementes. O DBSCAN avalia 24 configurações. Os perfis escolhidos são completados com dez chamadas de k = 1 por método. A contagem total é
 
 ```text
-5 valores de k × 10 sementes = 50 ajustes por método.
-5 métodos × 50 ajustes = 250 ajustes particionais.
-250 + 1 construção UPGMA + 1 DBSCAN = 252 ajustes principais.
+28 perfis × 4 valores de k × 10 sementes = 1.120 ajustes particionais na busca.
+1.120 + 24 DBSCAN + 50 chamadas com k = 1 + 1 árvore = 1.195 ajustes.
+5 métodos × 5 valores de k × 10 sementes + 1 árvore + 1 DBSCAN = 252 registros finais.
 ```
 
-Os cinco cortes da mesma árvore UPGMA não são cinco novas construções. As quatro projeções da Questão 2 são contabilizadas separadamente.
+O protocolo final reaproveita os ajustes dos perfis escolhidos e a execução do DBSCAN selecionada da grade. Os cinco cortes do UPGMA vêm de uma única árvore. As quatro projeções pertencem à Questão 2.
 
-Essa é a contagem das chamadas previstas pelo protocolo, não das operações internas de cada método. Em particular, a implementação instalada do Kernel FCM inicializa seus protótipos por um FCM interno. Isso não altera a contagem das 252 chamadas principais, mas mostra que seus custos computacionais não são equivalentes.
+A contagem usa chamadas aos métodos. O Kernel FCM inicializa os protótipos por um FCM interno que faz parte da própria chamada.
 
 ### 4.2. A ordem da seleção precisa estar clara
 
 ```text
 Para cada método particional:
-    para k em {1, 2, 3, 4, 5}:
+    para cada perfil e k em {2, 3, 4, 5}:
         executar com as sementes 42, 43, ..., 51
         escolher a melhor execução pela função objetivo do método
-        obter os rótulos crisp dessa execução
-        calcular a silhueta, se definida
-    escolher k* pela maior silhueta válida
-    avaliar a partição escolhida com o ARI
+        obter os rótulos crisp e calcular a silhueta, se definida
+    escolher perfil e k* pela maior silhueta válida
+    completar as 10 chamadas de k = 1 do perfil escolhido
+    avaliar com ARI após a seleção
 ```
 
-No GMM, a melhor execução é a de **maior** objetivo. Nos outros quatro, a de **menor** objetivo. Empates retêm a primeira execução na ordem percorrida pelo código.
+No GMM, a melhor execução é a de **maior** objetivo. Nos outros quatro, a de **menor** objetivo. Empates de objetivo retêm a menor semente. Empates de silhueta favorecem menor k e depois a ordem dos perfis, com a referência primeiro. No DBSCAN, a seleção exige silhueta válida e cobertura de pelo menos 95%.
 
 O código também calcula ARI das melhores execuções em outros valores de k e os grava no CSV. Isso permite a análise posterior em k = 3, mas esses valores de ARI não orientam a seleção oficial.
 
@@ -238,7 +238,7 @@ O código também calcula ARI das melhores execuções em outros valores de k e 
 
 Aumentar a quantidade de centros normalmente permite reduzir a inércia do K-Means. Aumentar componentes também dá flexibilidade ao GMM. Melhorar o objetivo bruto pode simplesmente refletir maior complexidade.
 
-Por isso o protocolo separa duas decisões: **melhor inicialização para um k fixo**, pelo objetivo; **escolha entre valores de k**, pela silhueta. Outros critérios, como BIC no GMM, seriam possíveis em outro desenho experimental, mas não foram o critério desta entrega.
+O objetivo escolhe a **melhor execução para um perfil e k fixos**. A silhueta escolhe **entre perfis e valores de k** usando as partições que venceram a primeira etapa.
 
 ### 4.4. Por que os objetivos não são comparáveis entre métodos
 
@@ -361,7 +361,7 @@ $$
 
 **Exemplo didático calculado:** com gamma 0,25 e distância euclidiana igual a 2, o kernel vale `exp(−1) ≈ 0,3679` e a distância quadrática induzida vale aproximadamente `1,2642`.
 
-**Pontos fortes e limites:** permite uma noção não linear de proximidade, mas o comportamento depende do kernel e de gamma. Neste estudo, usar kernel não melhorou as métricas da partição selecionada. Não houve análise de sensibilidade que permita concluir qual gamma seria melhor.
+**Pontos fortes e limites:** permite uma noção não linear de proximidade, mas o comportamento depende do kernel e de gamma. Na grade da Iris, m e gamma alteraram as partições em k = 3. Os perfis Kernel FCM e FCM selecionados atingiram as mesmas métricas em k = 2.
 
 **Como explicar:** “O Kernel FCM mantém as pertinências fuzzy, mas troca a distância convencional por uma distância induzida pelo RBF. Nesta variante, os centros continuam no espaço de entrada.”
 
@@ -517,7 +517,7 @@ Um ponto é **central ou core** quando `|Nε(x)| ≥ min_samples`. Um ponto **de
 
 Um ponto de borda não prolonga por conta própria a cadeia de expansão: a propagação depende de pontos centrais.
 
-**Configuração efetiva da Q1:** `eps=0,8`, `min_samples=5`, distância euclidiana, dados padronizados e uma execução. O valor 0,8 está em unidades da geometria padronizada, não em centímetros.
+**Configuração selecionada na Q1.** A maior silhueta válida com pelo menos 95% de cobertura ocorreu com `eps≈0,694293` e `min_samples=3`. O raio mede 1,5 vez a mediana da distância ao quinto vizinho no espaço padronizado.
 
 **Se mudar os parâmetros:** eps menor costuma fragmentar grupos e aumentar ruído; eps maior pode conectar regiões antes separadas. Aumentar `min_samples` exige maior densidade. São tendências, não uma promessa sobre o número de grupos em toda base.
 
@@ -613,11 +613,9 @@ Imagine duas espécies cujas medidas se sobrepõem bastante. Juntá-las pode mel
 
 ### 6.4. A convenção do ruído no DBSCAN
 
-O código remove as observações de rótulo `−1` antes de calcular a silhueta do DBSCAN. O valor descreve, portanto, os **146 pontos restantes**. Para o ARI, os 150 pontos permanecem, incluindo o rótulo `−1` como parte da partição estimada.
+A silhueta e o ARI do DBSCAN incluem as **144 flores retidas**. A máscara exclui o rótulo `−1` da partição prevista e aplica a mesma exclusão aos rótulos das espécies no ARI. O DBSCAN encontrou dois grupos entre as flores retidas e marcou seis flores como ruído.
 
-Os quatro ruídos não são quatro clusters. Há dois clusters encontrados e uma categoria de observações não atribuídas. A contagem de grupos usa os rótulos distintos excluindo `−1`.
-
-Ao comparar a silhueta do DBSCAN com a de outros métodos, diga explicitamente que a população avaliada é diferente.
+A comparação de amostra comum recalcula os dois índices para os sete métodos nas mesmas 144 flores. Todos coincidem nesse subconjunto, com silhueta 0,6035 e ARI 0,5760.
 
 ## 7. Como interpretar os resultados de agrupamento
 
@@ -631,9 +629,9 @@ Ao comparar a silhueta do DBSCAN com a de outros métodos, diga explicitamente q
 | K-Medoids | 2 | 0,5802 | 0,5681 | 0 |
 | GMM/EM | 2 | 0,5802 | 0,5681 | 0 |
 | UPGMA | 2 | 0,5802 | 0,5681 | 0 |
-| DBSCAN | 2, emergentes da densidade | 0,5963* | 0,5518 | 4 |
+| DBSCAN | 2, emergentes da densidade | 0,6035* | 0,5760* | 6 |
 
-`*` Silhueta do DBSCAN calculada sem os ruídos. Fonte: [resumo_agrupamentos.csv](resultados/resumo_agrupamentos.csv).
+`*` As duas métricas do DBSCAN usam os pontos retidos. [Resumo dos agrupamentos](resultados/resumo_agrupamentos.csv) · [Comparação nas mesmas flores](resultados/tunagem/comparacao_mesma_amostra.csv)
 
 Os seis métodos com escolha de k chegaram à mesma partição, salvo permutações dos identificadores:
 
@@ -662,7 +660,7 @@ Fonte: [metricas_por_k.csv](resultados/metricas_por_k.csv). k = 1 não aparece n
 
 ### 7.3. Por que o GMM em k = 3 merece destaque
 
-| Configuração GMM | Silhueta | ARI |
+| Perfil escolhido de GMM | Silhueta | ARI |
 |---|---:|---:|
 | k = 2, selecionada pelo protocolo | 0,5802 | 0,5681 |
 | k = 3, interpretação posterior | 0,3728 | 0,9039 |
@@ -681,11 +679,11 @@ O GMM recupera melhor a divisão entre versicolor e virginica nesse ajuste, mas 
 
 ### 7.4. O que aconteceu com o DBSCAN
 
-Um grupo contém 49 setosas. O outro contém 50 versicolors e 47 virginicas. O ruído contém uma setosa e três virginicas, totalizando quatro flores.
+Um grupo contém 49 setosas. O outro contém 49 versicolors e 46 virginicas. O ruído contém uma setosa, uma versicolor e quatro virginicas.
 
-Sua silhueta é numericamente maior, mas foi calculada após remover esses pontos. O ARI inclui todos e é menor que o dos seis métodos selecionados. Portanto, os índices não sustentam uma afirmação geral de que o DBSCAN foi o melhor agrupador.
+O melhor par elegível reteve 96% das flores. A maior silhueta de toda a grade, 0,6482, reteve 76,67%. A cobertura ajuda a interpretar as métricas porque os parâmetros podem mudar a quantidade de flores avaliadas. Na amostra comum aos sete métodos, as partições são iguais.
 
-“Ruído” é uma decisão do algoritmo sob eps e min_samples. Não prova erro de medição ou anomalia biológica.
+A atribuição de ruído descreve a conectividade de cada flor sob o raio e o número mínimo de vizinhos testados. [Grade do DBSCAN](resultados/tunagem/dbscan.csv)
 
 ## 8. Como funcionam as quatro técnicas de projeção
 
@@ -933,7 +931,7 @@ Também não se deve comparar a KL do t-SNE com a inércia do K-Means, ou com au
 | [codigo/questoes.py](codigo/questoes.py) | Organiza as execuções completas, projeções e gravação dos artefatos |
 | [codigo/algoritmos.py](codigo/algoritmos.py) | Carrega dados, adapta bibliotecas, seleciona execuções, calcula métricas e produz figuras |
 | [codigo/validar_resultados.py](codigo/validar_resultados.py) | Confere consistência dos resultados persistidos |
-| [codigo/tunagem.py](codigo/tunagem.py) | Explorações opcionais de parâmetros e diagnósticos complementares |
+| [codigo/tunagem.py](codigo/tunagem.py) | Executa e registra a busca de hiperparâmetros integrada à Questão 1 |
 | [resultados/](resultados/) | Registros, métricas, coordenadas, parâmetros e figuras |
 | [docs/artigo/artigo_ieee_revisado.pdf](docs/artigo/artigo_ieee_revisado.pdf) | Artigo revisado que fundamenta a apresentação |
 
@@ -947,11 +945,10 @@ O registro efetivamente usado para os agrupadores é definido pelo decorador `@a
 main.py
   → executar_questao_1()
       → carregar_iris()
-      → executar_todas_por_k()
-      → selecionar_melhores_por_k()
-      → construir UPGMA e executar DBSCAN
-      → selecionar_k_por_silhueta()
-      → condensar_resultados(), ARI, figuras, CSV e JSON
+      → pesquisar perfis e escolher execuções pelo objetivo
+      → escolher perfis e k pela silhueta
+      → completar k = 1, cortar uma árvore UPGMA e selecionar DBSCAN
+      → calcular ARI, comparar amostra comum e persistir figuras, CSV e JSON
   → executar_questao_2()
       → carregar_iris()
       → fit_transform(X) de cada projeção
@@ -985,8 +982,8 @@ As execuções gravam nos caminhos fixos de `resultados/` e podem substituir as 
 ### 10.4. Detalhes que podem virar pergunta técnica
 
 - `--seed` controla as projeções; a Q1 usa a sequência 42–51.
-- `--gamma` controla a Kernel PCA. O Kernel FCM principal continua com gamma 0,25 fixo no adaptador.
-- A função isolada `dbscan` tem default eps 0,5, mas o fluxo da Q1 passa **0,8**, que é o valor dos resultados apresentados.
+- `--gamma` controla a Kernel PCA. A Q1 busca o gamma do Kernel FCM na grade de hiperparâmetros.
+- Na execução padrão da Q1, o DBSCAN é selecionado pela grade. `--eps` e `--min-samples` permitem substituir o par escolhido numa execução explícita.
 - `n_init=1` no K-Means e GMM evita multiplicar dez chamadas por dez inicializações internas. O protocolo principal tem dez tentativas externas por k.
 - A PCA ajusta quatro componentes; as coordenadas, métricas locais e figuras usam as duas primeiras quando indicado.
 - UMAP pode mostrar parâmetros `target_*` em `get_params()`, mas o ajuste foi `fit_transform(X)` sem y. A presença desses defaults no registro não significa uso supervisionado das espécies.
@@ -996,9 +993,7 @@ As execuções gravam nos caminhos fixos de `resultados/` e podem substituir as 
 
 O validador confere, entre outros pontos, quantidade de chamadas e sementes, escolha do melhor objetivo por k, recálculo de silhueta e ARI dos ajustes particionais selecionados, normalização de pertinências e probabilidades, compatibilidade do argmax com rótulos e dimensões/finitude das projeções.
 
-O status aprovado existente é um registro de consistência. Não significa reexecutar todos os algoritmos nem certificar ótimo global. O código do validador não recalcula todos os aspectos de UPGMA, DBSCAN ou trustworthiness; não extrapole seu alcance.
-
-As explorações opcionais de tunagem não sustentam as conclusões dos slides. O artigo revisado removeu a alegação anterior de 840 execuções complementares porque seus artefatos não foram encontrados.
+A auditoria inclui a grade, a seleção por silhueta, as métricas do UPGMA e do DBSCAN, e o recálculo na amostra comum. Consulte os itens registrados no [relatório de validação](resultados/validacao.json).
 
 ## 11. Roteiro de fala para os 17 slides
 
@@ -1032,7 +1027,7 @@ As cinco perspectivas são partição exclusiva, fuzzy, probabilística, hierár
 
 **Objetivo:** deixar a ordem de seleção inequívoca, em aproximadamente um minuto e meio.
 
-> “Nos cinco métodos particionais, testamos k de 1 a 5 e dez sementes para cada k. Escolhemos a melhor tentativa pelo objetivo de cada método. Depois usamos a silhueta para escolher k. Só então interpretamos a concordância com as espécies pelo ARI. São 250 ajustes particionais, uma árvore UPGMA e um DBSCAN, totalizando 252 ajustes principais.”
+> “Testamos uma grade de parâmetros sobre k de 2 a 5, com dez sementes por combinação. Escolhemos a melhor execução pelo objetivo do método e usamos a silhueta para selecionar o perfil e k. O ARI avalia as escolhas em relação às espécies. O protocolo final conserva 252 registros, dentro de 1.195 ajustes executados.”
 
 Mostre as setas do processo. Ressalte que os cortes vêm de uma só árvore. Transição: “As duas métricas têm funções diferentes.”
 
@@ -1050,21 +1045,19 @@ Lembre que k = 1 é indefinido para silhueta. Transição: “As curvas mostram 
 
 > “Cada ponto representa a melhor execução daquele método e k, escolhida antes pelo objetivo. As seis curvas atingem a maior silhueta em k igual a 2. Ao criar mais grupos, a silhueta diminui. Nesta geometria, a divisão em dois blocos é mais favorável do que subdividir a região em que versicolor e virginica se aproximam.”
 
-Não diga que se descobriu o número verdadeiro de espécies. Transição: “Além de escolherem o mesmo k, os métodos chegaram à mesma composição.”
+Na partição escolhida, um grupo reúne 50 setosas e o outro reúne as 100 flores das duas espécies restantes. O resultado explica a igualdade das duas métricas entre os seis métodos na base completa.
 
-### Slide 7 — Seis métodos chegam à mesma partição
+### Slide 7 — Hiperparâmetros afetam as métricas
 
-**Objetivo:** explicar o empate das métricas, em aproximadamente 45 segundos.
+As linhas mostram os menores e maiores valores entre perfis em k = 3. O ponto destaca a métrica do perfil escolhido pela busca para esse mesmo k.
 
-> “Um grupo reuniu as 50 setosas; o outro reuniu as 50 versicolors e as 50 virginicas. Essa mesma partição explica a igualdade de silhueta, 0,5802, e ARI, 0,5681. Os nomes numéricos dos grupos podem mudar entre métodos, mas as flores agrupadas juntas são as mesmas.”
+> “Testar a inicialização produz diferenças pequenas de silhueta no K-Means. No PAM, a inicialização build melhora a silhueta e reduz o ARI. Os perfis fuzzy produzem silhuetas próximas. No GMM, variar a covariância e a regularização dá a maior amplitude de sensibilidade das duas métricas.”
 
-Transição: “Quando examinamos três componentes no GMM, aparece uma diferença importante entre os critérios.”
-
-### Slide 8 — No GMM, três grupos elevam o ARI
+### Slide 8 — GMM em dois e três componentes
 
 **Objetivo:** defender a conclusão central, em aproximadamente um minuto e quinze segundos.
 
-> “Com três componentes, o GMM chega a um ARI de 0,9039, mas sua silhueta cai para 0,3728. Isso mostra que a concordância com as espécies pode melhorar mesmo quando a separação geométrica medida pela silhueta piora. Esse resultado é uma interpretação posterior: o k selecionado pelo protocolo continua sendo 2.”
+> “No perfil escolhido do GMM, passar de dois para três componentes eleva o ARI para 0,9039 e reduz a silhueta para 0,3728. O k selecionado pela silhueta foi 2. A grade completa registra como outros tipos de covariância e valores de regularização afetam as duas métricas.”
 
 Se pedirem a composição, cite 50 setosas, 45 versicolors e um terceiro grupo com 50 virginicas e cinco versicolors. Não converta ARI em acurácia.
 
@@ -1076,11 +1069,11 @@ Se pedirem a composição, cite 50 setosas, 45 versicolors e um terceiro grupo c
 
 Se perguntarem pela distância da avaliação, responda que a silhueta dos cortes foi euclidiana para manter a convenção comparativa da Q1.
 
-### Slide 10 — DBSCAN encontra dois grupos e ruído
+### Slide 10 — DBSCAN avalia os pontos retidos
 
 **Objetivo:** explicar a diferença de amostra nas métricas, em cerca de um minuto.
 
-> “Com eps 0,8 e min_samples 5, o DBSCAN encontrou dois grupos e quatro pontos de ruído. A silhueta foi 0,5963 depois de excluir esses quatro pontos. Já o ARI incluiu todos e ficou em 0,5518. A silhueta maior, portanto, descreve uma população diferente daquela usada nos demais métodos e não demonstra superioridade geral.”
+> “A grade escolheu eps aproximadamente 0,694 e mínimo de três pontos, com pelo menos 95% das flores atribuídas a grupos. O DBSCAN encontrou dois grupos e seis pontos de ruído. Nas 144 flores retidas, a silhueta foi 0,6035 e o ARI foi 0,5760. Os outros métodos coincidiram com o DBSCAN ao comparar as mesmas flores.”
 
 Transição: “Agora passamos dos grupos às representações em duas dimensões.”
 
@@ -1118,13 +1111,13 @@ As duas técnicas usaram semente 42. Não afirme que o algoritmo descobriu as tr
 
 **Objetivo:** demonstrar consciência metodológica, em aproximadamente 45 segundos.
 
-> “Os métodos compartilham base e padronização, e seus parâmetros e resultados foram registrados. Entretanto, trabalhamos com uma única base e hiperparâmetros fixos. Houve apenas uma execução de cada projeção e não estimamos intervalos de confiança. As dez sementes ajudam a explorar a inicialização dos agrupadores, mas não são dez novas amostras nem garantem ótimo global.”
+> “Os métodos compartilham base e padronização. As grades mostram a sensibilidade dentro dos parâmetros testados. As dez sementes mudam a inicialização sobre as mesmas flores, e cada projeção usa uma configuração. A cobertura é parte da interpretação das métricas do DBSCAN.”
 
 ### Slide 16 — Grupos geométricos diferem de espécies
 
 **Objetivo:** fechar a resposta à pergunta inicial, em aproximadamente 45 segundos.
 
-> “A silhueta favoreceu dois grupos, principalmente setosa contra as demais. O GMM com três componentes apresentou maior concordância com as espécies pelo ARI. Nas projeções, a PCA ofereceu alta retenção de variância e interpretação dos eixos, enquanto o t-SNE teve maior preservação local no diagnóstico utilizado. A conclusão é interpretar resultados de acordo com o objetivo e a informação que cada métrica preserva.”
+> “A silhueta favoreceu dois grupos, separando setosa das demais. Em três componentes, o perfil escolhido do GMM alcançou ARI de 0,9039. Nas projeções, a PCA reteve 95,80% da variância em dois eixos e o t-SNE teve maior preservação local na escala de dez vizinhos.”
 
 ### Slide 17 — Fontes e rastreabilidade
 
@@ -1150,7 +1143,7 @@ Porque a partição escolhida foi a mesma, com setosa em um grupo e versicolor m
 
 ### 12.4. “Qual algoritmo foi melhor?”
 
-É necessário definir o critério e a configuração. Nas partições selecionadas, os seis métodos com escolha de k empataram. O DBSCAN usa uma população diferente na silhueta. Em k = 3, o GMM apresentou o maior ARI entre as melhores execuções dos seis métodos nesse k, mas essa não foi a configuração selecionada pela silhueta.
+Os sete métodos coincidiram quando avaliados nas mesmas 144 flores retidas pelo DBSCAN. Em k = 3, o GMM apresentou o maior ARI entre os seis perfis selecionados. A silhueta escolheu k = 2.
 
 ### 12.5. “Por que o K-Means não usa a média de todos os pontos como solução?”
 
@@ -1162,7 +1155,7 @@ Ele estende a associação exclusiva para pertinências fuzzy, mas não define a
 
 ### 12.7. “Por que usar m = 2 no FCM?”
 
-É a configuração adotada, que dá peso quadrático às pertinências no objetivo. Não houve comparação sistemática entre valores de m; portanto, não devemos afirmar que 2 é o valor ótimo para esta base.
+Foram avaliados 1,5, 2 e 2,5. Os perfis empataram na maior silhueta em k = 2, e a ordem da grade reteve m = 2. Em k = 3, variar m alterou as métricas.
 
 ### 12.8. “Kernel FCM é FCM depois da Kernel PCA?”
 
@@ -1170,7 +1163,7 @@ Não neste projeto. O Kernel FCM utiliza diretamente a distância induzida pelo 
 
 ### 12.9. “Gamma 0,25 foi o melhor valor encontrado?”
 
-É o valor fixado na configuração apresentada. O protocolo principal não demonstra sua otimalidade. Com esse gamma, distância 2 produz similaridade `exp(−1)`. Alterar gamma muda a escala de proximidade considerada.
+Com gamma 0,25 e m = 2, o perfil de referência empatou em maior silhueta em k = 2 e permaneceu pela ordem da grade. Foram testados também gamma 0,05 e 1. Variar gamma muda a escala de proximidade.
 
 ### 12.10. “K-Medoids sempre resiste a outliers?”
 
@@ -1200,7 +1193,7 @@ A construção segue a configuração UPGMA com Manhattan, e a avaliação usa a
 
 Ele não recebe k, mas seu resultado depende de eps, min_samples e da escala dos atributos. Portanto, o número emerge da configuração de densidade; isso não significa ausência de hiperparâmetros ou descoberta do número verdadeiro de classes.
 
-### 12.17. “Os quatro ruídos são erros na base?”
+### 12.17. “Os seis pontos de ruído são erros na base?”
 
 Não há evidência disso. São flores não incorporadas às regiões densas sob os parâmetros adotados. Poderiam ser pontos legítimos de regiões menos densas.
 
@@ -1208,9 +1201,9 @@ Não há evidência disso. São flores não incorporadas às regiões densas sob
 
 Porque a regra experimental é selecionar primeiro pela função objetivo do algoritmo, para cada k. Trocar o critério das sementes mudaria o protocolo. A silhueta atua na escolha entre valores de k das execuções já selecionadas.
 
-### 12.19. “Por que 252, e não 256 ou 254?”
+### 12.19. “Qual é a diferença entre 252 e 1.195?”
 
-Há 250 chamadas particionais, uma construção da árvore e um DBSCAN. Os cinco cortes pertencem à mesma árvore. As quatro técnicas de projeção da Q2 são registradas separadamente. Operações e ajustes auxiliares internos das bibliotecas não equivalem a novas chamadas principais do protocolo.
+Os 1.195 ajustes incluem os 1.120 da busca particional, os 24 do DBSCAN, as 50 chamadas de k = 1 e a árvore UPGMA. O recorte final contém os 250 ajustes dos perfis particionais escolhidos, a árvore e o DBSCAN selecionado.
 
 ### 12.20. “PCA escolhe os dois atributos mais importantes?”
 
@@ -1254,7 +1247,7 @@ Não. São dez inicializações sobre as mesmas 150 flores. Não houve divisão 
 
 ### 12.30. “Qual seria um próximo passo?”
 
-Estudar sensibilidade a escala e hiperparâmetros, repetir t-SNE e UMAP com várias sementes e comparar preservação em várias escalas de vizinhança. No GMM, seria possível estudar BIC ou estabilidade em um protocolo complementar. Essas são propostas futuras, não resultados já demonstrados aqui.
+Comparar escalas dos atributos, repetir t-SNE e UMAP com várias sementes e medir preservação em diferentes escalas de vizinhança.
 
 ### 12.31. “Qual método tem menor custo computacional?”
 
@@ -1274,7 +1267,7 @@ O projeto implementa a organização experimental e adaptadores sobre biblioteca
 | “GMM treinou uma gaussiana por espécie.” | “GMM ajustou componentes sem acesso às espécies.” |
 | “A melhor execução foi a de maior silhueta.” | “A melhor execução por k foi escolhida pelo objetivo; a silhueta escolheu k.” |
 | “Escolhemos k = 3 porque seu ARI era melhor.” | “O protocolo escolheu k = 2; k = 3 foi examinado para interpretação posterior.” |
-| “O DBSCAN teve maior silhueta e venceu.” | “Sua silhueta exclui os ruídos, então descreve outro subconjunto.” |
+| “O DBSCAN teve maior silhueta e venceu.” | “Na amostra comum de 144 flores, os sete métodos coincidiram.” |
 | “PCA preservou 95,80% das classes.” | “PC1 e PC2 retiveram 95,80% da variância dos atributos padronizados.” |
 | “Autovalores da Kernel PCA são percentuais.” | “São valores do espectro da matriz de kernel centralizada.” |
 | “A ilha maior tem mais variabilidade original.” | “Área e densidade em mapas não lineares podem ser distorcidas.” |

@@ -565,7 +565,7 @@ Na versão instalada, KFCM começa por um ajuste FCM interno com a mesma semente
 
 Para calcular `1−exp(−t)` em t muito pequeno, a biblioteca usa a identidade estável `−expm1(−t)`. Pesos muito pequenos podem sofrer underflow; se o denominador de um centro for zero, a implementação preserva o centro anterior.
 
-No adaptador do projeto: gamma = 0,25, m = 2, máximo de 300 iterações e tolerância `1e-5`. Seu objetivo é recalculado como `Σ u² δ²`. Há outras variantes de Kernel FCM; as equações deste capítulo descrevem a usada aqui.
+Na configuração selecionada, gamma = 0,25 e m = 2. O adaptador usa até 300 iterações e tolerância de `1e-5`. Para cada configuração avaliada, calcula o objetivo `Σ uᵐ δ²` com o expoente m usado no ajuste.
 
 ## 6. K-Medoids e PAM
 
@@ -933,7 +933,7 @@ Não há um objetivo de centroides sendo minimizado, e o ruído não é uma clas
 
 ### 9.6. Configuração no projeto
 
-Uma execução, eps = 0,8, min_samples = 5 e distância euclidiana em dados padronizados. Foram encontrados dois grupos e quatro ruídos. A silhueta remove esses quatro pontos; o ARI os mantém como rótulo `−1`.
+A busca selecionou eps = 0,6943 e min_samples = 3 com distância euclidiana nos dados padronizados. A configuração produziu dois grupos e classificou seis pontos como ruído. A silhueta e o ARI foram calculados nos 144 pontos atribuídos a grupos.
 
 As definições de parâmetros e a inclusão do próprio ponto são documentadas na [API DBSCAN](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html). A derivação por componentes do grafo descreve a estrutura da regra de conectividade.
 
@@ -1525,7 +1525,7 @@ Com um único grupo, b não existe. Com tantos grupos quanto observações, não
 
 Para uma observação em grupo unitário dentro de uma partição válida, o scikit-learn atribui silhueta zero por convenção. Distâncias degeneradas também exigem tratamento numérico.
 
-Na Q1, a silhueta é euclidiana e usa as quatro dimensões padronizadas. No DBSCAN, quatro ruídos foram retirados antes do cálculo. Assim, seu valor descreve 146 observações, enquanto os seis métodos selecionados usam as 150.
+Na Q1, a silhueta é euclidiana e usa as quatro dimensões padronizadas. A silhueta do DBSCAN descreve os 144 pontos atribuídos a grupos. O resultado principal dos outros seis métodos usa as 150 observações. A análise de mesma amostra recalcula as métricas dos sete métodos nos 144 pontos retidos pelo DBSCAN.
 
 ### 14.4. ARI: contagem de pares
 
@@ -1697,19 +1697,19 @@ Para n = 150, `n²=22.500` e o vetor condensado tem 11.175 entradas. Essas quant
 | K-Medoids | PAM, euclidiana, inicialização aleatória; k = 1 por busca exaustiva |
 | GMM/EM | Full, `random_from_data`, tolerância 10⁻⁵, regularização 10⁻⁶ |
 | UPGMA | Average linkage, Manhattan, uma árvore |
-| DBSCAN | Euclidiana, eps = 0,8, min_samples = 5 |
+| DBSCAN | Euclidiana, eps = 0,6943, min_samples = 3 |
 | PCA | Quatro componentes, SVD completa; figura usa duas |
 | Kernel PCA | RBF gamma = 0,25, duas componentes, solver denso |
 | t-SNE | Perplexidade 30, init PCA, seed 42, Barnes-Hut |
 | UMAP | 15 vizinhos, min_dist 0,1, spread 1, init espectral, seed 42 |
 
-“Justificar” não exige afirmar que cada valor é ótimo. É suficiente explicar seu papel e reconhecer que o estudo principal os fixou sem comprovar uma escolha universalmente melhor.
+Os parâmetros dos agrupadores foram escolhidos pelas silhuetas obtidas na Iris e nas grades avaliadas. Nos cinco métodos particionais, as configurações de referência empataram com outras configurações em k = 2 e foram selecionadas pelo desempate.
 
 ### 16.2. Orçamento e seleção
 
-Os cinco métodos particionais foram chamados dez vezes para cada k de 1 a 5. São 250 chamadas. Somando uma hierarquia UPGMA e um DBSCAN: 252. As quatro projeções foram executadas separadamente.
+O conjunto final inclui 250 ajustes particionais, uma árvore UPGMA e uma configuração DBSCAN. A busca avaliou 1.120 ajustes particionais em k de 2 a 5 e 24 configurações DBSCAN. Com os 50 ajustes de k = 1 e a árvore UPGMA, o total executado foi de 1.195 ajustes. As quatro projeções foram executadas separadamente.
 
-Para cada método e k, escolheu-se a execução pelo objetivo: menor custo nos quatro primeiros métodos, maior log-verossimilhança no GMM. Depois, k foi escolhido pela maior silhueta válida. O ARI não determinou as escolhas oficiais.
+Para cada método, configuração e k, a função objetivo selecionou a semente. Usou-se o menor custo nos quatro primeiros métodos e a maior log-verossimilhança no GMM. Os hiperparâmetros e o k foram escolhidos pela maior silhueta válida. No DBSCAN, a escolha também exigiu pelo menos 95% de cobertura. O ARI foi calculado depois da seleção.
 
 Operações auxiliares internas, como a inicialização do KFCM por FCM, e iterações não são novas chamadas principais na contagem do protocolo.
 
@@ -1719,7 +1719,7 @@ Os seis métodos com seleção de k produziram a mesma partição em k = 2: 50 s
 
 GMM com k = 3 atingiu ARI 0,903874 e silhueta 0,372773. A capacidade de covariâncias completas é compatível com maior flexibilidade para a organização das espécies, mas o experimento não isolou causalmente esse mecanismo. Esse caso foi interpretado posteriormente; não substituiu k = 2 na seleção oficial.
 
-O DBSCAN deixou quatro ruídos e apresentou silhueta 0,596318 nos 146 pontos restantes. O ARI, com todos, foi 0,551755. A diferença de população impede tratar o número maior de silhueta como uma vitória geral.
+O DBSCAN cobriu 144 pontos e classificou seis como ruído. Nesse subconjunto, os sete métodos obtiveram partições equivalentes, com silhueta 0,603455 e ARI 0,576048 em relação às espécies.
 
 ### 16.4. Como a teoria limita as conclusões das projeções
 

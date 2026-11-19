@@ -1,5 +1,5 @@
 // Artigo acadêmico em estilo IEEE conference (A4), implementado em Typst.
-// Compilar a partir da raiz: typst compile docs/artigo/artigo_ieee_revisado.typ docs/artigo/artigo_ieee_atualizado.pdf --root docs/artigo
+// Compilar a partir da raiz: typst compile docs/artigo/artigo_ieee_revisado.typ docs/artigo/artigo_ieee_revisado.pdf --root docs/artigo
 #set document(title: "Agrupamento e redução de dimensionalidade na base Iris: uma avaliação comparativa", author: ("Fátima Araújo", "Rogrigo Gomes"))
 #set page(paper: "a4", margin: (top: 19mm, bottom: 25mm, x: 13mm), numbering: none)
 #set text(font: "Nimbus Roman", size: 10pt, lang: "pt")
@@ -19,6 +19,19 @@
 #text(size: 10pt, weight: "regular", style: "italic")[#context numbering("A.", counter(heading).get().at(1)) #it.body]
 ]
 #show figure.where(kind: image): set figure(supplement: [Fig.])
+#let experimentos = json("diagnosticos_revisao.json").agrupamento
+#let db = experimentos.dbscan
+#let tabela-dados(cabecalho, linhas, columns: auto) = {
+  set text(size: 8pt)
+  set par(justify: false, first-line-indent: 0pt)
+  table(
+    columns: if columns == auto { cabecalho.len() } else { columns },
+    inset: (x: 2pt, y: 3pt),
+    stroke: .3pt,
+    table.header(..cabecalho.map(x => strong(x))),
+    ..linhas.flatten(),
+  )
+}
 #align(center)[
 #text(size: 24pt)[Agrupamento e redução de dimensionalidade na base Iris: uma avaliação comparativa]
 #v(.7em)
@@ -48,7 +61,7 @@
 #columns(2, gutter: 4.22mm)[
 #block[
 #set par(first-line-indent: 0pt)
-#text(size: 9pt, weight: "bold")[Resumo—Este artigo compara sete algoritmos de agrupamento e quatro técnicas de redução de dimensionalidade na base Iris padronizada. O protocolo abrange 250 execuções de métodos particionais, uma construção da hierarquia UPGMA e uma execução do DBSCAN. Nos métodos particionais, a função objetivo definiu a melhor execução para cada número de grupos. A silhueta favoreceu a mesma partição de dois grupos em seis métodos, com silhueta de 0,5802 e índice de Rand ajustado (ARI) de 0,5681. O DBSCAN identificou dois grupos e quatro pontos de ruído. A mistura gaussiana com três componentes atingiu ARI de 0,9039, mostrando que a partição favorecida pela silhueta e a de maior concordância com as espécies podem divergir. As duas primeiras componentes da PCA retiveram 95,80% da variância. Na comparação das quatro projeções, o t-SNE obteve o maior valor de #emph[trustworthiness] com dez vizinhos (0,9888).]
+#text(size: 9pt, weight: "bold")[Resumo—Este artigo compara sete algoritmos de agrupamento e quatro técnicas de redução de dimensionalidade na base Iris padronizada. Nos métodos particionais, a busca variou os hiperparâmetros e o número de grupos. A melhor execução por função objetivo de cada configuração foi avaliada pela silhueta euclidiana. O índice de Rand ajustado (ARI) mediu a concordância com as espécies. O DBSCAN encontrou #db.grupos grupos, com #db.cobertura% de cobertura, silhueta de #db.silhueta e ARI de #db.ari sobre #db.n observações. Em três grupos, #experimentos.maior_ari_k3.nome alcançou ARI de #experimentos.maior_ari_k3.ari. As duas primeiras componentes da PCA retiveram 95,80% da variância. Na comparação das projeções, o t-SNE obteve o maior #emph[trustworthiness] com dez vizinhos (0,9888).]
 
 #text(size: 9pt, weight: "bold", style: "italic")[Palavras-chave—agrupamento, Iris, silhueta, índice de Rand ajustado, redução de dimensionalidade.]
 ]
@@ -109,264 +122,100 @@ As técnicas de redução de dimensionalidade representam diferentes aspectos da
 O t-SNE ajusta uma representação de baixa dimensão pela minimização da divergência KL entre as distribuições de afinidade no espaço original e no espaço projetado. A perplexidade controla a escala de vizinhança considerada, e a inicialização influencia a otimização [16]. O UMAP constrói uma representação das relações de vizinhança e otimiza sua disposição em baixa dimensão. O número de vizinhos controla a escala local, enquanto min_dist influencia a compactação da representação [17]. A interpretação dessas projeções deve considerar possíveis distorções de distâncias globais e densidades.
 
 = Metodologia de agrupamento
-== Desenho experimental e recursos utilizados
-Para os cinco métodos particionais — K-Means, FCM, Kernel FCM, K-Medoids e GMM/EM —, foram avaliados os valores de $k$ de 1 a 5.
+== Desenho experimental
+A busca avaliou configurações para os cinco métodos particionais em $k in {2, 3, 4, 5}$. Cada combinação recebeu dez chamadas com sementes de 42 a 51. O K-Means e o GMM usaram `n_init=1` por chamada. O objetivo foi minimizado no K-Means, no FCM, no Kernel FCM e no K-Medoids. No GMM, foi maximizada a log-verossimilhança total. Empates de objetivo seguiram a ordem das sementes. A partição exclusiva foi obtida pela maior pertinência nos métodos fuzzy e pela maior probabilidade posterior no GMM.
 
-Cada combinação de método e $k$ recebeu dez chamadas com sementes inteiras de 42 a 51, totalizando 50 execuções por método e 250 execuções particionais. No K-Means e no GMM, utilizou-se `n_init=1` em cada chamada. O Kernel FCM começa com um ajuste interno de FCM, executado com a mesma semente, para inicializar as pertinências e os protótipos. Esse ajuste interno faz parte da chamada do Kernel FCM na contagem do protocolo. No K-Medoids com $k = 1$, as dez chamadas repetiram a mesma busca exaustiva pelo medoide, cujo resultado independe da semente.
+Foram comparadas as silhuetas das melhores execuções por objetivo, escolhendo o maior valor. Empates de silhueta favoreceram menor $k$ e a ordem da grade, com a configuração de referência primeiro. Para cada método particional, os quatro conjuntos de ajustes do perfil escolhido foram reaproveitados e somados a dez chamadas em $k=1$. Em $k=1$, o K-Medoids repete a busca exaustiva pelo único medoide. O ajuste interno de FCM que inicializa o Kernel FCM integra a chamada do método.
 
-Do UPGMA foram extraídos os cortes de um a cinco grupos a partir de uma única hierarquia. O DBSCAN também foi executado uma vez, completando as 252 execuções do protocolo de agrupamento. As métricas de agrupamento foram calculadas no espaço dos quatro atributos padronizados.
+A hierarquia UPGMA foi construída uma vez com Manhattan e ligação média, com extração de cinco cortes. No DBSCAN, foram testados #experimentos.contagens.ajustes_dbscan pares de parâmetros, incluindo raios fixos e raios relativos à mediana da distância ao quinto vizinho, contando o próprio ponto. Selecionou-se a maior silhueta válida entre as configurações com cobertura de pelo menos #experimentos.contagens.cobertura_minima_dbscan_pct%. Empates favoreceram maior cobertura e a ordem da grade.
 
-Os experimentos foram executados em Python 3.14.4, em ambiente virtual. A preparação dos dados utilizou NumPy 2.5.4 e pandas 3.0.6. O scikit-learn 1.9.1 forneceu K-Means, GMM, DBSCAN, PCA, Kernel PCA, t-SNE e as métricas de avaliação, enquanto o SciPy 1.18.1 foi utilizado na construção da hierarquia UPGMA. Os métodos FCM e Kernel FCM foram executados com fuzzy-c-means 2.3.1, o PAM com kmedoids 0.5.5 e o UMAP com umap-learn 0.5.12, em ambiente com Numba 0.68.0.
+A busca fez #experimentos.contagens.ajustes_particionais ajustes particionais para $k$ de 2 a 5. Incluindo o DBSCAN, as 50 chamadas em $k=1$ e a árvore, foram #experimentos.contagens.ajustes_totais ajustes. O protocolo final conserva 252 resultados, correspondentes aos 250 ajustes dos perfis escolhidos, à árvore e à configuração escolhida de DBSCAN.
 
-O ponto de entrada dos experimentos é `codigo/main.py`. Os parâmetros, rótulos dos agrupamentos, métricas e coordenadas projetadas estão nos arquivos CSV e JSON em `resultados/`.
+== Grade de hiperparâmetros
+#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Parâmetros variados no experimento], tabela-dados(
+  ("Método", "Variação"),
+  (
+    ("K-Means", [Inicialização `random` e `k-means++`]),
+    ("FCM", [$m$: 1,5, 2 e 2,5]),
+    ("Kernel FCM", [RBF com $m$ de 1,5, 2 e 2,5, cruzado com $gamma$ de 0,05, 0,25 e 1]),
+    ("K-Medoids", [PAM euclidiano com inicialização `random` e `build`]),
+    ("GMM/EM", [Covariância `full`, `tied`, `diag` e `spherical`, cruzada com regularização de $10^(-6)$, $10^(-4)$ e $10^(-2)$]),
+    ("UPGMA", [Cortes $k$ de 1 a 5 na mesma árvore]),
+    ("DBSCAN", [Raios $epsilon$ fixos (0,4, 0,6, 0,8 e 1,0) e relativos (fatores de 0,75, 1, 1,5 e 2), cruzados com `min_samples` de 3, 5 e 10]),
+  ),
+  columns: (25%, 75%),
+))
 
-== Parâmetros e seleção das execuções
-A @parametros-agrupamento reúne as configurações utilizadas e os critérios de seleção das execuções dos sete agrupadores indicados para a Equipe 08 no enunciado [1].
+Nos métodos fuzzy, o objetivo pondera a distância quadrática pela pertinência elevada ao $m$ de cada configuração. No Kernel FCM, a distância quadrática induzida pelo RBF é $2 (1 - exp(-gamma norm(x - v)^2))$, em que $v$ é o protótipo no espaço de entrada [7]. O objetivo serve para escolher a semente dentro da configuração e do $k$.
 
-#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Configurações dos agrupadores e critérios de seleção por k], [
-#set text(size: 8pt)
-#set par(justify: false, first-line-indent: 0pt)
-#table(
-  columns: (20%, 49%, 31%),
-  inset: (x: 3pt, y: 4pt),
-  stroke: .3pt,
-  table.header([*Método*], [*Configuração*], [*Critério de seleção*]),
-  [K-Means],
-  [Distância euclidiana, algoritmo de Lloyd e inicialização aleatória (`n_init=1`).],
-  [Menor soma das distâncias quadráticas aos centroides.],
-  [FCM],
-  [Distância euclidiana quadrática e pertinências iniciais aleatórias. $m = 2$, até 300 iterações e tolerância de 0,00001.],
-  [Menor objetivo fuzzy.],
-  [Kernel FCM],
-  [Kernel RBF com $gamma$ igual a 0,25 e inicialização por FCM. $m = 2$, até 300 iterações e tolerância de 0,00001.],
-  [Menor objetivo fuzzy com distância induzida pelo kernel.],
-  [K-Medoids],
-  [PAM; distância euclidiana; inicialização aleatória; até 300 iterações para k > 1. Busca exaustiva para k = 1.],
-  [Menor soma das distâncias aos medoides.],
-  [GMM/EM],
-  [Covariâncias completas; inicialização `random_from_data`; `n_init=1`; tolerância de 0,00001; regularização de 0,000001.],
-  [Maior log-verossimilhança total no modelo final.],
-  [UPGMA],
-  [Distância Manhattan; ligação média; uma hierarquia e cortes de 1 a 5 grupos.],
-  [Sem reinicializações; corte escolhido pela silhueta.],
-  [DBSCAN],
-  [Distância euclidiana; eps = 0,8; `min_samples=5`; uma execução.],
-  [Sem seleção entre execuções.],
-)
-]) <parametros-agrupamento>
+Os experimentos usam Python e as bibliotecas scikit-learn, SciPy, fuzzy-c-means, kmedoids e umap-learn. O ponto de entrada é `codigo/main.py`. Sementes, parâmetros, versões, métricas e partições estão em `resultados/`. As grades e figuras de sensibilidade estão em `resultados/tunagem/`.
 
-A melhor execução de cada k foi selecionada pela função objetivo antes do cálculo da silhueta. Em caso de empate, o código retém a primeira execução na ordem das sementes. Nos métodos fuzzy, os rótulos exclusivos são obtidos pela maior pertinência; no GMM, pela maior probabilidade posterior. As funções objetivo têm escalas e significados próprios e são comparadas apenas entre execuções do mesmo método e do mesmo k.
+== Métricas
+A silhueta euclidiana foi calculada no espaço dos quatro atributos padronizados. Para cada observação $i$,
+$ s(i) = (b(i)-a(i))/max(a(i),b(i)), $
+em que $a(i)$ é a distância média no próprio grupo e $b(i)$ é a menor distância média a outro grupo [12]. A métrica é indefinida em $k=1$ e em partições degeneradas. Nos cortes do UPGMA, a métrica de avaliação euclidiana é distinta da distância Manhattan usada nas fusões.
 
-No Kernel FCM, o kernel $K(x,v) = exp(-gamma norm(x-v)^2)$ induz a distância quadrática $2(1-K(x,v))$. Na atualização dos protótipos, o kernel reduz a contribuição das observações mais distantes. O objetivo registrado pondera essa distância pelas pertinências elevadas a $m$. Para os dois métodos fuzzy, adotou-se $m = 2$. O valor 0,25 de $gamma$ é o inverso do número de atributos e coincide com a regra padrão do kernel RBF do scikit-learn.
-
-No DBSCAN, `min_samples` inclui o próprio ponto na contagem da vizinhança. A configuração exploratória adotou `eps` igual a 0,8 e `min_samples` igual a 5. A varredura posterior de `eps` examina a sensibilidade da partição e do ruído ao raio.
-
-== Avaliação
-Os agrupamentos foram avaliados pela silhueta, que considera a coesão e a separação dos grupos, e pelo índice de Rand ajustado (ARI), que mede a concordância com as espécies conhecidas. O cálculo das métricas seguiu as convenções do scikit-learn [18].
-
-Para cada observação i, a silhueta é definida por
-$ s(i) = (b(i)-a(i))/max(a(i), b(i)), $
-em que $a(i)$ é a distância média às demais observações do próprio grupo e $b(i)$ é a menor distância média às observações de outro grupo. Valores próximos de 1 indicam forte separação, valores próximos de zero indicam que as duas distâncias médias são semelhantes e valores negativos indicam que a observação está, em média, mais próxima de outro grupo. A silhueta da partição é a média desses valores. Entre as partições selecionadas pela função objetivo, adotou-se o $k$ com maior silhueta válida [12].
-
-Utilizou-se distância euclidiana no cálculo da silhueta de todos os métodos. No UPGMA, portanto, a avaliação considera uma métrica diferente da distância Manhattan empregada na construção da hierarquia. A silhueta é indefinida quando há apenas um grupo, como em k = 1, ou quando cada observação constitui um grupo. Essas partições foram excluídas da seleção. Em partições válidas, a biblioteca atribui silhueta zero às observações que formam grupos unitários.
-
-O ARI compara pares de observações para verificar a concordância entre a partição estimada e a partição de referência, definida pelas espécies, descontando a concordância esperada ao acaso [13]. O índice assume valor 1 quando as partições são equivalentes, independentemente dos identificadores dos grupos. Valores próximos de zero indicam concordância próxima à esperada ao acaso, e valores negativos indicam concordância inferior a essa referência. O ARI foi utilizado apenas na avaliação externa, após a seleção da partição, sem orientar a escolha de inicializações, hiperparâmetros ou k.
-
-No DBSCAN, a silhueta foi calculada apenas sobre os pontos atribuídos a grupos. O ARI incluiu todas as observações e tratou os pontos de ruído como um único conjunto de rótulo −1 para calcular a concordância.
+O ARI compara a partição estimada com as espécies, descontando a concordância esperada ao acaso [13]. As métricas usam as implementações do scikit-learn [18]. O ARI foi calculado após a seleção e usado para comentar as alternativas da grade. Para o DBSCAN, ambas as métricas excluem as observações de rótulo −1, aplicando a mesma máscara às espécies no ARI. A cobertura é a fração de observações mantidas após aplicar essa máscara.
 
 = Resultados de agrupamento
-== Comparação das partições selecionadas
-#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Resultados das partições selecionadas], [
-#set text(size: 8pt)
-#table(columns: 5, inset: (x: 2pt, y: 3pt), stroke: .3pt, table.header([*Método*],[*k escolhido*],[*Silhueta*],[*ARI*],[*Ruído*]),
-[K-Means],
-[2],
-[0,5802],
-[0,5681],
-[0],
-[FCM],
-[2],
-[0,5802],
-[0,5681],
-[0],
-[Kernel FCM],
-[2],
-[0,5802],
-[0,5681],
-[0],
-[K-Medoids],
-[2],
-[0,5802],
-[0,5681],
-[0],
-[GMM/EM],
-[2],
-[0,5802],
-[0,5681],
-[0],
-[UPGMA],
-[2],
-[0,5802],
-[0,5681],
-[0],
-[DBSCAN],
-[2 (auto.)],
-[0,5963],
-[0,5518],
-[4]
-)
-])
+== Partições selecionadas
+#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Resultados dos sete métodos. Para o DBSCAN, $k$ é o número de grupos encontrados e $n$ é o número de flores avaliadas.], tabela-dados(
+  ("Método", "Parâmetros", "k", "Sil.", "ARI", "n"),
+  experimentos.resumo,
+  columns: (19%, 40%, 6%, 13%, 13%, 9%),
+))
 
-Os seis métodos com seleção de $k$ escolheram dois grupos e produziram a mesma partição, salvo permutação dos identificadores. Um grupo contém as 50 observações de #emph[I. setosa]. O outro reúne as 100 observações de #emph[I. versicolor] e #emph[I. virginica]. As métricas coincidem porque avaliam essas mesmas atribuições.
+#if experimentos.particao_comum and experimentos.estrutura_setosa [
+  Os seis métodos com escolha de $k$ chegaram à mesma partição de dois grupos. Um reúne as 50 setosas, o outro reúne as 50 versicolors e as 50 virginicas. A concordância das partições explica as silhuetas e os ARIs iguais na base completa.
+]
+O DBSCAN reteve #db.n observações e marcou #db.ruido como ruído. Sua silhueta e seu ARI descrevem apenas as flores atribuídas a grupos. Para controlar a diferença de cobertura na comparação, também foram reavaliadas as outras partições selecionadas nas mesmas #db.n flores.
 
-O DBSCAN atribuiu 49 observações de #emph[I. setosa] a um grupo e 50 de #emph[I. versicolor] e 47 de #emph[I. virginica] ao outro. O ruído corresponde a quatro pontos (2,67% da base), sendo um de #emph[I. setosa] e três de #emph[I. virginica]. Sua silhueta de 0,5963 descreve 146 observações, enquanto a silhueta de 0,5802 dos demais métodos abrange as 150. Sobre a base completa, o ARI do DBSCAN foi 0,5518.
+#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Comparação sobre a amostra retida pelo DBSCAN. A última coluna mede a concordância direta com a partição do DBSCAN.], tabela-dados(
+  ("Método", "Silhueta", "ARI com espécies", "ARI com DBSCAN"),
+  experimentos.mesma_amostra,
+))
 
-== Silhuetas e comparação por k
-A @silhuetas-por-k apresenta as silhuetas das melhores execuções particionais e dos cortes do UPGMA. A silhueta é indefinida para $k = 1$.
-#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Silhueta das partições avaliadas por k], [
-#set text(size: 8pt)
-#table(columns: 5, inset: (x: 2pt, y: 3pt), stroke: .3pt, table.header([*Método*],[*k = 2*],[*k = 3*],[*k = 4*],[*k = 5*]),
-[K-Means],
-[0,5802],
-[0,4584],
-[0,3883],
-[0,3477],
-[FCM],
-[0,5802],
-[0,4574],
-[0,4006],
-[0,3342],
-[Kernel FCM],
-[0,5802],
-[0,4574],
-[0,3941],
-[0,3285],
-[K-Medoids],
-[0,5802],
-[0,4497],
-[0,4080],
-[0,3421],
-[GMM/EM],
-[0,5802],
-[0,3728],
-[0,3455],
-[0,1503],
-[UPGMA],
-[0,5802],
-[0,4517],
-[0,3991],
-[0,3824]
-)
-]) <silhuetas-por-k>
+#if experimentos.amostra_igual [
+  Na amostra comum, os sete métodos concordaram integralmente, salvo os identificadores dos grupos. As diferenças numéricas na base completa acompanham a mudança de amostra.
+] else [
+  Na amostra comum, valores de ARI entre partições abaixo de 1 indicam diferenças nas atribuições de grupos que persistem mesmo após igualar a cobertura.
+]
 
-#figure(image("figuras/ieee/silhuetas_comparadas.pdf", width: 100%), caption: [Silhueta por $k$ dos seis métodos. A linha tracejada indica a escolha de $k = 2$. A silhueta é indefinida em $k = 1$.])
+== Silhueta e ARI por número de grupos
+#figure(image("figuras/ieee/silhuetas_comparadas.pdf", width: 100%), caption: [Silhueta dos perfis selecionados para cada $k$. Em $k=1$, a silhueta é indefinida.])
 
-A silhueta diminuiu de dois para três grupos em todos os métodos avaliados. A @comparacao-k3 examina as partições de três grupos para identificar quanto elas se aproximam das três espécies.
-#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Avaliação complementar com três grupos], [
-#set text(size: 8pt)
-#table(columns: 3, inset: (x: 2pt, y: 3pt), stroke: .3pt, table.header([*Método*],[*Silhueta em k = 3*],[*ARI em k = 3*]),
-[K-Means],
-[0,4584],
-[0,6101],
-[FCM],
-[0,4574],
-[0,6303],
-[Kernel FCM],
-[0,4574],
-[0,6303],
-[K-Medoids],
-[0,4497],
-[0,6765],
-[GMM/EM],
-[0,3728],
-[0,9039],
-[UPGMA],
-[0,4517],
-[0,7184]
-)
-]) <comparacao-k3>
+#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Silhueta e ARI, nessa ordem, para cada corte ou melhor execução dos perfis selecionados.], tabela-dados(
+  ("Método", "k = 2", "k = 3", "k = 4", "k = 5"),
+  experimentos.por_k,
+  columns: (20%, 20%, 20%, 20%, 20%),
+))
 
-Em três grupos, o GMM alcançou o maior ARI (0,9039), seguido por UPGMA (0,7184) e K-Medoids (0,6765). No GMM, a passagem de dois para três componentes reduziu a silhueta de 0,5802 para 0,3728 e elevou o ARI de 0,5681 para 0,9039.
+Em $k=3$, o maior ARI entre os perfis selecionados foi #experimentos.maior_ari_k3.ari, obtido por #experimentos.maior_ari_k3.nome. O GMM alcançou silhueta de #experimentos.em_k3.silhueta e ARI de #experimentos.em_k3.ari com três componentes. Comparar as duas métricas ajuda a identificar partições geometricamente favorecidas e partições que recuperam melhor a distinção entre as espécies.
 
-A tabela de contingência da execução selecionada do GMM em k igual a 3 torna essa diferença explícita. Os identificadores dos grupos são arbitrários.
-#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Contingência da mistura gaussiana com três grupos], [
-#set text(size: 8pt)
-#table(columns: 4, inset: (x: 2pt, y: 3pt), stroke: .3pt, table.header([*Espécie*],[*Grupo 0*],[*Grupo 1*],[*Grupo 2*]),
-[Iris-setosa],
-[50],
-[0],
-[0],
-[Iris-versicolor],
-[0],
-[45],
-[5],
-[Iris-virginica],
-[0],
-[0],
-[50]
-)
-])
+== Sensibilidade dos métodos particionais
+A tabela de sensibilidade examina as configurações em $k=3$, mantendo fixo o número de grupos. As curvas completas para $k$ de 2 a 5 e os mapas das configurações cruzadas encontram-se em `resultados/tunagem/figuras/`. Cada célula descreve a execução de melhor objetivo da respectiva configuração.
 
-As 50 observações de #emph[I. setosa] formam um grupo exclusivo. Outro contém 45 observações de #emph[I. versicolor], e o terceiro reúne as 50 de #emph[I. virginica] e cinco de #emph[I. versicolor].
+#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Perfis com menor e maior silhueta válida em $k=3$ e intervalo de ARI entre os perfis.], tabela-dados(
+  ("Método", "Menor Sil.", "Maior Sil.", "Faixa de ARI"),
+  experimentos.sensibilidade_k3,
+  columns: (19%, 27%, 27%, 27%),
+))
 
-== Interpretação por algoritmo e diagnósticos complementares
-*K-Means.* A preferência por dois grupos expressa a separação compacta das setosas. Em três grupos, a partição recupera parcialmente as espécies e depende da inicialização; a análise de sensibilidade abaixo quantifica essa dependência.
+Em $k=3$, `k-means++` elevou ligeiramente a silhueta e o ARI em relação à inicialização aleatória. No PAM, `build` elevou a silhueta e reduziu o ARI. As configurações fuzzy produziram silhuetas próximas entre si, mesmo com diferenças de ARI. O GMM apresentou a maior faixa de variação das duas métricas, compatível com a flexibilidade de formas e orientações admitidas para os componentes em cada configuração. Os cinco métodos particionais retiveram a configuração de referência após os empates na maior silhueta em $k=2$.
 
-*FCM.* As pertinências permitem descrever transições entre grupos, mas sua conversão pela maior pertinência elimina essa informação na silhueta e no ARI. Em k = 3, a partição exclusiva coincide exatamente com a do Kernel FCM, salvo permutação dos rótulos.
+== Cobertura no DBSCAN
+#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Configuração selecionada, referência e maior silhueta observada na grade do DBSCAN. As duas métricas usam os pontos retidos de cada configuração.], tabela-dados(
+  ("Perfil", [$epsilon$], "Mín.", "Gr.", "Cob. %", "Sil.", "ARI"),
+  experimentos.dbscan.tabela,
+  columns: (20%, 14%, 9%, 9%, 16%, 16%, 16%),
+))
 
-*Kernel FCM.* A comparação direta das partições de FCM e Kernel FCM em $k = 3$ resultou em ARI igual a 1. Com $gamma$ igual a 0,25, as diferenças de objetivo e pertinência não se traduziram em diferenças na atribuição exclusiva.
-
-*K-Medoids.* A representação por observações reais e a soma de distâncias não quadráticas reduzem a influência de pontos extremos em comparação ao objetivo quadrático do K-Means. Essa propriedade não foi testada por contaminação nesta base; o ARI de 0,6765 em três grupos descreve apenas a configuração avaliada.
-
-*GMM/EM.* O melhor ajuste com cinco componentes apresentou silhueta de 0,1503. Os pesos foram (0,1410; 0,3677; 0,2989; 0,1319; 0,0604), com (20; 55; 45; 20; 10) atribuições exclusivas. A componente de menor peso teve um autovalor de covariância de 0,00000381, da mesma ordem de grandeza que a regularização de 0,000001. Isso indica baixa variância em uma direção para essa componente. O critério de informação bayesiano (BIC) combina a qualidade do ajuste com uma penalidade pela complexidade do modelo. Nos melhores ajustes por verossimilhança, os valores foram 1051,2801, 797,6857, 804,5072, 834,8324 e 847,7804 para $k$ de 1 a 5, com mínimo em $k = 2$.
-
-*UPGMA.* A hierarquia permite examinar cortes aninhados sem novas inicializações. O corte em três grupos alcança ARI de 0,7184, mas o corte em dois mantém a maior silhueta tanto euclidiana quanto Manhattan.
-
-*DBSCAN.* Com `min_samples=5`, a varredura complementar produziu dois grupos em cada um dos cinco raios testados.
-#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Sensibilidade do DBSCAN a eps. Silhueta calculada sem ruído.], [
-#set text(size: 8pt)
-#table(columns: 4, inset: (x: 2pt, y: 3pt), stroke: .3pt,
-table.header([*eps*], [*Grupos*], [*Ruído*], [*Silhueta*]),
-[0,6], [2], [26], [0,6405],
-[0,7], [2], [8], [0,6104],
-[0,8], [2], [4], [0,5963],
-[0,9], [2], [4], [0,5963],
-[1,0], [2], [3], [0,5936],
-)
-])
-Os raios 0,8 e 0,9 produziram as mesmas contagens de grupos e ruído e o mesmo valor de silhueta. Com raio 0,6, a silhueta foi maior e cobriu apenas 124 observações. Lidas em conjunto, as duas medidas mostram como o raio afeta a quantidade de pontos incluídos no cálculo.
-
-== Dependência da inicialização
-Para examinar a variação entre as dez sementes, a tabela apresenta o intervalo da função objetivo em k igual a 3. O melhor extremo é o mínimo para K-Means, FCM, Kernel FCM e K-Medoids, e o máximo para GMM/EM. Cada linha deve ser interpretada na escala do próprio algoritmo; objetivos de métodos diferentes não são diretamente comparáveis.
-#figure(kind: table, supplement: [TABELA], numbering: "I", caption: [Faixa das funções objetivo em $k = 3$], [
-#set text(size: 8pt)
-#table(columns: 3, inset: (x: 2pt, y: 3pt), stroke: .3pt, table.header([*Método*],[*Mínimo*],[*Máximo*]),
-[K-Means],
-[140,9684],
-[192,0372],
-[FCM],
-[101,2222],
-[101,2222],
-[Kernel FCM],
-[32,7858],
-[32,7858],
-[K-Medoids],
-[131,2703],
-[132,3408],
-[GMM/EM],
-[-318,3884],
-[-292,0196]
-)
-])
-
-K-Means e GMM exibiram variação do objetivo entre sementes. No FCM e no Kernel FCM, os extremos coincidem na precisão exibida. As dez execuções de GMM com três componentes satisfizeram o critério de convergência da biblioteca e alcançaram valores distintos de log-verossimilhança.
-
-Em análise complementar, executou-se K-Means com $k = 3$, inicialização aleatória, semente 42 e 100 inicializações internas. O objetivo passou de 140,9684 para 140,9658, uma redução de 0,0018%. A silhueta passou de 0,4584 para 0,4590 e o ARI de 0,6101 para 0,6201.
+Um raio que retém poucas flores pode produzir silhueta elevada ao remover pontos de regiões de transição. A escolha por silhueta com cobertura mínima mantém a avaliação próxima do conjunto original. Os mapas completos apresentam como o raio e a densidade mínima afetam o número de grupos, as duas métricas e a cobertura.
 
 == Hierarquia e dendrograma
-#figure(image("figuras/ieee/dendrograma_upgma.pdf", width: 100%), caption: [Árvore UPGMA com distância Manhattan e ligação média, truncada em 12 subárvores. As contagens aparecem entre parênteses e as linhas indicam cortes em dois e três grupos.])
+#figure(image("figuras/ieee/dendrograma_upgma.pdf", width: 100%), caption: [Árvore UPGMA com distância Manhattan e ligação média, truncada em 12 subárvores. Os cortes indicados produzem dois e três grupos.])
 
-No dendrograma, a altura de cada fusão corresponde à distância média entre as observações dos dois grupos na escala padronizada. O corte em dois grupos separa #emph[I. setosa] das demais espécies. Na métrica de construção da hierarquia, as silhuetas Manhattan foram 0,6192, 0,5024, 0,4084 e 0,3770 para $k$ de 2 a 5, respectivamente. O corte em dois grupos também maximiza a silhueta nessa métrica.
+No dendrograma, a altura de fusão corresponde à distância média entre as observações dos grupos. O corte em dois grupos separa #emph[I. setosa] das demais espécies. Nos cortes de dois a cinco grupos, as silhuetas Manhattan foram 0,6192, 0,5024, 0,4084 e 0,3770. A distância euclidiana usada na avaliação principal e a Manhattan favorecem o corte em dois grupos.
 
 = Redução de dimensionalidade
 As quatro técnicas receberam a mesma matriz padronizada. Cada técnica foi executada uma vez. A PCA estimou quatro componentes e o gráfico mostra as duas primeiras. As demais técnicas foram ajustadas diretamente para duas dimensões. Os CSV registram as coordenadas das 150 observações por método, com seus identificadores e espécies.
@@ -535,10 +384,10 @@ Para comparar a estrutura local das projeções, calculou-se #emph[trustworthine
 O t-SNE obteve o maior valor nessa configuração (0,9888). UMAP (0,9783) e PCA (0,9782) obtiveram valores próximos entre si, e Kernel PCA obteve 0,9322. A comparação descreve a introdução de vizinhos na escala de dez observações.
 
 = Discussão e limitações
-O estudo é descritivo e utiliza uma única base. As repetições dos métodos particionais examinam a influência da inicialização, mantendo fixas as observações. Os diagnósticos complementares variaram o raio do DBSCAN e o número de inicializações do K-Means. A estabilidade das projeções entre sementes e a sensibilidade a $gamma$, à perplexidade e ao número de vizinhos ficaram sem avaliação. No t-SNE e no UMAP, as descrições se limitam à configuração visual observada, pois distâncias entre regiões e densidades podem mudar na projeção.
+O estudo descreve uma única base com atributos padronizados. As dez sementes examinam a influência da inicialização para as mesmas flores. As grades delimitam as configurações comparadas. A interpretação do DBSCAN depende da cobertura mínima e da comparação na amostra comum. Cada projeção foi ajustada uma vez, com uma configuração registrada. As distâncias entre regiões e as densidades podem mudar na projeção.
 
 = Conclusão
-A silhueta favoreceu a separação de #emph[I. setosa] das outras duas espécies nos seis métodos com seleção de $k$. A mistura gaussiana com três componentes recuperou melhor a distinção entre #emph[I. versicolor] e #emph[I. virginica], alcançando ARI de 0,9039. O resultado distingue a separação geométrica avaliada pela silhueta da concordância com os rótulos medida pelo ARI.
+A comparação separa a coesão geométrica, medida pela silhueta, da concordância com as espécies, medida pelo ARI. Em três grupos, #experimentos.maior_ari_k3.nome alcançou o maior ARI entre os perfis selecionados (#experimentos.maior_ari_k3.ari). Para o DBSCAN, a cobertura de #db.cobertura% especifica a amostra a que se referem as duas métricas.
 
 As quatro projeções reproduziram visualmente a separação de #emph[I. setosa]. A PCA reteve 95,80% da variância em duas componentes, e o t-SNE obteve o maior #emph[trustworthiness] com dez vizinhos entre as configurações avaliadas.
 

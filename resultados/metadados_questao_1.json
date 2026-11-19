@@ -1,5 +1,5 @@
 {
-  "base": "iris/iris.data (UCI Iris)",
+  "base": "codigo/iris/iris.data (UCI Iris)",
   "preprocessamento": {
     "padronizado": true,
     "atributos": [
@@ -34,10 +34,94 @@
     "k_1": "indefinida (NaN)"
   },
   "dbscan": {
-    "eps": 0.8,
-    "min_samples": 5,
+    "eps": 0.6942927963744061,
+    "min_samples": 3,
     "silhueta": "pontos de ruído (-1) removidos",
-    "ari": "todos os pontos, com ruído (-1) mantido"
+    "ari": "pontos de ruído (-1) removidos"
+  },
+  "tunagem": {
+    "valores_k": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "sementes": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51
+    ],
+    "cobertura_minima_dbscan_pct": 95.0,
+    "criterio_particionais": "Melhor objetivo finito entre as sementes, com empate pela menor semente. Maior silhueta entre configurações e k, com empate pelo menor k e pela primeira configuração na grade, iniciada pelo perfil de referência.",
+    "criterio_dbscan": "Maior silhueta válida com ao menos 95% de cobertura, com empate pela maior cobertura e pela primeira configuração na grade.",
+    "ajustes_particionais": 1120,
+    "ajustes_dbscan": 24,
+    "selecionados": {
+      "k-means": {
+        "configuracao": 1,
+        "parametros": {
+          "init": "random"
+        },
+        "k": 2
+      },
+      "fuzzy-k-means": {
+        "configuracao": 1,
+        "parametros": {
+          "m": 2.0
+        },
+        "k": 2
+      },
+      "kernel-fuzzy-k-means": {
+        "configuracao": 1,
+        "parametros": {
+          "m": 2.0,
+          "gamma": 0.25
+        },
+        "k": 2
+      },
+      "k-medoids": {
+        "configuracao": 1,
+        "parametros": {
+          "init": "random"
+        },
+        "k": 2
+      },
+      "gaussian-mixture": {
+        "configuracao": 1,
+        "parametros": {
+          "covariance_type": "full",
+          "reg_covar": 1e-06
+        },
+        "k": 2
+      }
+    },
+    "dbscan": {
+      "configuracao": 19,
+      "regra": "eps_relativo",
+      "eps": 0.6942927963744061,
+      "min_samples": 3,
+      "fator": 1.5,
+      "referencia_5_vizinhos": 0.46286186424960407,
+      "grupos": 2,
+      "ruido": 6,
+      "amostras_avaliadas": 144,
+      "cobertura_pct": 96.0,
+      "silhueta": 0.6034547527923034,
+      "elegivel": true,
+      "ari": 0.5760482515266581,
+      "selecionado": true
+    },
+    "dbscan_modo": "automatico",
+    "ajustes_k1": 50,
+    "ajustes_upgma": 1,
+    "ajustes_totais": 1195
   },
   "versoes": {
     "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",

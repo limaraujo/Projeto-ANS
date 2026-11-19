@@ -10,6 +10,13 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.manifold import TSNE, trustworthiness
+from threadpoolctl import threadpool_limits
+from tunagem import (
+    PADRAO_DBSCAN,
+    SEMENTES,
+    buscar_hiperparametros,
+    comparar_amostra_dbscan,
+)
 from umap import UMAP
 
 from algoritmos import (
@@ -17,7 +24,6 @@ from algoritmos import (
     calcular_ari,
     carregar_iris,
     condensar_resultados,
-    dbscan,
     executar_todas_por_k,
     plotar_dendrograma,
     plotar_silhuetas,
@@ -35,63 +41,74 @@ CODIGO = Path(__file__).resolve().parent
 
 def executar_questao_1(
     padronizar: bool = True,
-    eps_dbscan: float = 0.8,
-    min_samples_dbscan: int = 5,
+    eps_dbscan: float | None = None,
+    min_samples_dbscan: int | None = None,
+    *,
+    diretorio_resultados: str | Path = ROOT / "resultados",
 ) -> pd.DataFrame:
-    """Executa os sete algoritmos de agrupamento da Questão 1."""
-    diretorio_resultados = ROOT / "resultados"
-    diretorio_figuras = ROOT / "resultados" / "figuras"
+    """Executa a busca e consolida os sete agrupamentos da Questão 1."""
+    diretorio_resultados = Path(diretorio_resultados)
+    diretorio_tunagem = diretorio_resultados / "tunagem"
+    diretorio_figuras = diretorio_resultados / "figuras"
     X, y, preprocessamento = carregar_iris(padronizar=padronizar)
     valores_k = range(1, 6)
-    nomes_particionais = [
-        "k-means",
-        "fuzzy-k-means",
-        "kernel-fuzzy-k-means",
-        "k-medoids",
-        "gaussian-mixture",
-    ]
+    parametros_dbscan = None
+    if eps_dbscan is not None or min_samples_dbscan is not None:
+        parametros_dbscan = (
+            PADRAO_DBSCAN[0] if eps_dbscan is None else eps_dbscan,
+            PADRAO_DBSCAN[1] if min_samples_dbscan is None else min_samples_dbscan,
+        )
+    busca = buscar_hiperparametros(X, y, diretorio_tunagem, parametros_dbscan)
 
     todas_execucoes: dict[str, Any] = {}
     melhores: dict[str, dict[int, ResultadoAgrupamento]] = {}
-    for nome in nomes_particionais:
-        print(f"Executando {nome} (50 ajustes)...")
-        execucoes = executar_todas_por_k(nome, X, valores_k)
-        todas_execucoes[nome] = execucoes
-        melhores[nome] = selecionar_melhores_por_k(nome, execucoes)
+    ajustes_k1 = 0
+    with threadpool_limits(limits=1):
+        for nome, execucoes in busca.particionais.items():
+            parametros = busca.metadados["selecionados"][nome]["parametros"]
+            execucoes_k1 = executar_todas_por_k(
+                nome, X, range(1, 2), seed_inicial=SEMENTES.start, **parametros
+            )
+            ajustes_k1 += len(execucoes_k1[1])
+            todas_execucoes[nome] = execucoes_k1 | execucoes
+            melhores[nome] = selecionar_melhores_por_k(
+                nome,
+                {k: ajustes for k, ajustes in todas_execucoes[nome].items() if ajustes},
+            )
 
     print("Executando upgma (uma hierarquia e cinco cortes)...")
     resultados_upgma = upgma(X, valores_k=tuple(valores_k))
     melhores["upgma"] = resultados_upgma
     todas_execucoes["upgma"] = resultados_upgma
 
-    print("Executando dbscan (uma execução)...")
-    resultado_dbscan = dbscan(X, eps=eps_dbscan, min_samples=min_samples_dbscan)
+    resultado_dbscan = busca.dbscan
     todas_execucoes["dbscan"] = resultado_dbscan
 
-    for nome, resultados in melhores.items():
-        k_estrela, silhuetas = selecionar_k_por_silhueta(X, resultados)
-        plotar_silhuetas(nome, silhuetas, k_estrela, diretorio_figuras)
     plotar_dendrograma(resultados_upgma[2], diretorio_figuras)
 
     resumo = condensar_resultados(X, y, melhores, resultado_dbscan)
     diretorio_resultados.mkdir(parents=True, exist_ok=True)
     linhas = []
     contingencias = {}
+    selecionados = {}
     for nome, resultados in melhores.items():
         k_estrela, silhuetas = selecionar_k_por_silhueta(X, resultados)
+        plotar_silhuetas(nome, silhuetas, k_estrela, diretorio_figuras)
+        selecionados[nome] = resultados[k_estrela]
         contingencias[nome] = pd.crosstab(
             pd.Series(y, name="especie"),
-            pd.Series(resultados[k_estrela].rotulos, name="grupo"),
+            pd.Series(selecionados[nome].rotulos, name="grupo"),
         ).to_dict()
-        for k, resultado in resultados.items():
+        for k in valores_k:
+            resultado = resultados.get(k)
             linhas.append(
                 {
                     "algoritmo": nome,
                     "k": k,
-                    "seed": resultado.parametros.get("seed"),
-                    "objetivo": resultado.objetivo,
-                    "silhueta": silhuetas[k],
-                    "ari": calcular_ari(y, resultado.rotulos),
+                    "seed": resultado.parametros.get("seed") if resultado else None,
+                    "objetivo": resultado.objetivo if resultado else None,
+                    "silhueta": silhuetas.get(k),
+                    "ari": calcular_ari(y, resultado.rotulos) if resultado else None,
                     "selecionado": k == k_estrela,
                 }
             )
@@ -104,20 +121,34 @@ def executar_questao_1(
     )
     resumo.to_csv(diretorio_resultados / "resumo_agrupamentos.csv", index=False)
     salvar_json(diretorio_resultados / "execucoes_questao_1.json", todas_execucoes)
+    comparar_amostra_dbscan(X, y, selecionados, resultado_dbscan).to_csv(
+        diretorio_tunagem / "comparacao_mesma_amostra.csv", index=False
+    )
+    metadados_tunagem = busca.metadados | {
+        "ajustes_k1": ajustes_k1,
+        "ajustes_upgma": 1,
+        "ajustes_totais": (
+            busca.metadados["ajustes_particionais"]
+            + busca.metadados["ajustes_dbscan"]
+            + ajustes_k1
+            + 1
+        ),
+    }
     salvar_json(
         diretorio_resultados / "metadados_questao_1.json",
         {
             "base": "codigo/iris/iris.data (UCI Iris)",
             "preprocessamento": preprocessamento,
             "valores_k": list(valores_k),
-            "execucoes_por_algoritmo_particional": 10,
+            "execucoes_por_algoritmo_particional": len(SEMENTES),
             "silhueta": {"metrica": "euclidean", "k_1": "indefinida (NaN)"},
             "dbscan": {
-                "eps": eps_dbscan,
-                "min_samples": min_samples_dbscan,
+                "eps": resultado_dbscan.parametros["eps"],
+                "min_samples": resultado_dbscan.parametros["min_samples"],
                 "silhueta": "pontos de ruído (-1) removidos",
-                "ari": "todos os pontos, com ruído (-1) mantido",
+                "ari": "pontos de ruído (-1) removidos",
             },
+            "tunagem": metadados_tunagem,
             "versoes": {
                 "python": sys.version,
                 **{

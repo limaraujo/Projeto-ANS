@@ -22,7 +22,7 @@ Implementar e avaliar sete algoritmos de agrupamento e quatro técnicas de redu�
 
 > **Nota:** UPGMA corresponde ao método de ligação média não ponderada (*unweighted average linkage*); não são algoritmos separados.
 
-Para os cinco algoritmos particionais, executar dez inicializações para cada $k \in \{1,2,3,4,5\}$: **250 ajustes**. Somando UPGMA e DBSCAN, são **252 execuções** no total. A extração de cinco cortes do dendrograma não constitui cinco novas execuções do hierárquico.
+O conjunto final inclui dez inicializações dos cinco algoritmos particionais para cada $k \in \{1,2,3,4,5\}$, uma árvore UPGMA e uma configuração DBSCAN, totalizando **252 execuções**. A busca acrescenta ajustes de outras configurações. Os cinco cortes do dendrograma vêm de uma única árvore.
 
 ### 2.2. Redução de dimensionalidade (Questão 2)
 
@@ -59,6 +59,7 @@ Para os cinco algoritmos particionais, executar dez inicializações para cada $
 - **RF08 — Partição probabilística para crisp:** para A05, atribuir cada observação ao componente com maior probabilidade posterior: $c_i=\arg\max_j P(z_i=j\mid x_i)$.
 - **RF09 — Hierárquico:** executar UPGMA uma vez usando Manhattan e *average linkage*, gerar dendrograma e extrair partições para $k \in \{1,2,3,4,5\}$.
 - **RF10 — DBSCAN:** executar uma vez com `eps` e `min_samples` documentados; registrar clusters e observações classificadas como ruído.
+- **RF22 — Hiperparâmetros:** avaliar uma grade por método particional e pelo DBSCAN, incluir a configuração de referência e mostrar a sensibilidade das métricas. No UPGMA, variar o corte da árvore e preservar a distância e a ligação exigidas.
 
 ## 5. Requisitos funcionais — métricas e seleção
 
@@ -71,15 +72,15 @@ Para os cinco algoritmos particionais, executar dez inicializações para cada $
 
 A silhueta **não é definida para k = 1**; nesse caso registrar `NaN` (ou equivalente), não zero. Logo, para os algoritmos com escolha de k, a busca por $k^*$ considera, em condições usuais, $k \in \{2,3,4,5\}$, desde que a partição contenha ao menos dois rótulos distintos e menos rótulos do que observações.
 
-Para DBSCAN, uma convenção defensável é calcular o **ARI com todas as observações**, mantendo `-1` como rótulo do ruído, e calcular a **silhueta sobre os pontos não classificados como ruído**, caso sobrem ao menos dois clusters válidos. Essa convenção deve constar no relatório, pois afeta a comparabilidade.
+Para o DBSCAN, calcular **ARI e silhueta apenas nas observações atribuídas a grupos**, excluindo `-1`. Reportar cobertura e ruído e apresentar uma comparação complementar em que todos os métodos são avaliados no mesmo subconjunto retido pelo DBSCAN.
 
-> A seleção da melhor execução deve ocorrer pela **função objetivo**, antes de calcular e comparar silhuetas. Não selecionar a execução de melhor silhueta em substituição ao critério do enunciado.
+A **função objetivo** seleciona uma inicialização dentro de cada combinação de hiperparâmetros e `k`. A **silhueta** seleciona a combinação e o número de grupos. No DBSCAN, a busca maximiza a silhueta com pelo menos 95% de cobertura, como critério experimental. O ARI é calculado para a avaliação externa depois da seleção.
 
 ## 6. Requisitos funcionais — visualização e síntese
 
 - **RF15 — Silhueta × k:** gerar um gráfico para cada um dos seis algoritmos A01–A06, com eixo horizontal `k`, eixo vertical `Sil`, identificação de $k^*$ e indicação da indefinição para `k = 1`.
 - **RF16 — Dendrograma:** gerar dendrograma correspondente ao UPGMA com distância Manhattan.
-- **RF17 — Tabela comparativa:** consolidar algoritmo, $k^*$ (quando aplicável), silhueta e ARI.
+- **RF17 — Tabela comparativa:** consolidar algoritmo, hiperparâmetros selecionados, $k^*$ (quando aplicável), silhueta, ARI e cobertura. Comentar a concordância e as diferenças entre os métodos na Iris.
 
 | Algoritmo | k* | Silhueta | ARI |
 |---|---:|---:|---:|
@@ -206,7 +207,7 @@ ALGORITMOS = {
 | Silhueta | Distância euclidiana como referência comparativa | Explicitar que difere da distância Manhattan usada para construir o UPGMA |
 | K-Medoids | Euclidiana | Exigência do enunciado |
 | UPGMA | Manhattan + *average linkage* | Exigência do enunciado |
-| DBSCAN | Estabelecer regra justificável para `eps` e `min_samples` | Evitar ajuste oportunista em função do ARI |
+| DBSCAN | Selecionar `eps` e `min_samples` por silhueta, com cobertura mínima de 95% | Publicar silhueta, ARI e cobertura para cada configuração |
 
 A maior silhueta **não implica necessariamente** maior concordância com as três espécies da Iris. A silhueta é uma métrica interna; o ARI é uma avaliação externa com rótulos de referência.
 
@@ -233,7 +234,8 @@ Cada ajuste deve produzir registro estruturado, com campos aplicáveis ao métod
 ## 13. Critérios de aceitação
 
 - [ ] Executar os sete algoritmos de agrupamento.
-- [ ] Realizar as 252 execuções previstas.
+- [ ] Avaliar a grade de hiperparâmetros e documentar o efeito das variações.
+- [ ] Registrar as 252 execuções do conjunto final e o total de ajustes da busca.
 - [ ] Registrar parâmetros, sementes e resultados de cada ajuste.
 - [ ] Selecionar por função objetivo a melhor execução de A01–A05 em cada `k`.
 - [ ] Converter partições fuzzy e probabilísticas para crisp.
@@ -242,11 +244,7 @@ Cada ajuste deve produzir registro estruturado, com campos aplicáveis ao métod
 - [ ] Calcular o ARI das partições selecionadas e do DBSCAN.
 - [ ] Registrar explicitamente o tratamento do ruído do DBSCAN.
 - [ ] Gerar seis gráficos Sil × k e um dendrograma.
-- [ ] Consolidar os resultados em tabela comparativa.
+- [ ] Consolidar e comentar silhueta, ARI e cobertura dos sete métodos.
 - [ ] Executar PCA, Kernel PCA, t-SNE e UMAP.
 - [ ] Gerar os quatro gráficos bidimensionais e apresentar as saídas pertinentes.
 - [ ] Comentar os resultados dos dois conjuntos de experimentos.
-
-## 14. Próxima etapa
-
-Definir uma interface uniforme para os algoritmos e o esquema de persistência das execuções. Depois, implementar o orquestrador de experimentos e as métricas compartilhadas, antes de codificar ou integrar cada algoritmo específico.

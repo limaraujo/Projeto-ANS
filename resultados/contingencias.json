@@ -1,14 +1,14 @@
 {
   "k-means": {
     "0": {
-      "Iris-setosa": 0,
-      "Iris-versicolor": 50,
-      "Iris-virginica": 50
-    },
-    "1": {
       "Iris-setosa": 50,
       "Iris-versicolor": 0,
       "Iris-virginica": 0
+    },
+    "1": {
+      "Iris-setosa": 0,
+      "Iris-versicolor": 50,
+      "Iris-virginica": 50
     }
   },
   "fuzzy-k-means": {
@@ -74,8 +74,8 @@
   "dbscan": {
     "-1": {
       "Iris-setosa": 1,
-      "Iris-versicolor": 0,
-      "Iris-virginica": 3
+      "Iris-versicolor": 1,
+      "Iris-virginica": 4
     },
     "0": {
       "Iris-setosa": 49,
@@ -84,8 +84,8 @@
     },
     "1": {
       "Iris-setosa": 0,
-      "Iris-versicolor": 50,
-      "Iris-virginica": 47
+      "Iris-versicolor": 49,
+      "Iris-virginica": 46
     }
   }
 }

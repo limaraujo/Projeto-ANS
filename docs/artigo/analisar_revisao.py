@@ -1,4 +1,4 @@
-"""Diagnósticos complementares; preserva as execuções do protocolo principal."""
+"""Gera tabelas e figuras do artigo a partir dos resultados experimentais."""
 import json
 import os
 from pathlib import Path
@@ -12,8 +12,6 @@ import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans, DBSCAN
-from sklearn.mixture import GaussianMixture
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.metrics.pairwise import rbf_kernel
 from umap.umap_ import find_ab_params
@@ -21,14 +19,120 @@ from umap.umap_ import find_ab_params
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'docs/artigo'
 FIG = OUT / 'figuras/ieee'
-q = json.loads((ROOT / 'resultados/execucoes_questao_1.json').read_text())
-p = json.loads((ROOT / 'resultados/execucoes_questao_2.json').read_text())
+RESULTADOS = ROOT / 'resultados'
+TUNAGEM = RESULTADOS / 'tunagem'
+q = json.loads((RESULTADOS / 'execucoes_questao_1.json').read_text())
+p = json.loads((RESULTADOS / 'execucoes_questao_2.json').read_text())
+metadados = json.loads((RESULTADOS / 'metadados_questao_1.json').read_text())
+m = pd.read_csv(RESULTADOS / 'metricas_por_k.csv')
+resumo = pd.read_csv(RESULTADOS / 'resumo_agrupamentos.csv')
+particionais = pd.read_csv(TUNAGEM / 'particionais.csv')
+dbscan = pd.read_csv(TUNAGEM / 'dbscan.csv')
+mesma_amostra = pd.read_csv(TUNAGEM / 'comparacao_mesma_amostra.csv')
 df = pd.read_csv(ROOT / 'codigo/iris/iris.data', header=None).dropna(how='all')
-X = StandardScaler().fit_transform(df.iloc[:, :4])
-y = df.iloc[:, 4]
+X = df.iloc[:, :4].to_numpy()
+if metadados['preprocessamento']['padronizado']:
+    X = StandardScaler().fit_transform(X)
+
+NOMES = dict(zip(
+    ['k-means', 'fuzzy-k-means', 'kernel-fuzzy-k-means', 'k-medoids',
+     'gaussian-mixture', 'upgma', 'dbscan'],
+    ['K-Means', 'FCM', 'Kernel FCM', 'K-Medoids', 'GMM/EM', 'UPGMA', 'DBSCAN'],
+))
+
+
+def fmt(x, casas=4):
+    return '—' if pd.isna(x) else f'{x:.{casas}f}'.replace('.', ',')
+
+
+def resumir_parametros(nome, p):
+    if nome in {'k-means', 'k-medoids'}:
+        return p['init']
+    if nome == 'fuzzy-k-means':
+        return f"m = {p['m']:g}".replace('.', ',')
+    if nome == 'kernel-fuzzy-k-means':
+        return f"m = {p['m']:g}; γ = {p['gamma']:g}".replace('.', ',')
+    if nome == 'gaussian-mixture':
+        return f"{p['covariance_type']}; reg = {p['reg_covar']:g}"
+    if nome == 'upgma':
+        return 'ligação média, Manhattan'
+    return f"ε = {fmt(p['eps'], 3)}; min_samples = {p['min_samples']}"
+
+
 def best(name, k):
-    return (max if name == 'gaussian-mixture' else min)(q[name][str(k)], key=lambda r:r['objetivo'])
+    semente = m[(m.algoritmo == name) & (m.k == k)].iloc[0].seed
+    return next(run for run in q[name][str(k)] if run['parametros']['seed'] == semente)
+
+
 r = {'pca_singular_values': p['pca']['valores_singulares'], 'pca_mean': p['pca']['media']}
+r['agrupamento'] = {
+    'contagens': {k: metadados['tunagem'][k] for k in
+                  ['ajustes_particionais', 'ajustes_dbscan', 'ajustes_totais',
+                   'cobertura_minima_dbscan_pct']},
+    'resumo': [], 'mesma_amostra': [], 'por_k': [], 'sensibilidade_k3': [],
+}
+g = r['agrupamento']
+rotulos = {}
+for linha in resumo.to_dict('records'):
+    nome = linha['Algoritmo']
+    n = int(linha['Amostras avaliadas'])
+    k = int(linha['Clusters']) if nome == 'dbscan' else int(linha['k*'])
+    if nome == 'dbscan':
+        resultado = q[nome]
+    elif nome == 'upgma':
+        resultado = q[nome][str(k)]
+    else:
+        resultado = best(nome, k)
+    rotulos[nome] = np.asarray(resultado['rotulos'])
+    g['resumo'].append([NOMES[nome], resumir_parametros(nome, resultado['parametros']), str(k),
+                        fmt(linha['Silhueta']), fmt(linha['ARI']), str(n)])
+
+    mesma = mesma_amostra[mesma_amostra.algoritmo == nome].iloc[0]
+    g['mesma_amostra'].append([NOMES[nome], fmt(mesma.silhueta), fmt(mesma.ari),
+                              fmt(mesma.ari_com_dbscan)])
+    if nome == 'dbscan':
+        continue
+
+    linhas_k = m[(m.algoritmo == nome) & (m.k > 1)].sort_values('k')
+    g['por_k'].append([NOMES[nome], *[f'{fmt(x.silhueta)} / {fmt(x.ari)}'
+                                     for x in linhas_k.itertuples()]])
+    if nome in set(particionais.algoritmo):
+        candidatas_k3 = particionais[(particionais.algoritmo == nome) & (particionais.k == 3)]
+        validas = candidatas_k3.dropna(subset=['silhueta']).sort_values('silhueta')
+        extremos = [validas.iloc[0], validas.iloc[-1]]
+        g['sensibilidade_k3'].append([
+            NOMES[nome],
+            *[f'{resumir_parametros(nome, linha)} ({fmt(linha.silhueta)})'
+              for linha in extremos],
+            f'{fmt(candidatas_k3.ari.min())} a {fmt(candidatas_k3.ari.max())}',
+        ])
+
+escolhida = dbscan[dbscan.selecionado].iloc[0]
+mais_alta = dbscan.dropna(subset=['silhueta']).sort_values(
+    ['silhueta', 'cobertura_pct'], ascending=False).iloc[0]
+base_dbscan = dbscan[np.isclose(dbscan.eps, .8) & dbscan.min_samples.eq(5)].iloc[0]
+g['dbscan'] = {
+    'eps': fmt(escolhida.eps, 3), 'min_samples': int(escolhida.min_samples),
+    'cobertura': fmt(escolhida.cobertura_pct, 2), 'n': int(escolhida.amostras_avaliadas),
+    'ruido': int(escolhida.ruido), 'grupos': int(escolhida.grupos),
+    'silhueta': fmt(escolhida.silhueta), 'ari': fmt(escolhida.ari),
+    'tabela': [[nome, fmt(linha.eps, 3), str(linha.min_samples), str(linha.grupos),
+                fmt(linha.cobertura_pct, 2), fmt(linha.silhueta), fmt(linha.ari)]
+               for nome, linha in [('Escolhida', escolhida), ('Referência', base_dbscan),
+                                  ('Maior Sil', mais_alta)]],
+}
+g['amostra_igual'] = bool(mesma_amostra.ari_com_dbscan.eq(1).all())
+g['particao_comum'] = all(
+    adjusted_rand_score(rotulos['k-means'], rotulo) == 1
+    for nome, rotulo in rotulos.items() if nome != 'dbscan'
+)
+g['estrutura_setosa'] = adjusted_rand_score(
+    df.iloc[:, 4] == 'Iris-setosa', rotulos['k-means']
+) == 1
+gmm_k3 = m[(m.algoritmo == 'gaussian-mixture') & (m.k == 3)].iloc[0]
+maior_ari_k3 = m[m.k == 3].sort_values('ari', ascending=False).iloc[0]
+g['em_k3'] = {'silhueta': fmt(gmm_k3.silhueta), 'ari': fmt(gmm_k3.ari)}
+g['maior_ari_k3'] = {'nome': NOMES[maior_ari_k3.algoritmo], 'ari': fmt(maior_ari_k3.ari)}
 r['upgma_manhattan'] = {k: silhouette_score(X, q['upgma'][str(k)]['rotulos'], metric='manhattan') for k in range(2,6)}
 a, b = find_ab_params(1., .1)
 z = np.array(p['umap']['coordenadas'])
@@ -38,34 +142,17 @@ Kc = K - K.mean(axis=0)[None,:] - K.mean(axis=1)[:,None] + K.mean()
 eig = np.linalg.eigvalsh(Kc)
 assert eig.min() > -1e-10
 r['kernel_pca'] = {'trace': np.trace(Kc), 'fractions': (np.array(p['kernel_pca']['autovalores'])/np.trace(Kc)).tolist()}
-km = KMeans(n_clusters=3, init='random', n_init=100, random_state=42).fit(X)
-r['kmeans_sensitivity'] = {'n_init':100, 'seed':42, 'objective':km.inertia_, 'ari':adjusted_rand_score(y,km.labels_), 'silhouette':silhouette_score(X,km.labels_)}
 r['fuzzy_same_partition_k3'] = adjusted_rand_score(best('fuzzy-k-means',3)['rotulos'],best('kernel-fuzzy-k-means',3)['rotulos']) == 1
-r['gmm'] = {}
-for k in range(1,6):
-    old = best('gaussian-mixture',k)
-    model = GaussianMixture(n_components=k, covariance_type='full', random_state=old['parametros']['seed'], tol=1e-5, reg_covar=1e-6, n_init=1, init_params='random_from_data').fit(X)
-    assert np.isclose(model.score(X)*len(X), old['objetivo'])
-    r['gmm'][k] = {'weights':model.weights_.tolist(), 'counts':np.bincount(model.predict(X),minlength=k).tolist(), 'bic':model.bic(X), 'min_cov_eigenvalues':np.linalg.eigvalsh(model.covariances_).min(axis=1).tolist()}
-r['dbscan'] = []
-for eps in [.6,.7,.8,.9,1.]:
-    labels = DBSCAN(eps=eps,min_samples=5).fit_predict(X)
-    mask = labels != -1
-    groups = len(set(labels[mask]))
-    r['dbscan'].append({'eps':eps,'groups':groups,'noise':int((~mask).sum()),'silhouette':silhouette_score(X[mask],labels[mask]) if groups>1 else None})
 (OUT/'diagnosticos_revisao.json').write_text(json.dumps(r,indent=2,ensure_ascii=False)+'\n')
 plt.rcParams.update({'font.family':'serif','font.size':8,'axes.formatter.use_mathtext':False})
 fmt = FuncFormatter(lambda x,pos:f'{x:g}'.replace('.',','))
 def finish(fig,ax,name):
     ax.xaxis.set_major_formatter(fmt); ax.yaxis.set_major_formatter(fmt)
     fig.tight_layout(pad=.6); fig.savefig(FIG/name); plt.close(fig)
-m = pd.read_csv(ROOT/'resultados/metricas_por_k.csv')
-names = ['K-Means','FCM','Kernel FCM','K-Medoids','GMM/EM','UPGMA']
 fig,ax=plt.subplots(figsize=(3.45,2.6))
-for (name,rows), label, marker in zip(m.groupby('algoritmo',sort=False),names,['o','s','^','v','D','x']):
-    ax.plot(rows.k,rows.silhueta,marker=marker,label=label,lw=.9,ms=3)
-ax.axvline(2,ls='--',color='gray',lw=.8)
-ax.set(xlabel='Número de grupos (k)',ylabel='Silhueta média',xticks=range(1,6),ylim=(.1,.64))
+for (name,rows), marker in zip(m.groupby('algoritmo',sort=False),['o','s','^','v','D','x']):
+    ax.plot(rows.k,rows.silhueta,marker=marker,label=NOMES[name],lw=.9,ms=3)
+ax.set(xlabel='Número de grupos (k)',ylabel='Silhueta média',xticks=range(1,6))
 ax.legend(ncol=2,fontsize=6.5); ax.grid(alpha=.2)
 finish(fig,ax,'silhuetas_comparadas.pdf')
 Z=np.array(q['upgma']['2']['hierarquia'])

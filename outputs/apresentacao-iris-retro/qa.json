@@ -1,15 +1,15 @@
 {
   "status": "passed",
   "backend": "ooxml",
-  "generatedAt": "2026-11-18T12:43:00.229Z",
+  "generatedAt": "2026-11-19T18:09:23.925Z",
   "issues": [],
   "conversion": {
-    "pdf": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-iris-retro/presentation.pdf",
+    "pdf": "outputs/apresentacao-iris-retro/presentation.pdf",
     "engine": "native-subset",
     "pages": 17,
     "limitation": "Cairo/Pango conversion of supported editable OOXML only; LibreOffice/PowerPoint compatibility is not established by this export."
   },
-  "validatedAt": "2026-11-18T12:43:41.650Z",
+  "validatedAt": "2026-11-19T18:09:57.196Z",
   "slideCount": 17,
   "pdfPages": 17,
   "previewCount": 17,
@@ -53,17 +53,14 @@
     ],
     "issues": [],
     "reviewer": "Codex",
-    "method": "Inspeção visual de prévias representativas e comparação pixel a pixel das 17 páginas com a versão já inspecionada.",
+    "method": "Inspeção visual das 17 prévias. A cada regeneração, conferência visual dos slides alterados (10 e 16) e comparação pixel a pixel dos demais.",
     "observations": [
-      "Conferidos títulos, fórmulas, barras, legendas, notas e rodapés.",
-      "Conferidos cortes do dendrograma, métricas de agrupamento e fração retida pela Kernel PCA com os registros locais.",
-      "Tema retrô em formato 16:9, com texto editável e figuras acompanhadas das fontes SVG.",
-      "PDF renderizado com Cairo/Pango. Compatibilidade com Microsoft PowerPoint permanece sem verificação.",
-      "Logo branco na capa, com transparência, detalhes do brasão e alinhamento no canto superior direito.",
-      "Nos slides 2 a 17, a alteração visual ficou restrita ao mesmo logotipo branco no canto inferior direito."
+      "Conferidos títulos, eixos, legendas, alinhamento dos cartões e contraste.",
+      "Comparados os números do protocolo e do DBSCAN e as faixas de sensibilidade com os registros oficiais.",
+      "PDF renderizado pelo conversor nativo Cairo/Pango. A abertura no Microsoft PowerPoint permanece sem verificação."
     ],
-    "fingerprint": "47f957fd3891811eac863618728552ab7196860b386139186aaf03e68bf5aac8",
-    "reviewedAt": "2026-11-18T12:43:41.313Z"
+    "fingerprint": "5294d873821f801593d46e1b46a6ea84fd74c42997b368e1536468282a4c7105",
+    "reviewedAt": "2026-11-19T18:09:56.679Z"
   },
   "limitations": [
     "Text fit uses conservative font metrics, not a typography engine.",
