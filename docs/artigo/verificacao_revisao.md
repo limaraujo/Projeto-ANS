@@ -26,7 +26,7 @@ Os arquivos canônicos são `artigo_ieee_revisado.typ` e `artigo_ieee_revisado.p
 
 ## Histórico das verificações de 16 e 18/11/2026
 
-As contagens, métricas e figuras descritas a seguir se referem às versões históricas do protocolo.
+As contagens, métricas e figuras descritas a seguir se referem às versões históricas do protocolo. O artigo original, o PDF atualizado em 18/11 e os CSVs e o log de `resultados/historico/` estão no commit `27bb65a`.
 
 ## Fase 1 — requisitos e auditoria inicial
 
@@ -75,7 +75,7 @@ As páginas editoriais ou institucionais e, onde disponíveis, textos dos trabal
 
 ## Fases 3–5 — redação e revisão final
 
-O artigo novo preserva `artigo_ieee.typ` e `artigo_ieee.pdf`. Foi acrescentada fundamentação citada e removida a alegação sem suporte sobre o complemento. Foram mantidas as seis curvas, o dendrograma e quatro projeções. O PDF revisado compilou com Typst: A4, duas colunas, sete páginas. A extração textual confirmou seções e referências; não houve inspeção visual página a página nem reexecução dos 252 ajustes ou das quatro projeções. A conformidade com um template oficial IEEE não foi certificada.
+O fonte `artigo_ieee.typ` e o PDF original `artigo_ieee.pdf` estão no histórico do Git. Foi acrescentada fundamentação citada e removida a alegação sem suporte sobre o complemento. Foram mantidas as seis curvas, o dendrograma e quatro projeções. O PDF revisado compilou com Typst: A4, duas colunas, sete páginas. A extração textual confirmou seções e referências; não houve inspeção visual página a página nem reexecução dos 252 ajustes ou das quatro projeções. A conformidade com um template oficial IEEE não foi certificada.
 
 ## Revisão de 18/11/2026 — correções e diagnósticos complementares
 

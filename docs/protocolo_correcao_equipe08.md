@@ -2,7 +2,7 @@
 
 Este registro documenta a revisão anterior à rodada oficial com hiperparâmetros fixados pela média piloto. O [README](../README.md) descreve o protocolo vigente.
 
-Use o [artigo revisado](artigo/artigo_ieee_revisado.pdf) e a [apresentação em PDF](../apresentacao_iris_retro.pdf) como referência da entrega. As correções abaixo partem dos resultados já registrados. A prioridade é explicar as escolhas experimentais, demonstrar o efeito dos parâmetros e alinhar o texto do artigo, dos slides, do notebook e do guia.
+Use o [artigo revisado](artigo/artigo_ieee_revisado.pdf) e a [apresentação em PDF](../outputs/apresentacao-iris-retro/presentation.pdf) como referência da entrega. As correções abaixo partem dos resultados já registrados. A prioridade é explicar as escolhas experimentais, demonstrar o efeito dos parâmetros e alinhar o texto do artigo, dos slides, do notebook e do guia.
 
 ## 1. Justificar a cobertura mínima do DBSCAN
 
@@ -45,7 +45,7 @@ Use o [artigo revisado](artigo/artigo_ieee_revisado.pdf) e a [apresentação em 
 
 - **Chamadas e convergência.** Na discussão do artigo e nas notas dos slides 4 e 15, use “dez chamadas por perfil e *k*” ao contar o protocolo. Registre que as chamadas de PAM com `build` repetiram partição e objetivo em cada *k* da grade e que a busca de um único medoide em *k* = 1 foi exaustiva. Informe que dois ajustes do GMM atingiram o limite de 100 iterações sem convergir. São `full` com regularização 10⁻², *k* = 4, semente 45, e `diag` com regularização 10⁻², *k* = 5, semente 44. As melhores execuções nas duas células convergiram. [Execuções da grade](../resultados/tunagem/execucoes.json) · [Log](../resultados/execucao_console.txt)
 - **Trustworthiness.** Na introdução da Questão 2 do notebook, no slide 14 e na fala de conclusão do guia, use a definição que já consta no artigo, § VI-E. “O índice penaliza pontos que entram na lista dos dez vizinhos após a projeção. A penalidade cresce quanto mais distante o ponto estava no ranking original.” Use “Maior *trustworthiness* com dez vizinhos” como título do slide 14. Vincule o valor 0,9888 à configuração avaliada. [Notebook](../codigo/Projeto_AMNS_Equipe8.ipynb) · [Guia](../GUIA_APRESENTACAO.md)
-- **Controle de versões.** Corrija o glossário do guia para apresentar ε = 0,694293 e `min_samples=3` como escolha final, com ε = 0,8 e `min_samples=5` como referência. No README e no registro de verificação, identifique `artigo_ieee.pdf`, `artigo_ieee_atualizado.pdf` e `resultados/historico/` como materiais históricos. Registre que a comprovação dos 840 ajustes mencionados no artigo antigo depende de registros individuais ausentes. [README](../README.md) · [Verificação do artigo](artigo/verificacao_revisao.md)
+- **Controle de versões.** Corrija o glossário do guia para apresentar ε = 0,694293 e `min_samples=3` como escolha final, com ε = 0,8 e `min_samples=5` como referência. Os materiais históricos `artigo_ieee.pdf`, `artigo_ieee_atualizado.pdf` e `resultados/historico/` estão no commit `27bb65a`. A comprovação dos 840 ajustes mencionados no artigo antigo depende de registros individuais ausentes. [README](../README.md) · [Verificação do artigo](artigo/verificacao_revisao.md)
 
 ## 4. Regenerar e conferir a entrega
 

@@ -1,4 +1,0 @@
-A partir desta pasta:
-node scripts/cli.mjs build --spec deck.json --out ../reproduced --backend ooxml --pdf-engine native
-
-Para PptxGenJS: npm install --no-audit --no-fund e omita --backend.

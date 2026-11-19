@@ -6,9 +6,8 @@ Duração estimada: 18 minutos. Notas de fala incluídas no PPTX e em notes.md.
 - presentation.pptx: textos, cards, diagrama e barras editáveis.
 - presentation.pdf: versão para exibição e compartilhamento.
 - previews/index.html: galeria das 17 páginas.
-- source/deck.json: conteúdo e plano da apresentação.
-- source/scripts/: gerador portátil da skill, com a opção duck=false na capa.
-- source/assets/input/: imagens utilizadas; source/figuras-svg/: fontes vetoriais adicionais.
+- [Conteúdo e plano](../apresentacao-retro-src/deck.json)
+- [Gerador](../apresentacao-retro-src/engine/) e [figuras PNG e SVG](../apresentacao-retro-src/assets/)
 - qa.json e visual-review.json: validação técnica e registro da inspeção visual.
 
 A apresentação sintetiza a versão do artigo que incorpora a busca de
@@ -22,14 +21,15 @@ Mono. As fontes não estão embutidas. O PDF foi produzido pelo conversor nativo
 Cairo/Pango da skill. A validação cobre ZIP/XML, texto editável, geometria e
 renderização. A abertura no Microsoft PowerPoint permanece sem verificação.
 
-Para reproduzir PPTX, PDF e prévias a partir desta pasta:
+Para reproduzir PPTX, PDF e prévias, execute a partir da raiz do projeto.
 
 ```sh
-cd source
-node scripts/cli.mjs build --spec deck.json --out ../reproduced --backend ooxml --pdf-engine native
+slides_dir=$(mktemp -d)
+node outputs/apresentacao-retro-src/engine/scripts/cli.mjs build \
+  --spec outputs/apresentacao-retro-src/deck.json \
+  --out "$slides_dir" --backend ooxml --pdf-engine native
 ```
 
-O script `../apresentacao-retro-src/gerar_apresentacao.py` recompõe as figuras e
-o conteúdo da apresentação com os resultados locais. Execute antes o script
-`docs/artigo/analisar_revisao.py` a partir da raiz do projeto para atualizar as
-tabelas e os diagnósticos usados pela apresentação.
+Para atualizar as figuras e o conteúdo com os resultados locais, execute
+`docs/artigo/analisar_revisao.py` e `outputs/apresentacao-retro-src/gerar_apresentacao.py`,
+nessa ordem, a partir da raiz do projeto.

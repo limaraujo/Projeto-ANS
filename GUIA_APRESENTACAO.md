@@ -1,6 +1,6 @@
 # Guia de estudo e apresentação — Projeto AM-NS / Equipe 08
 
-Este guia prepara você para **explicar o projeto e defender sua base técnica**. Ele acompanha os 17 slides da [apresentação em PowerPoint](apresentacao_iris_retro.pptx) e da [versão em PDF](apresentacao_iris_retro.pdf).
+Este guia prepara você para **explicar o projeto e defender sua base técnica**. Ele acompanha os 17 slides da [apresentação em PowerPoint](outputs/apresentacao-iris-retro/presentation.pptx) e da [versão em PDF](outputs/apresentacao-iris-retro/presentation.pdf).
 
 As configurações e os números foram conferidos no código e nos artefatos existentes. As explicações distinguem o funcionamento geral dos métodos da configuração efetivamente utilizada. A elaboração deste guia não reexecutou os experimentos.
 

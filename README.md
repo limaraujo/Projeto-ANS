@@ -7,8 +7,9 @@ Implementação dos sete algoritmos de agrupamento da Equipe 08 e das técnicas 
 ```text
 .
 ├── codigo/       # scripts Python, dependências e base Iris
-├── docs/         # enunciado, requisitos, relatório e artigo
-├── resultados/   # métricas, execuções, figuras e histórico
+├── docs/         # enunciado, requisitos e artigo
+├── outputs/      # apresentação, prévias e fontes dos slides
+├── resultados/   # métricas, execuções e figuras
 └── README.md
 ```
 
@@ -20,7 +21,8 @@ Implementação dos sete algoritmos de agrupamento da Equipe 08 e das técnicas 
 - [Notebook para Jupyter ou Colab](codigo/Projeto_AMNS_Equipe8.ipynb).
 - [Artigo revisado em PDF](docs/artigo/artigo_ieee_revisado.pdf).
 - `resultados/figuras/`: gráficos produzidos pelos experimentos.
-- `resultados/historico/`: resultados antigos preservados.
+
+As versões anteriores do artigo e dos resultados estão no histórico do Git, no commit `27bb65a`.
 
 ## Execução
 
@@ -43,6 +45,7 @@ Para regenerar as figuras vetoriais e compilar a versão revisada:
 
 ```sh
 .venv/bin/python docs/artigo/analisar_revisao.py
+.venv/bin/python docs/artigo/gerar_figuras_tunagem_artigo.py
 typst compile docs/artigo/artigo_ieee_revisado.typ docs/artigo/artigo_ieee_revisado.pdf --root .
 ```
 
@@ -52,10 +55,11 @@ O enunciado oficial e os requisitos complementares estão disponíveis no reposi
 
 A apresentação e o guia abaixo documentam o protocolo anterior da Questão 1. Os resultados da rodada oficial atual estão no artigo revisado e em `resultados/`.
 
-- [PowerPoint editável](apresentacao_iris_retro.pptx)
-- [Apresentação em PDF](apresentacao_iris_retro.pdf)
+- [PowerPoint editável](outputs/apresentacao-iris-retro/presentation.pptx)
+- [Apresentação em PDF](outputs/apresentacao-iris-retro/presentation.pdf)
 - [Notas de fala](outputs/apresentacao-iris-retro/notes.md)
 - [Guia de estudo e apresentação](GUIA_APRESENTACAO.md)
+- [Instruções para reproduzir os slides](outputs/apresentacao-iris-retro/LEIA-ME.md)
 
 ## Busca de hiperparâmetros da Questão 1
 

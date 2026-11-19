@@ -1,4 +1,0 @@
-interface:
-  display_name: "Slides Creator"
-  short_description: "Apresentações científicas editáveis, PDF e prévias"
-  default_prompt: "Use $slides-creator para criar uma apresentação técnica com PowerPoint editável, PDF e prévias validadas."
