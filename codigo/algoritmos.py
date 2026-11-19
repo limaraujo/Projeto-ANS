@@ -19,7 +19,7 @@ from scipy.spatial.distance import cdist, pdist
 from sklearn.cluster import DBSCAN, KMeans
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.mixture import GaussianMixture
-from sklearn.preprocessing import MinMaxScaler, Normalizer, RobustScaler, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 
 class ResultadoAgrupamento(BaseModel):
@@ -136,8 +136,8 @@ def calcular_silhueta(
 ) -> float:
     """Calcula a silhueta média de uma partição crisp.
 
-    Retorna ``np.nan`` quando a métrica não é definida, como no caso de um
-    único cluster (k = 1). Para DBSCAN, use ``ignorar_ruido=True``.
+    Retorna ``np.nan`` quando a métrica não é definida (como k = 1).
+    Para DBSCAN, use ``ignorar_ruido=True`` para excluir pontos ``-1``.
     """
     X = np.asarray(data, dtype=float)
     labels = np.asarray(rotulos)
@@ -164,7 +164,7 @@ def selecionar_k_por_silhueta(
     data: np.ndarray,
     resultados: dict[int, ResultadoAgrupamento],
 ) -> tuple[int, dict[int, float]]:
-    """Calcula Sil(k) para k in {2..5} (k=1 indefinido) e retorna k*."""
+    """Calcula Sil(k) para k em {2..5} (k=1 indefinido) e retorna k*."""
     silhuetas = {
         k: calcular_silhueta(data, resultado.rotulos)
         for k, resultado in resultados.items()
@@ -185,7 +185,7 @@ def calcular_ari(
     """Calcula o Índice de Rand Ajustado (ARI) entre espécies e clusters.
 
     Para DBSCAN, use ``ignorar_ruido=True`` para excluir os pontos com rótulo
-    ``-1`` antes do cálculo, conforme orientação da disciplina.
+    ``-1`` antes do cálculo.
     """
     y_true = np.asarray(rotulos_verdadeiros)
     y_pred = np.asarray(rotulos_preditos)
@@ -320,7 +320,6 @@ def plotar_comparacao_algoritmos(
     sns.set_theme(style="whitegrid", context="notebook")
     fig, axes = plt.subplots(1, 2, figsize=(13.5, 5.2), sharey=True)
 
-    # Painel A: k* selecionado pela Silhueta (e automático no DBSCAN)
     df_k_star = resumo.copy()
     df_k_star["Método"] = df_k_star["Algoritmo"].map(rotulos_legiveis)
     melt_star = df_k_star.melt(
@@ -345,7 +344,6 @@ def plotar_comparacao_algoritmos(
     for container in axes[0].containers:
         axes[0].bar_label(container, fmt="%.2f", fontsize=8, padding=2)
 
-    # Painel B: Partições com k = 3 (classes reais) + DBSCAN automático
     df_k3 = metricas_por_k[metricas_por_k["k"] == 3][
         ["algoritmo", "silhueta", "ari"]
     ].rename(columns={"algoritmo": "Algoritmo", "silhueta": "Silhueta", "ari": "ARI"})
@@ -591,22 +589,25 @@ def kmedoids(
 ) -> ResultadoAgrupamento:
     """Executa PAM com distância euclidiana (protocolo Equipe 08)."""
     X = _validar_entrada(data, k)
+    distancias = cdist(X, X, metric="euclidean")
     if k == 1:
-        distancias = cdist(X, X, metric="euclidean")
-        indices_medoides = np.array([np.argmin(distancias.sum(axis=0))])
+        indices_medoides = np.array([np.argmin(distancias.sum(axis=0))], dtype=int)
         rotulos = np.zeros(len(X), dtype=int)
         objetivo = float(distancias[:, indices_medoides[0]].sum())
     else:
-        distancias = cdist(X, X, metric="euclidean")
-        modelo = pam(
-            distancias,
-            k,
-            init=init,
-            max_iter=max_iter,
-            random_state=seed,
-        )
+        if init == "first":
+            medoides_iniciais = np.arange(k, dtype=np.uintp)
+            modelo = pam(distancias, medoides_iniciais, max_iter=max_iter)
+        else:
+            modelo = pam(
+                distancias,
+                k,
+                init=init,
+                max_iter=max_iter,
+                random_state=seed,
+            )
         indices_medoides = np.asarray(modelo.medoids, dtype=int)
-        rotulos = modelo.labels.copy()
+        rotulos = np.asarray(modelo.labels, dtype=int).copy()
         objetivo = float(modelo.loss)
 
     centros = X[indices_medoides].copy()
@@ -678,27 +679,12 @@ def gaussian_mixture(
     )
 
 
-def _aplicar_escalonamento_upgma(X: np.ndarray, escalonamento: str) -> np.ndarray:
-    """Aplica transformação interna de escala antes da distância Manhattan."""
-    if escalonamento == "standard":
-        return X
-    if escalonamento == "minmax":
-        return MinMaxScaler().fit_transform(X)
-    if escalonamento == "robust":
-        return RobustScaler().fit_transform(X)
-    if escalonamento == "l2":
-        return Normalizer(norm="l2").fit_transform(X)
-    raise ValueError(f"Escalonamento desconhecido para UPGMA: {escalonamento}")
-
-
 @algoritmo("upgma", execucoes=1)
 def upgma(
     data: np.ndarray,
     valores_k: tuple[int, ...] = (1, 2, 3, 4, 5),
-    escalonamento: str = "standard",
-    optimal_ordering: bool = False,
 ) -> dict[int, ResultadoAgrupamento]:
-    """Constrói uma hierarquia UPGMA com distância Manhattan (protocolo Equipe 08)."""
+    """Constrói uma única árvore UPGMA com distância Manhattan (protocolo Equipe 08)."""
     X = _validar_entrada(data, 1)
     if len(X) < 2:
         raise ValueError("UPGMA requer pelo menos duas amostras.")
@@ -707,25 +693,14 @@ def upgma(
     for k in valores_k:
         _validar_entrada(X, k)
 
-    X_escalonado = _aplicar_escalonamento_upgma(X, escalonamento)
-    hierarquia = linkage(
-        pdist(X_escalonado, metric="cityblock"),
-        method="average",
-        optimal_ordering=optimal_ordering,
-    )
+    hierarquia = linkage(pdist(X, metric="cityblock"), method="average")
     cortes = cut_tree(hierarquia, n_clusters=list(valores_k))
     return {
         k: ResultadoAgrupamento(
             algoritmo="upgma",
             tipo="hierarquico",
             rotulos=cortes[:, i].copy(),
-            parametros={
-                "k": k,
-                "metric": "manhattan",
-                "linkage": "average",
-                "escalonamento": escalonamento,
-                "optimal_ordering": optimal_ordering,
-            },
+            parametros={"k": k, "metric": "manhattan", "linkage": "average"},
             hierarquia=hierarquia.copy(),
         )
         for i, k in enumerate(valores_k)

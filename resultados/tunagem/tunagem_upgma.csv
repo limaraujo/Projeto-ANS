@@ -1,0 +1,6 @@
+metric,linkage,k,silhueta,ari,selecionado
+manhattan,average,1,,0.0,False
+manhattan,average,2,0.580184463257396,0.5681159420289855,True
+manhattan,average,3,0.4516922163782868,0.7183576141196959,False
+manhattan,average,4,0.3991226809197922,0.7075980945621901,False
+manhattan,average,5,0.38238944231628114,0.6875169129187638,False

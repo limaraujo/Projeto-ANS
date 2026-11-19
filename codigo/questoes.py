@@ -41,7 +41,7 @@ def executar_questao_1(
     eps_dbscan: float | None = None,
     min_samples_dbscan: int | None = None,
 ) -> pd.DataFrame:
-    """Executa a busca de hiperparâmetros e os sete algoritmos da Questão 1."""
+    """Executa a rodada piloto de hiperparâmetros e a rodada oficial da Questão 1."""
     diretorio_resultados = ROOT / "resultados"
     diretorio_figuras = ROOT / "resultados" / "figuras"
     X, y, preprocessamento = carregar_iris(padronizar=padronizar)
@@ -64,7 +64,7 @@ def executar_questao_1(
                 "reg_covar": 1e-6,
                 "init_params": "random_from_data",
             },
-            "upgma": {"escalonamento": "standard", "optimal_ordering": False},
+            "upgma": {},
             "dbscan": {"eps": 0.8, "min_samples": 5},
         }
 
@@ -85,17 +85,19 @@ def executar_questao_1(
     todas_execucoes: dict[str, Any] = {}
     melhores: dict[str, dict[int, ResultadoAgrupamento]] = {}
     for nome in nomes_particionais:
-        print(f"Executando {nome} com {hiperparams[nome]} (50 ajustes)...")
-        execucoes = executar_todas_por_k(nome, X, valores_k, **hiperparams[nome])
+        print(f"Rodada oficial — {nome} com {hiperparams[nome]} (seeds 42..51)...")
+        execucoes = executar_todas_por_k(
+            nome, X, valores_k, seed_inicial=42, **hiperparams[nome]
+        )
         todas_execucoes[nome] = execucoes
         melhores[nome] = selecionar_melhores_por_k(nome, execucoes)
 
-    print(f"Executando upgma com {hiperparams['upgma']} (uma hierarquia e cinco cortes)...")
-    resultados_upgma = upgma(X, valores_k=tuple(valores_k), **hiperparams["upgma"])
+    print("Rodada oficial — upgma (árvore única Manhattan/average e 5 cortes)...")
+    resultados_upgma = upgma(X, valores_k=tuple(valores_k))
     melhores["upgma"] = resultados_upgma
     todas_execucoes["upgma"] = resultados_upgma
 
-    print(f"Executando dbscan com {hiperparams['dbscan']} (uma execução)...")
+    print(f"Rodada oficial — dbscan com {hiperparams['dbscan']}...")
     resultado_dbscan = dbscan(X, **hiperparams["dbscan"])
     todas_execucoes["dbscan"] = resultado_dbscan
 
@@ -146,11 +148,14 @@ def executar_questao_1(
             "preprocessamento": preprocessamento,
             "valores_k": list(valores_k),
             "execucoes_por_algoritmo_particional": 10,
+            "seeds_piloto": list(range(0, 10)),
+            "seeds_oficiais": list(range(42, 52)),
             "tunagem_aplicada": usar_tunados,
             "hiperparametros_selecionados": hiperparams,
             "silhueta": {"metrica": "euclidean", "k_1": "indefinida (NaN)"},
             "dbscan": {
                 **hiperparams["dbscan"],
+                "cobertura_minima_piloto": "95%",
                 "silhueta": "pontos de ruído (-1) excluídos",
                 "ari": "pontos de ruído (-1) excluídos",
             },

@@ -1,5 +1,5 @@
 {
-  "base": "iris/iris.data (UCI Iris)",
+  "base": "codigo/iris/iris.data (UCI Iris)",
   "preprocessamento": {
     "padronizado": true,
     "atributos": [
@@ -29,22 +29,77 @@
     5
   ],
   "execucoes_por_algoritmo_particional": 10,
+  "seeds_piloto": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "seeds_oficiais": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51
+  ],
+  "tunagem_aplicada": true,
+  "hiperparametros_selecionados": {
+    "k-means": {
+      "init": "random",
+      "tol": 0.0001,
+      "max_iter": 50
+    },
+    "fuzzy-k-means": {
+      "m": 2.0,
+      "error": 1e-05
+    },
+    "kernel-fuzzy-k-means": {
+      "gamma": 0.05,
+      "m": 2.0
+    },
+    "k-medoids": {
+      "init": "random",
+      "max_iter": 300
+    },
+    "gaussian-mixture": {
+      "covariance_type": "spherical",
+      "reg_covar": 0.01,
+      "init_params": "random_from_data"
+    },
+    "upgma": {},
+    "dbscan": {
+      "eps": 0.8,
+      "min_samples": 7
+    }
+  },
   "silhueta": {
     "metrica": "euclidean",
     "k_1": "indefinida (NaN)"
   },
   "dbscan": {
     "eps": 0.8,
-    "min_samples": 5,
-    "silhueta": "pontos de ruído (-1) removidos",
-    "ari": "todos os pontos, com ruído (-1) mantido"
+    "min_samples": 7,
+    "cobertura_minima_piloto": "95%",
+    "silhueta": "pontos de ruído (-1) excluídos",
+    "ari": "pontos de ruído (-1) excluídos"
   },
   "versoes": {
-    "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
-    "numpy": "2.5.4",
-    "pandas": "3.0.6",
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
     "scikit-learn": "1.9.1",
-    "scipy": "1.18.1",
+    "scipy": "1.16.3",
     "matplotlib": "3.11.2",
     "seaborn": "0.13.2",
     "pydantic": "2.14.1",

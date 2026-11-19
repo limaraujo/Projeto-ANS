@@ -1,0 +1,92 @@
+{
+  "k-means": {
+    "algoritmo": "k-means",
+    "parametros": {
+      "init": "random",
+      "tol": 0.0001,
+      "max_iter": 50
+    },
+    "eh_referencia": false,
+    "silhueta_media_k2_k5": 0.4444146962205401,
+    "silhueta_k2": 0.580184463257396,
+    "silhueta_k3": 0.4589717867018717,
+    "ari_k2": 0.5681159420289855,
+    "ari_k3": 0.6201351808870379
+  },
+  "fuzzy-k-means": {
+    "algoritmo": "fuzzy-k-means",
+    "parametros": {
+      "m": 2.0,
+      "error": 1e-05
+    },
+    "eh_referencia": true,
+    "silhueta_media_k2_k5": 0.44310819059403406,
+    "silhueta_k2": 0.580184463257396,
+    "silhueta_k3": 0.4574372958520429,
+    "ari_k2": 0.5681159420289855,
+    "ari_k3": 0.6303393343888227
+  },
+  "kernel-fuzzy-k-means": {
+    "algoritmo": "kernel-fuzzy-k-means",
+    "parametros": {
+      "gamma": 0.05,
+      "m": 2.0
+    },
+    "eh_referencia": false,
+    "silhueta_media_k2_k5": 0.4418972272684195,
+    "silhueta_k2": 0.580184463257396,
+    "silhueta_k3": 0.4574372958520429,
+    "ari_k2": 0.5681159420289855,
+    "ari_k3": 0.6303393343888227
+  },
+  "k-medoids": {
+    "algoritmo": "k-medoids",
+    "parametros": {
+      "init": "random",
+      "max_iter": 300
+    },
+    "eh_referencia": true,
+    "silhueta_media_k2_k5": 0.44499589095739284,
+    "silhueta_k2": 0.580184463257396,
+    "silhueta_k3": 0.4497202122514745,
+    "ari_k2": 0.5681159420289855,
+    "ari_k3": 0.676454462051257
+  },
+  "gaussian-mixture": {
+    "algoritmo": "gaussian-mixture",
+    "parametros": {
+      "covariance_type": "spherical",
+      "reg_covar": 0.01,
+      "init_params": "random_from_data"
+    },
+    "eh_referencia": false,
+    "silhueta_media_k2_k5": 0.449521127324085,
+    "silhueta_k2": 0.5753869579723336,
+    "silhueta_k3": 0.4568295013461273,
+    "ari_k2": 0.5437515388376617,
+    "ari_k3": 0.6199243317810601
+  },
+  "upgma": {
+    "algoritmo": "upgma",
+    "parametros": {},
+    "k_estrela": 2,
+    "silhueta_media_k2_k5": 0.4533472007179391,
+    "silhueta_k2": 0.580184463257396,
+    "silhueta_k3": 0.4516922163782868,
+    "ari_k2": 0.5681159420289855,
+    "ari_k3": 0.7183576141196959
+  },
+  "dbscan": {
+    "algoritmo": "dbscan",
+    "parametros": {
+      "eps": 0.8,
+      "min_samples": 7
+    },
+    "grupos": 2,
+    "ruido": 7,
+    "ruido_pct": 4.666666666666667,
+    "cobertura_pct": 95.33333333333333,
+    "silhueta": 0.6049414470278598,
+    "ari": 0.5709346511440505
+  }
+}

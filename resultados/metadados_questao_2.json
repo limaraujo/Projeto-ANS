@@ -21,14 +21,14 @@
     ]
   },
   "seed": 42,
-  "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
   "fonte_requisitos": "Projeto-AMG-NS-2026-2.pdf; Equipe 08",
   "sha256_dados": "6f608b71a7317216319b4d27b4d9bc84e6abd734eda7872b71a458569e2656c0",
   "versoes": {
-    "numpy": "2.5.4",
-    "pandas": "3.0.6",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
     "scikit-learn": "1.9.1",
-    "scipy": "1.18.1",
+    "scipy": "1.16.3",
     "umap-learn": "0.5.12",
     "numba": "0.68.0",
     "matplotlib": "3.11.2"
