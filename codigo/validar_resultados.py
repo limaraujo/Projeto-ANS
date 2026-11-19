@@ -7,15 +7,18 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 
-from algoritmos import carregar_iris, salvar_json
+from algoritmos import calcular_ari, calcular_silhueta, carregar_iris, salvar_json
 
 
 def validar() -> None:
     raiz = Path(__file__).resolve().parent.parent / "resultados"
     q1 = json.loads((raiz / "execucoes_questao_1.json").read_text())
     q2 = json.loads((raiz / "execucoes_questao_2.json").read_text())
+    meta_q1 = json.loads((raiz / "metadados_questao_1.json").read_text())
     X, y, _ = carregar_iris()
     metricas = pd.read_csv(raiz / "metricas_por_k.csv")
+    resumo = pd.read_csv(raiz / "resumo_agrupamentos.csv")
+
     total = 2
     for nome, por_k in q1.items():
         if nome in ("upgma", "dbscan"):
@@ -48,6 +51,34 @@ def validar() -> None:
                         assert np.allclose(u.sum(axis=1), 1)
                         assert np.array_equal(u.argmax(axis=1), r["rotulos"])
     assert total == 252
+
+    # Valida DBSCAN (Silhueta e ARI excluindo pontos de ruído -1)
+    rotulos_dbscan = np.array(q1["dbscan"]["rotulos"])
+    linha_dbscan = resumo[resumo["Algoritmo"] == "dbscan"].iloc[0]
+    assert np.isclose(
+        linha_dbscan["Silhueta"],
+        calcular_silhueta(X, rotulos_dbscan, ignorar_ruido=True),
+    )
+    assert np.isclose(
+        linha_dbscan["ARI"],
+        calcular_ari(y, rotulos_dbscan, ignorar_ruido=True),
+    )
+
+    # Valida existência da busca de hiperparâmetros dos 7 algoritmos
+    if meta_q1.get("tunagem_aplicada"):
+        tunados = json.loads(
+            (raiz / "tunagem" / "melhores_hiperparametros.json").read_text()
+        )
+        assert set(tunados.keys()) == {
+            "k-means",
+            "fuzzy-k-means",
+            "kernel-fuzzy-k-means",
+            "k-medoids",
+            "gaussian-mixture",
+            "upgma",
+            "dbscan",
+        }
+
     for nome, r in q2.items():
         z = np.array(r["coordenadas"])
         assert z.shape == (150, 4 if nome == "pca" else 2)
@@ -55,6 +86,7 @@ def validar() -> None:
         assert 0 <= r["trustworthiness_10"] <= 1
     assert np.isclose(sum(q2["pca"]["variancia_explicada"]), 1)
     assert q2["tsne"]["divergencia_kl"] >= 0
+
     salvar_json(
         raiz / "validacao.json",
         {
@@ -64,14 +96,15 @@ def validar() -> None:
             "verificacoes": [
                 "sementes e contagens",
                 "ótimos por função objetivo",
-                "silhuetas e ARI recalculados",
+                "silhuetas (k=1 indefinido) e ARI recalculados (ruído -1 excluído no DBSCAN)",
+                "busca de hiperparâmetros dos 7 algoritmos",
                 "normalização e argmax das pertinências e probabilidades",
                 "dimensões e finitude das projeções",
                 "variância PCA e KL t-SNE",
             ],
         },
     )
-    print("Validação aprovada: 252 ajustes e quatro técnicas de redução.")
+    print("Validação aprovada: 252 ajustes, tunagem dos 7 algoritmos e 4 projeções.")
 
 
 if __name__ == "__main__":

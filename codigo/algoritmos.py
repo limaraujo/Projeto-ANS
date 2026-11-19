@@ -19,7 +19,7 @@ from scipy.spatial.distance import cdist, pdist
 from sklearn.cluster import DBSCAN, KMeans
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.mixture import GaussianMixture
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler, Normalizer, RobustScaler, StandardScaler
 
 
 class ResultadoAgrupamento(BaseModel):
@@ -75,14 +75,12 @@ def executar_melhores_por_k(
     data: np.ndarray,
     valores_k: range = range(1, 6),
     seed_inicial: int = 42,
+    **kwargs: Any,
 ) -> dict[int, ResultadoAgrupamento]:
-    """Executa um algoritmo particional e retém o melhor resultado de cada ``k``.
-
-    O número de inicializações e o sentido de otimização são obtidos do
-    registro do algoritmo. As sementes são consecutivas, a partir de
-    ``seed_inicial``.
-    """
-    todas_execucoes = executar_todas_por_k(nome, data, valores_k, seed_inicial)
+    """Executa um algoritmo particional e retém o melhor resultado de cada ``k``."""
+    todas_execucoes = executar_todas_por_k(
+        nome, data, valores_k, seed_inicial, **kwargs
+    )
     return selecionar_melhores_por_k(nome, todas_execucoes)
 
 
@@ -91,6 +89,7 @@ def executar_todas_por_k(
     data: np.ndarray,
     valores_k: range = range(1, 6),
     seed_inicial: int = 42,
+    **kwargs: Any,
 ) -> dict[int, list[ResultadoAgrupamento]]:
     """Executa e mantém todas as dez inicializações de cada ``k``."""
     try:
@@ -102,7 +101,9 @@ def executar_todas_por_k(
 
     return {
         k: [
-            executar_algoritmo(nome, data, k=k, seed=seed_inicial + tentativa)
+            executar_algoritmo(
+                nome, data, k=k, seed=seed_inicial + tentativa, **kwargs
+            )
             for tentativa in range(quantidade_execucoes)
         ]
         for k in valores_k
@@ -136,8 +137,7 @@ def calcular_silhueta(
     """Calcula a silhueta média de uma partição crisp.
 
     Retorna ``np.nan`` quando a métrica não é definida, como no caso de um
-    único cluster. Para DBSCAN, use ``ignorar_ruido=True`` para remover os
-    pontos de rótulo ``-1`` antes do cálculo.
+    único cluster (k = 1). Para DBSCAN, use ``ignorar_ruido=True``.
     """
     X = np.asarray(data, dtype=float)
     labels = np.asarray(rotulos)
@@ -164,9 +164,10 @@ def selecionar_k_por_silhueta(
     data: np.ndarray,
     resultados: dict[int, ResultadoAgrupamento],
 ) -> tuple[int, dict[int, float]]:
-    """Calcula Sil(k) e retorna o ``k*`` com a maior silhueta válida."""
+    """Calcula Sil(k) para k in {2..5} (k=1 indefinido) e retorna k*."""
     silhuetas = {
-        k: calcular_silhueta(data, resultado.rotulos) for k, resultado in resultados.items()
+        k: calcular_silhueta(data, resultado.rotulos)
+        for k, resultado in resultados.items()
     }
     valores_validos = {k: sil for k, sil in silhuetas.items() if not np.isnan(sil)}
     if not valores_validos:
@@ -176,11 +177,15 @@ def selecionar_k_por_silhueta(
     return k_estrela, silhuetas
 
 
-def calcular_ari(rotulos_verdadeiros: np.ndarray, rotulos_preditos: np.ndarray) -> float:
+def calcular_ari(
+    rotulos_verdadeiros: np.ndarray,
+    rotulos_preditos: np.ndarray,
+    ignorar_ruido: bool = False,
+) -> float:
     """Calcula o Índice de Rand Ajustado (ARI) entre espécies e clusters.
 
-    Para DBSCAN, mantenha o rótulo ``-1`` em ``rotulos_preditos``: o ruído
-    também faz parte da partição que será comparada às espécies verdadeiras.
+    Para DBSCAN, use ``ignorar_ruido=True`` para excluir os pontos com rótulo
+    ``-1`` antes do cálculo, conforme orientação da disciplina.
     """
     y_true = np.asarray(rotulos_verdadeiros)
     y_pred = np.asarray(rotulos_preditos)
@@ -188,8 +193,11 @@ def calcular_ari(rotulos_verdadeiros: np.ndarray, rotulos_preditos: np.ndarray) 
         raise ValueError(
             "Os dois vetores de rótulos devem ser unidimensionais e ter o mesmo tamanho."
         )
+    if ignorar_ruido:
+        mascara = y_pred != -1
+        y_true, y_pred = y_true[mascara], y_pred[mascara]
     if len(y_true) == 0:
-        raise ValueError("Os vetores de rótulos não podem ser vazios.")
+        return float("nan")
     return float(adjusted_rand_score(y_true, y_pred))
 
 
@@ -199,11 +207,7 @@ def condensar_resultados(
     resultados_por_algoritmo: dict[str, dict[int, ResultadoAgrupamento]],
     resultado_dbscan: ResultadoAgrupamento | None = None,
 ) -> pd.DataFrame:
-    """Cria uma tabela comparativa dos resultados selecionados.
-
-    Para métodos com ``k``, a linha usa a partição de maior silhueta (``k*``).
-    Para DBSCAN, a silhueta ignora o ruído e o ARI mantém o rótulo ``-1``.
-    """
+    """Cria a tabela comparativa dos resultados selecionados dos 7 algoritmos."""
     linhas: list[dict[str, Any]] = []
     for nome, resultados in resultados_por_algoritmo.items():
         k_estrela, silhuetas = selecionar_k_por_silhueta(data, resultados)
@@ -229,7 +233,7 @@ def condensar_resultados(
                 "Algoritmo": "dbscan",
                 "k*": "automático",
                 "Silhueta": calcular_silhueta(data, rotulos, ignorar_ruido=True),
-                "ARI": calcular_ari(rotulos_verdadeiros, rotulos),
+                "ARI": calcular_ari(rotulos_verdadeiros, rotulos, ignorar_ruido=True),
                 "Clusters": quantidade_clusters,
                 "Ruído": quantidade_ruido,
                 "Ruído (%)": 100 * quantidade_ruido / len(rotulos),
@@ -245,11 +249,7 @@ def plotar_silhuetas(
     k_estrela: int,
     diretorio_saida: str | Path = "figuras",
 ) -> Path:
-    """Salva, com Seaborn, o gráfico Sil × k de um algoritmo.
-
-    A silhueta de ``k=1`` não é definida e por isso é marcada no gráfico,
-    mas não entra na linha nem na escolha de ``k*``.
-    """
+    """Salva o gráfico Sil × k (k=1 marcado como indefinido)."""
     diretorio = Path(diretorio_saida)
     diretorio.mkdir(parents=True, exist_ok=True)
 
@@ -274,7 +274,7 @@ def plotar_silhuetas(
         if np.isnan(silhuetas[k]):
             ax.annotate(
                 "indefinida",
-                xy=(k, 0),
+                xy=(k, min(valores_validos)),
                 xytext=(0, 8),
                 textcoords="offset points",
                 ha="center",
@@ -298,6 +298,87 @@ def plotar_silhuetas(
     return caminho_saida
 
 
+def plotar_comparacao_algoritmos(
+    resumo: pd.DataFrame,
+    metricas_por_k: pd.DataFrame,
+    diretorio_saida: str | Path = "figuras",
+) -> Path:
+    """Gera gráfico comparativo de Silhueta e ARI entre os 7 algoritmos."""
+    diretorio = Path(diretorio_saida)
+    diretorio.mkdir(parents=True, exist_ok=True)
+
+    rotulos_legiveis = {
+        "k-means": "K-Means",
+        "fuzzy-k-means": "Fuzzy K-Means",
+        "kernel-fuzzy-k-means": "Kernel FCM",
+        "k-medoids": "K-Medoids",
+        "gaussian-mixture": "GMM/EM",
+        "upgma": "UPGMA",
+        "dbscan": "DBSCAN",
+    }
+
+    sns.set_theme(style="whitegrid", context="notebook")
+    fig, axes = plt.subplots(1, 2, figsize=(13.5, 5.2), sharey=True)
+
+    # Painel A: k* selecionado pela Silhueta (e automático no DBSCAN)
+    df_k_star = resumo.copy()
+    df_k_star["Método"] = df_k_star["Algoritmo"].map(rotulos_legiveis)
+    melt_star = df_k_star.melt(
+        id_vars="Método",
+        value_vars=["Silhueta", "ARI"],
+        var_name="Métrica",
+        value_name="Valor",
+    )
+    sns.barplot(
+        data=melt_star,
+        x="Método",
+        y="Valor",
+        hue="Métrica",
+        palette=["#2676a1", "#e07a5f"],
+        ax=axes[0],
+    )
+    axes[0].set_title("Desempenho em k* (selecionado pela Silhueta)")
+    axes[0].set_xlabel("")
+    axes[0].set_ylabel("Pontuação")
+    axes[0].set_ylim(0, 1.05)
+    axes[0].tick_params(axis="x", rotation=25)
+    for container in axes[0].containers:
+        axes[0].bar_label(container, fmt="%.2f", fontsize=8, padding=2)
+
+    # Painel B: Partições com k = 3 (classes reais) + DBSCAN automático
+    df_k3 = metricas_por_k[metricas_por_k["k"] == 3][
+        ["algoritmo", "silhueta", "ari"]
+    ].rename(columns={"algoritmo": "Algoritmo", "silhueta": "Silhueta", "ari": "ARI"})
+    df_db = resumo[resumo["Algoritmo"] == "dbscan"][["Algoritmo", "Silhueta", "ARI"]]
+    df_comp_k3 = pd.concat([df_k3, df_db], ignore_index=True)
+    df_comp_k3["Método"] = df_comp_k3["Algoritmo"].map(rotulos_legiveis)
+    melt_k3 = df_comp_k3.melt(
+        id_vars="Método",
+        value_vars=["Silhueta", "ARI"],
+        var_name="Métrica",
+        value_name="Valor",
+    )
+    sns.barplot(
+        data=melt_k3,
+        x="Método",
+        y="Valor",
+        hue="Métrica",
+        palette=["#2676a1", "#e07a5f"],
+        ax=axes[1],
+    )
+    axes[1].set_title("Desempenho em k = 3 (espécies reais) vs. DBSCAN")
+    axes[1].set_xlabel("")
+    axes[1].tick_params(axis="x", rotation=25)
+    for container in axes[1].containers:
+        axes[1].bar_label(container, fmt="%.2f", fontsize=8, padding=2)
+
+    fig.tight_layout()
+    caminho_saida = diretorio / "comparacao_algoritmos.png"
+    fig.savefig(caminho_saida, dpi=160)
+    plt.close(fig)
+    return caminho_saida
+
+
 def carregar_iris(
     caminho: str | Path | None = None,
     padronizar: bool = True,
@@ -307,7 +388,9 @@ def carregar_iris(
     colunas = ["sepal_length", "sepal_width", "petal_length", "petal_width", "species"]
     dados = pd.read_csv(caminho, header=None, names=colunas).dropna(how="all")
     if dados.shape[0] != 150:
-        raise ValueError(f"A base Iris deve conter 150 observações; foram lidas {dados.shape[0]}.")
+        raise ValueError(
+            f"A base Iris deve conter 150 observações; foram lidas {dados.shape[0]}."
+        )
 
     X = dados[colunas[:-1]].to_numpy(dtype=float)
     y = dados["species"].to_numpy()
@@ -369,7 +452,9 @@ def salvar_json(caminho: str | Path, conteudo: Any) -> Path:
     destino = Path(caminho)
     destino.parent.mkdir(parents=True, exist_ok=True)
     with destino.open("w", encoding="utf-8") as arquivo:
-        json.dump(_para_json(conteudo), arquivo, ensure_ascii=False, indent=2, allow_nan=False)
+        json.dump(
+            _para_json(conteudo), arquivo, ensure_ascii=False, indent=2, allow_nan=False
+        )
     return destino
 
 
@@ -386,13 +471,22 @@ def _validar_entrada(data: np.ndarray, k: int) -> np.ndarray:
 
 
 @algoritmo("k-means")
-def k_means(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
+def k_means(
+    data: np.ndarray,
+    k: int,
+    seed: int,
+    init: str = "k-means++",
+    tol: float = 1e-4,
+    max_iter: int = 300,
+) -> ResultadoAgrupamento:
     """Agrupa os dados com K-Means e retorna os rótulos e centros encontrados."""
     X = _validar_entrada(data, k)
     modelo = KMeans(
         n_clusters=k,
         n_init=1,
-        init="random",
+        init=init,
+        tol=tol,
+        max_iter=max_iter,
         random_state=seed,
     ).fit(X)
     return ResultadoAgrupamento(
@@ -400,17 +494,45 @@ def k_means(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
         tipo="crisp",
         rotulos=modelo.labels_.copy(),
         objetivo=float(modelo.inertia_),
-        parametros={"k": k, "seed": seed, "n_init": 1, "init": "random"},
+        parametros={
+            "k": k,
+            "seed": seed,
+            "n_init": 1,
+            "init": init,
+            "tol": tol,
+            "max_iter": max_iter,
+            "n_iter": int(modelo.n_iter_),
+        },
         centros=modelo.cluster_centers_.copy(),
     )
 
 
-def _executar_fuzzy(data, k, seed, gamma=None):
+def _executar_fuzzy(
+    data: np.ndarray,
+    k: int,
+    seed: int,
+    m: float = 2.0,
+    max_iter: int = 300,
+    error: float = 1e-5,
+    gamma: float | None = None,
+) -> ResultadoAgrupamento:
     """Compartilha ajuste e conversão crisp dos dois métodos fuzzy."""
     X = _validar_entrada(data, k)
-    parametros = dict(k=k, seed=seed, m=2.0, max_iter=300, error=1e-5)
-    opcoes = dict(n_clusters=k, m=2.0, max_iter=300, error=1e-5, random_state=seed)
-    modelo = FCM(**opcoes) if gamma is None else KFCM(**opcoes, gamma=gamma)
+    parametros: dict[str, Any] = {
+        "k": k,
+        "seed": seed,
+        "m": float(m),
+        "max_iter": int(max_iter),
+        "error": float(error),
+    }
+    opcoes = dict(
+        n_clusters=k,
+        m=float(m),
+        max_iter=int(max_iter),
+        error=float(error),
+        random_state=seed,
+    )
+    modelo = FCM(**opcoes) if gamma is None else KFCM(**opcoes, gamma=float(gamma))
     modelo.fit(X)
     centros, pertinencias = modelo.centers.copy(), modelo.u.copy()
     distancias = np.sum((X[:, None, :] - centros[None, :, :]) ** 2, axis=2)
@@ -423,7 +545,7 @@ def _executar_fuzzy(data, k, seed, gamma=None):
         algoritmo=nome,
         tipo="fuzzy",
         rotulos=np.argmax(pertinencias, axis=1),
-        objetivo=float(np.sum(pertinencias**2.0 * distancias)),
+        objetivo=float(np.sum((pertinencias ** float(m)) * distancias)),
         parametros=parametros,
         centros=centros,
         pertinencias=pertinencias,
@@ -431,23 +553,44 @@ def _executar_fuzzy(data, k, seed, gamma=None):
 
 
 @algoritmo("fuzzy-k-means")
-def fuzzy_k_means(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
+def fuzzy_k_means(
+    data: np.ndarray,
+    k: int,
+    seed: int,
+    m: float = 2.0,
+    max_iter: int = 300,
+    error: float = 1e-5,
+) -> ResultadoAgrupamento:
     """Executa uma inicialização do Fuzzy C-Means."""
-    return _executar_fuzzy(data, k, seed)
+    return _executar_fuzzy(data, k, seed, m=m, max_iter=max_iter, error=error)
 
 
 @algoritmo("kernel-fuzzy-k-means")
-def kernel_fuzzy_k_means(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
+def kernel_fuzzy_k_means(
+    data: np.ndarray,
+    k: int,
+    seed: int,
+    gamma: float = 0.25,
+    m: float = 2.0,
+    max_iter: int = 300,
+    error: float = 1e-5,
+) -> ResultadoAgrupamento:
     """Executa uma inicialização do Kernel Fuzzy C-Means com kernel RBF."""
-    return _executar_fuzzy(data, k, seed, gamma=0.25)
+    return _executar_fuzzy(
+        data, k, seed, m=m, max_iter=max_iter, error=error, gamma=gamma
+    )
 
 
 @algoritmo("k-medoids")
-def kmedoids(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
-    """Executa PAM com inicialização aleatória e distância euclidiana."""
-
+def kmedoids(
+    data: np.ndarray,
+    k: int,
+    seed: int,
+    init: str = "random",
+    max_iter: int = 300,
+) -> ResultadoAgrupamento:
+    """Executa PAM com distância euclidiana (protocolo Equipe 08)."""
     X = _validar_entrada(data, k)
-    # Para um único grupo, a busca exaustiva encontra o medoide ótimo.
     if k == 1:
         distancias = cdist(X, X, metric="euclidean")
         indices_medoides = np.array([np.argmin(distancias.sum(axis=0))])
@@ -458,8 +601,8 @@ def kmedoids(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
         modelo = pam(
             distancias,
             k,
-            init="random",
-            max_iter=300,
+            init=init,
+            max_iter=max_iter,
             random_state=seed,
         )
         indices_medoides = np.asarray(modelo.medoids, dtype=int)
@@ -478,8 +621,8 @@ def kmedoids(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
             "seed": seed,
             "metric": "euclidean",
             "method": "pam",
-            "init": "random" if k > 1 else "exhaustive",
-            "max_iter": 300 if k > 1 else None,
+            "init": init if k > 1 else "exhaustive",
+            "max_iter": max_iter if k > 1 else None,
             "medoid_indices": indices_medoides.tolist(),
         },
         centros=centros,
@@ -487,17 +630,27 @@ def kmedoids(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
 
 
 @algoritmo("gaussian-mixture", objetivo="maximizar")
-def gaussian_mixture(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupamento:
-    """Agrupa os dados com Gaussian Mixture Model (GMM) e retorna os rótulos e centros encontrados."""
+def gaussian_mixture(
+    data: np.ndarray,
+    k: int,
+    seed: int,
+    covariance_type: str = "full",
+    reg_covar: float = 1e-6,
+    tol: float = 1e-5,
+    max_iter: int = 100,
+    init_params: str = "random_from_data",
+) -> ResultadoAgrupamento:
+    """Agrupa os dados com Gaussian Mixture Model (EM)."""
     X = _validar_entrada(data, k)
     modelo = GaussianMixture(
         n_components=k,
-        covariance_type="full",
+        covariance_type=covariance_type,
         random_state=seed,
-        tol=1e-5,
-        reg_covar=1e-6,
+        tol=tol,
+        reg_covar=reg_covar,
+        max_iter=max_iter,
         n_init=1,
-        init_params="random_from_data",
+        init_params=init_params,
     ).fit(X)
 
     probabilidades = modelo.predict_proba(X)
@@ -511,31 +664,41 @@ def gaussian_mixture(data: np.ndarray, k: int, seed: int) -> ResultadoAgrupament
         parametros={
             "k": k,
             "seed": seed,
-            "covariance_type": "full",
-            "tol": 1e-5,
-            "reg_covar": 1e-6,
+            "covariance_type": covariance_type,
+            "tol": tol,
+            "reg_covar": reg_covar,
+            "max_iter": max_iter,
             "n_init": 1,
-            "init_params": "random_from_data",
+            "init_params": init_params,
             "converged": modelo.converged_,
             "n_iter": modelo.n_iter_,
         },
-        # ``means_`` é exposto pelos stubs do scikit-learn como array-like;
-        # ``np.array`` materializa uma cópia concreta e preserva o isolamento
-        # do resultado em relação ao estimador ajustado.
         centros=np.array(modelo.means_, copy=True),
         probabilidades=probabilidades,
     )
 
 
+def _aplicar_escalonamento_upgma(X: np.ndarray, escalonamento: str) -> np.ndarray:
+    """Aplica transformação interna de escala antes da distância Manhattan."""
+    if escalonamento == "standard":
+        return X
+    if escalonamento == "minmax":
+        return MinMaxScaler().fit_transform(X)
+    if escalonamento == "robust":
+        return RobustScaler().fit_transform(X)
+    if escalonamento == "l2":
+        return Normalizer(norm="l2").fit_transform(X)
+    raise ValueError(f"Escalonamento desconhecido para UPGMA: {escalonamento}")
+
+
 @algoritmo("upgma", execucoes=1)
 def upgma(
-    data: np.ndarray, valores_k: tuple[int, ...] = (1, 2, 3, 4, 5)
+    data: np.ndarray,
+    valores_k: tuple[int, ...] = (1, 2, 3, 4, 5),
+    escalonamento: str = "standard",
+    optimal_ordering: bool = False,
 ) -> dict[int, ResultadoAgrupamento]:
-    """Constrói uma hierarquia Manhattan e extrai todos os cortes solicitados.
-
-    Cada resultado inclui a mesma matriz de ligações, utilizável por
-    ``scipy.cluster.hierarchy.dendrogram``.
-    """
+    """Constrói uma hierarquia UPGMA com distância Manhattan (protocolo Equipe 08)."""
     X = _validar_entrada(data, 1)
     if len(X) < 2:
         raise ValueError("UPGMA requer pelo menos duas amostras.")
@@ -543,14 +706,26 @@ def upgma(
         raise ValueError("valores_k deve conter ao menos um valor.")
     for k in valores_k:
         _validar_entrada(X, k)
-    hierarquia = linkage(pdist(X, metric="cityblock"), method="average")
+
+    X_escalonado = _aplicar_escalonamento_upgma(X, escalonamento)
+    hierarquia = linkage(
+        pdist(X_escalonado, metric="cityblock"),
+        method="average",
+        optimal_ordering=optimal_ordering,
+    )
     cortes = cut_tree(hierarquia, n_clusters=list(valores_k))
     return {
         k: ResultadoAgrupamento(
             algoritmo="upgma",
             tipo="hierarquico",
             rotulos=cortes[:, i].copy(),
-            parametros={"k": k, "metric": "manhattan", "linkage": "average"},
+            parametros={
+                "k": k,
+                "metric": "manhattan",
+                "linkage": "average",
+                "escalonamento": escalonamento,
+                "optimal_ordering": optimal_ordering,
+            },
             hierarquia=hierarquia.copy(),
         )
         for i, k in enumerate(valores_k)
@@ -560,15 +735,13 @@ def upgma(
 @algoritmo("dbscan", execucoes=1)
 def dbscan(
     data: np.ndarray,
-    eps: float = 0.5,
+    eps: float = 0.8,
     min_samples: int = 5,
 ) -> ResultadoAgrupamento:
-
+    """Executa DBSCAN com distância euclidiana."""
     X = np.asarray(data, dtype=float)
-
     if X.ndim != 2 or X.shape[0] == 0 or X.shape[1] == 0:
         raise ValueError("data deve ser uma matriz bidimensional não vazia.")
-
     if not np.isfinite(X).all():
         raise ValueError("data não pode conter NaN ou valores infinitos.")
 
@@ -577,9 +750,7 @@ def dbscan(
         min_samples=min_samples,
         metric="euclidean",
     )
-
     rotulos = modelo.fit_predict(X)
-
     ruido = int(np.sum(rotulos == -1))
 
     return ResultadoAgrupamento(
@@ -588,8 +759,8 @@ def dbscan(
         rotulos=rotulos.copy(),
         objetivo=None,
         parametros={
-            "eps": eps,
-            "min_samples": min_samples,
+            "eps": float(eps),
+            "min_samples": int(min_samples),
             "metric": "euclidean",
         },
         ruido=ruido,

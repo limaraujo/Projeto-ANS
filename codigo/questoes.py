@@ -19,6 +19,7 @@ from algoritmos import (
     condensar_resultados,
     dbscan,
     executar_todas_por_k,
+    plotar_comparacao_algoritmos,
     plotar_dendrograma,
     plotar_silhuetas,
     plt,
@@ -28,6 +29,7 @@ from algoritmos import (
     sns,
     upgma,
 )
+from tunagem import executar_tunagem_completa
 
 ROOT = Path(__file__).resolve().parent.parent
 CODIGO = Path(__file__).resolve().parent
@@ -35,13 +37,42 @@ CODIGO = Path(__file__).resolve().parent
 
 def executar_questao_1(
     padronizar: bool = True,
-    eps_dbscan: float = 0.8,
-    min_samples_dbscan: int = 5,
+    usar_tunados: bool = True,
+    eps_dbscan: float | None = None,
+    min_samples_dbscan: int | None = None,
 ) -> pd.DataFrame:
-    """Executa os sete algoritmos de agrupamento da Questão 1."""
+    """Executa a busca de hiperparâmetros e os sete algoritmos da Questão 1."""
     diretorio_resultados = ROOT / "resultados"
     diretorio_figuras = ROOT / "resultados" / "figuras"
     X, y, preprocessamento = carregar_iris(padronizar=padronizar)
+
+    if usar_tunados:
+        selecoes_tunagem = executar_tunagem_completa(
+            X, y, diretorio_resultados / "tunagem", diretorio_figuras
+        )
+        hiperparams = {
+            nome: dict(info["parametros"]) for nome, info in selecoes_tunagem.items()
+        }
+    else:
+        hiperparams = {
+            "k-means": {"init": "k-means++", "tol": 1e-4, "max_iter": 300},
+            "fuzzy-k-means": {"m": 2.0, "error": 1e-5},
+            "kernel-fuzzy-k-means": {"gamma": 0.25, "m": 2.0},
+            "k-medoids": {"init": "random", "max_iter": 300},
+            "gaussian-mixture": {
+                "covariance_type": "full",
+                "reg_covar": 1e-6,
+                "init_params": "random_from_data",
+            },
+            "upgma": {"escalonamento": "standard", "optimal_ordering": False},
+            "dbscan": {"eps": 0.8, "min_samples": 5},
+        }
+
+    if eps_dbscan is not None:
+        hiperparams["dbscan"]["eps"] = float(eps_dbscan)
+    if min_samples_dbscan is not None:
+        hiperparams["dbscan"]["min_samples"] = int(min_samples_dbscan)
+
     valores_k = range(1, 6)
     nomes_particionais = [
         "k-means",
@@ -54,18 +85,18 @@ def executar_questao_1(
     todas_execucoes: dict[str, Any] = {}
     melhores: dict[str, dict[int, ResultadoAgrupamento]] = {}
     for nome in nomes_particionais:
-        print(f"Executando {nome} (50 ajustes)...")
-        execucoes = executar_todas_por_k(nome, X, valores_k)
+        print(f"Executando {nome} com {hiperparams[nome]} (50 ajustes)...")
+        execucoes = executar_todas_por_k(nome, X, valores_k, **hiperparams[nome])
         todas_execucoes[nome] = execucoes
         melhores[nome] = selecionar_melhores_por_k(nome, execucoes)
 
-    print("Executando upgma (uma hierarquia e cinco cortes)...")
-    resultados_upgma = upgma(X, valores_k=tuple(valores_k))
+    print(f"Executando upgma com {hiperparams['upgma']} (uma hierarquia e cinco cortes)...")
+    resultados_upgma = upgma(X, valores_k=tuple(valores_k), **hiperparams["upgma"])
     melhores["upgma"] = resultados_upgma
     todas_execucoes["upgma"] = resultados_upgma
 
-    print("Executando dbscan (uma execução)...")
-    resultado_dbscan = dbscan(X, eps=eps_dbscan, min_samples=min_samples_dbscan)
+    print(f"Executando dbscan com {hiperparams['dbscan']} (uma execução)...")
+    resultado_dbscan = dbscan(X, **hiperparams["dbscan"])
     todas_execucoes["dbscan"] = resultado_dbscan
 
     for nome, resultados in melhores.items():
@@ -98,8 +129,12 @@ def executar_questao_1(
     contingencias["dbscan"] = pd.crosstab(
         pd.Series(y), pd.Series(resultado_dbscan.rotulos)
     ).to_dict()
+
+    df_metricas_por_k = pd.DataFrame(linhas)
+    plotar_comparacao_algoritmos(resumo, df_metricas_por_k, diretorio_figuras)
+
     salvar_json(diretorio_resultados / "contingencias.json", contingencias)
-    pd.DataFrame(linhas).to_csv(
+    df_metricas_por_k.to_csv(
         diretorio_resultados / "metricas_por_k.csv", index=False
     )
     resumo.to_csv(diretorio_resultados / "resumo_agrupamentos.csv", index=False)
@@ -111,12 +146,13 @@ def executar_questao_1(
             "preprocessamento": preprocessamento,
             "valores_k": list(valores_k),
             "execucoes_por_algoritmo_particional": 10,
+            "tunagem_aplicada": usar_tunados,
+            "hiperparametros_selecionados": hiperparams,
             "silhueta": {"metrica": "euclidean", "k_1": "indefinida (NaN)"},
             "dbscan": {
-                "eps": eps_dbscan,
-                "min_samples": min_samples_dbscan,
-                "silhueta": "pontos de ruído (-1) removidos",
-                "ari": "todos os pontos, com ruído (-1) mantido",
+                **hiperparams["dbscan"],
+                "silhueta": "pontos de ruído (-1) excluídos",
+                "ari": "pontos de ruído (-1) excluídos",
             },
             "versoes": {
                 "python": sys.version,
