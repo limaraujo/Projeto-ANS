@@ -648,7 +648,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "01 / 17 retroui-pixel",
+          "text": "01 / 18 retroui-pixel",
           "role": "footer"
         },
         {
@@ -715,7 +715,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Agrupamento e redução de dimensionalidade\nFátima Araújo e Rogrigo Gomes · Equipe 08"
+          "text": "Busca de hiperparâmetros e avaliação comparativa\nFátima Araújo e Rodrigo Gomes · Equipe 08"
         },
         {
           "kind": "text",
@@ -727,7 +727,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "Turma do CIn/UFPE · 2026.2 · 18 min"
+          "text": "Turma do CIn/UFPE · 2026.2 · 22 min"
         },
         {
           "kind": "shape",
@@ -1406,7 +1406,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "02 / 17 [ART] [EXP]",
+          "text": "02 / 18 [ART] [EXP]",
           "role": "footer"
         },
         {
@@ -1678,7 +1678,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Sépalas e pétalas:\ncomprimento e largura.",
+          "text": "Arquivo Iris da UCI\nexplicitado.",
           "background": "141414"
         },
         {
@@ -1877,11 +1877,11 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Espécies usadas após o\najuste.",
+          "text": "Rótulos usados somente\ndepois.",
           "background": "141414"
         }
       ],
-      "notes": "Tempo: 1 min. Usou-se codigo/iris/iris.data. Para cada atributo, μ é a média das 150 observações e σ é a raiz da média dos desvios quadráticos em relação a μ. A análise é descritiva da base completa. Os rótulos de espécie servem à avaliação externa e à identificação visual.",
+      "notes": "Tempo: 1 min. Usou-se codigo/iris/iris.data, correspondente à edição da UCI. As linhas 35 e 38 diferem de load_iris do scikit-learn; por isso a origem do arquivo precisa ser explicitada. Para cada atributo, μ é a média das 150 observações e σ é o desvio-padrão populacional. Os rótulos de espécie não entram no ajuste nem na seleção.",
       "title": "Três espécies; quantos grupos?"
     },
     {
@@ -2509,7 +2509,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "03 / 17 [ART]",
+          "text": "03 / 18 [ART]",
           "role": "footer"
         },
         {
@@ -2984,7 +2984,7 @@
           "background": "141414"
         }
       ],
-      "notes": "Tempo: 1 min. O Kernel FCM usa protótipos no espaço de entrada e kernel RBF. K-Medoids usa PAM e Euclidiana. UPGMA usa ligação média com Manhattan. Perfis selecionados: K-Means: random, k=2. FCM: m = 2, k=2. Kernel FCM: m = 2; γ = 0,25, k=2. K-Medoids: random, k=2. GMM/EM: full; reg = 1e-06, k=2. UPGMA: ligação média, Manhattan, k=2. DBSCAN: ε = 0,694; min_samples = 3, k=2.",
+      "notes": "Tempo: 1 min. O Kernel FCM usa protótipos no espaço de entrada e kernel RBF. K-Medoids usa PAM e Euclidiana. UPGMA usa ligação média com Manhattan. Perfis selecionados: K-Means: k-means++, k=2. FCM: m = 2, k=2. Kernel FCM: m = 2; γ = 0,05, k=2. K-Medoids: build, k=2. GMM/EM: spherical; reg = 0.01, k=2. UPGMA: ligação média, Manhattan, k=2. DBSCAN: ε = 0,694; min_samples = 3, k=2.",
       "title": "Sete métodos, cinco perspectivas"
     },
     {
@@ -3612,7 +3612,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "04 / 17 [EXP] [ART]",
+          "text": "04 / 18 [EXP] [ART]",
           "role": "footer"
         },
         {
@@ -3636,7 +3636,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "O protocolo separa ajuste e avaliação",
+          "text": "Tunagem e rodada final são separadas",
           "bold": true,
           "role": "title"
         },
@@ -3773,7 +3773,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Padronizar\nX",
+          "text": "TUNAGEM\n1.120 part.\n+ 24 DBSCAN",
           "background": "141414",
           "component": "PixelDiagram"
         },
@@ -3910,7 +3910,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "10 sementes\npor perfil\ne k",
+          "text": "42–51\nperfil pela\nmédia S₂…₅",
           "background": "141414",
           "component": "PixelDiagram"
         },
@@ -4047,7 +4047,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Selecionar\npelo\nobjetivo",
+          "text": "FINAL\n250 part.\n+ árvore +\nDBSCAN",
           "background": "141414",
           "component": "PixelDiagram"
         },
@@ -4184,7 +4184,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Escolher\npela\nsilhueta",
+          "text": "52–61\nobjetivo →\nk por\nsilhueta",
           "background": "141414",
           "component": "PixelDiagram"
         },
@@ -4198,12 +4198,12 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "1195 ajustes ao todo · 252 registros no protocolo final.",
+          "text": "1.144 na tunagem + 252 na rodada final = 1.396 ajustes.",
           "bold": true
         }
       ],
-      "notes": "Tempo: 1,5 min. A grade inclui 1120 ajustes nos métodos particionais em k de 2 a 5 e 24 candidatos no DBSCAN. Em cada perfil e k, escolhe-se a melhor execução pela função objetivo. Silhueta seleciona perfil e k, com desempate por menor k e ordem da grade. Os perfis escolhidos acrescentam dez execuções em k=1. UPGMA usa cinco cortes da mesma árvore. O DBSCAN escolhe a maior silhueta válida com pelo menos 95.0% de cobertura. O ARI é calculado depois das escolhas.",
-      "title": "O protocolo separa ajuste e avaliação"
+      "notes": "Tempo: 1,5 min. A tunagem inclui 1120 ajustes particionais em k de 2 a 5 e 24 candidatos do DBSCAN: 1.144 ajustes. Em cada configuração e k, a melhor execução é escolhida pela função objetivo. O perfil fixado maximiza a média das quatro silhuetas, sem escolher k nessa etapa. A rodada final usa novas sementes, 52 a 61, nos cinco valores de k. Só então k é escolhido pela silhueta. UPGMA usa uma árvore; DBSCAN, a configuração elegível com pelo menos 95.0% de cobertura. O ARI não orienta nenhuma escolha.",
+      "title": "Tunagem e rodada final são separadas"
     },
     {
       "background": "0B0B0B",
@@ -4830,7 +4830,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "05 / 17 [ART] [EXP]",
+          "text": "05 / 18 [ART] [EXP]",
           "role": "footer"
         },
         {
@@ -5933,7 +5933,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "06 / 17 [EXP]",
+          "text": "06 / 18 [EXP]",
           "role": "footer"
         },
         {
@@ -5957,7 +5957,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "A silhueta favorece dois grupos",
+          "text": "Rodada final: silhueta favorece k = 2",
           "bold": true,
           "role": "title"
         },
@@ -6107,7 +6107,7 @@
         }
       ],
       "notes": "Tempo: 1 min. Cada ponto usa a execução de melhor objetivo no perfil escolhido e no respectivo k. Os seis métodos selecionaram a mesma partição em k=2. Um grupo reúne as 50 setosas. O outro contém 50 versicolors e 50 virginicas. Silhueta 0,5802 e ARI 0,5681 em 150 flores.",
-      "title": "A silhueta favorece dois grupos"
+      "title": "Rodada final: silhueta favorece k = 2"
     },
     {
       "background": "0B0B0B",
@@ -6734,7 +6734,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "07 / 17 [EXP] [ART]",
+          "text": "07 / 18 [EXP] [ART]",
           "role": "footer"
         },
         {
@@ -6758,7 +6758,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Hiperparâmetros afetam as métricas",
+          "text": "Tunagem: inicialização e difusividade",
           "bold": true,
           "role": "title"
         },
@@ -6872,12 +6872,12 @@
         },
         {
           "kind": "image",
-          "path": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-retro-src/assets/sensibilidade.png",
+          "path": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-retro-src/assets/tunagem_particionais.png",
           "x": 1.15,
           "y": 2.3800000000000003,
           "w": 11,
           "h": 3.1199999999999997,
-          "alt": "Faixas entre perfis em k = 3. O ponto marca o perfil escolhido pela busca.",
+          "alt": "Perfis em amarelo foram escolhidos pela média das silhuetas em k = 2…5.",
           "role": "image",
           "component": "PixelWindow"
         },
@@ -6891,7 +6891,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Faixas entre perfis em k = 3. O ponto marca o perfil escolhido\npela busca."
+          "text": "Perfis em amarelo foram escolhidos pela média das silhuetas em k\n= 2…5."
         },
         {
           "kind": "text",
@@ -6907,8 +6907,8 @@
           "role": "footer"
         }
       ],
-      "notes": "Tempo: 1,5 min. Cada extremo usa a melhor execução por objetivo da sua configuração. K-Means: extremos random (0,4584) e k-means++ (0,4590); ARI 0,6101 a 0,6201. FCM: extremos m = 2 (0,4574) e m = 1,5 (0,4590); ARI 0,6201 a 0,6303. Kernel FCM: extremos m = 2; γ = 1 (0,4562) e m = 1,5; γ = 0,05 (0,4590); ARI 0,6201 a 0,6648. K-Medoids: extremos random (0,4497) e build (0,4555); ARI 0,6416 a 0,6765. GMM/EM: extremos tied; reg = 1e-06 (0,2406) e spherical; reg = 0.01 (0,4568); ARI 0,4375 a 0,9222.",
-      "title": "Hiperparâmetros afetam as métricas"
+      "notes": "Tempo: 1,5 min. K-Means comparou random e k-means++; a diferença média foi pequena e k-means++ foi selecionado. No FCM, m = 2 venceu a média; m controla a difusividade das pertinências. No K-Medoids, a inicialização build foi superior à random na média. Cada ponto representa a melhor das dez execuções pela função objetivo, usando sementes 42–51.",
+      "title": "Tunagem: inicialização e difusividade"
     },
     {
       "background": "0B0B0B",
@@ -7535,7 +7535,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "08 / 17 [EXP] [ART]",
+          "text": "08 / 18 [EXP] [ART]",
           "role": "footer"
         },
         {
@@ -7559,7 +7559,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "GMM em dois e três componentes",
+          "text": "Kernel, GMM e DBSCAN na tunagem",
           "bold": true,
           "role": "title"
         },
@@ -7673,12 +7673,12 @@
         },
         {
           "kind": "image",
-          "path": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-retro-src/assets/gmm_comparacao.png",
+          "path": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-retro-src/assets/tunagem_complexos.png",
           "x": 1.15,
           "y": 2.3800000000000003,
           "w": 11,
           "h": 3.1199999999999997,
-          "alt": "Silhueta mede a geometria dos grupos. ARI mede concordância com espécies.",
+          "alt": "Contorno amarelo: perfil escolhido; no DBSCAN, a linha marca 95% de cobertura.",
           "role": "image",
           "component": "PixelWindow"
         },
@@ -7692,7 +7692,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Silhueta mede a geometria dos grupos. ARI mede concordância com\nespécies."
+          "text": "Contorno amarelo: perfil escolhido; no DBSCAN, a linha marca 95%\nde cobertura."
         },
         {
           "kind": "text",
@@ -7708,8 +7708,8 @@
           "role": "footer"
         }
       ],
-      "notes": "Tempo: 1,5 min. Em k=2, silhueta 0,5802 e ARI 0,5681. Em k=3, silhueta 0,3728 e ARI 0,9039. Comparamos o mesmo perfil em k distintos. A silhueta orientou a escolha; o ARI descreve a concordância com as espécies.",
-      "title": "GMM em dois e três componentes"
+      "notes": "Tempo: 2 min. Kernel FCM avaliou nove pares de m e gamma; m = 2 e gamma = 0,05 maximizou a silhueta média. O GMM cruzou quatro estruturas de covariância com três regularizações; venceu spherical com regularização 0,01. O DBSCAN avaliou 24 pares de epsilon e min_samples. O círculo amarelo identifica epsilon = 0,6943 e min_samples = 3; pontos à esquerda de 95% eram inelegíveis, mesmo com silhueta maior.",
+      "title": "Kernel, GMM e DBSCAN na tunagem"
     },
     {
       "background": "0B0B0B",
@@ -8336,7 +8336,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "09 / 17 [EXP] [ART] [DIAG]",
+          "text": "09 / 18 [EXP] [ART]",
           "role": "footer"
         },
         {
@@ -8360,7 +8360,808 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Uma árvore permite vários cortes",
+          "text": "GMM: critério interno não maximiza ARI",
+          "bold": true,
+          "role": "title"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.65,
+          "y": 1.92,
+          "w": 12,
+          "h": 0.025,
+          "fill": "F5F5F5",
+          "role": "decoration",
+          "component": "PixelDivider",
+          "part": "line"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.65,
+          "y": 1.885,
+          "w": 0.07,
+          "h": 0.095,
+          "fill": "F5F5F5",
+          "role": "decoration",
+          "component": "PixelDivider",
+          "part": "pixel"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.78,
+          "y": 1.885,
+          "w": 0.07,
+          "h": 0.095,
+          "fill": "F5F5F5",
+          "role": "decoration",
+          "component": "PixelDivider",
+          "part": "pixel"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.91,
+          "y": 1.885,
+          "w": 0.07,
+          "h": 0.095,
+          "fill": "F5F5F5",
+          "role": "decoration",
+          "component": "PixelDivider",
+          "part": "pixel"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.8555555555555556,
+          "y": 2.2355555555555555,
+          "w": 11.7,
+          "h": 3.52,
+          "fill": "000000",
+          "role": "panel",
+          "component": "PixelCard",
+          "part": "shadow"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.8555555555555556,
+          "y": 2.18,
+          "w": 11.588888888888889,
+          "h": 3.52,
+          "fill": "F5F5F5",
+          "role": "panel",
+          "component": "PixelCard",
+          "part": "border"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.8,
+          "y": 2.2355555555555555,
+          "w": 11.7,
+          "h": 3.408888888888889,
+          "fill": "F5F5F5",
+          "role": "panel",
+          "component": "PixelCard",
+          "part": "border"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.8833333333333334,
+          "y": 2.207777777777778,
+          "w": 11.533333333333333,
+          "h": 3.4644444444444447,
+          "fill": "141414",
+          "role": "panel",
+          "component": "PixelCard",
+          "part": "surface"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.8277777777777778,
+          "y": 2.263333333333333,
+          "w": 11.644444444444444,
+          "h": 3.3533333333333335,
+          "fill": "141414",
+          "role": "panel",
+          "component": "PixelCard",
+          "part": "surface"
+        },
+        {
+          "kind": "image",
+          "path": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-retro-src/assets/gmm_tunagem.png",
+          "x": 1.15,
+          "y": 2.3800000000000003,
+          "w": 11,
+          "h": 3.1199999999999997,
+          "alt": "k = 3: o perfil esférico foi selecionado; o perfil full teve maior ARI apenas na tunagem.",
+          "role": "image",
+          "component": "PixelWindow"
+        },
+        {
+          "kind": "text",
+          "x": 0.85,
+          "y": 5.98,
+          "w": 11.6,
+          "h": 0.72,
+          "fontSize": 20,
+          "font": "Liberation Mono",
+          "color": "F5F5F5",
+          "mono": true,
+          "text": "k = 3: o perfil esférico foi selecionado; o perfil full teve\nmaior ARI apenas na tunagem."
+        },
+        {
+          "kind": "text",
+          "x": 0.85,
+          "y": 6.79,
+          "w": 9.45,
+          "h": 0.24,
+          "fontSize": 12,
+          "font": "Liberation Mono",
+          "color": "AAAAAA",
+          "mono": true,
+          "text": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+          "role": "footer"
+        }
+      ],
+      "notes": "Tempo: 1,5 min. O perfil selecionado pela silhueta média foi spherical com regularização 0,01. Em k=3, ele obteve silhueta 0,4568 e ARI 0,6199. Na tunagem, full com a mesma regularização obteve silhueta menor, 0,3685, e ARI maior, 0,9222. Não são duas execuções do mesmo perfil. O ARI não participou da seleção; por isso a alternativa full não definiu o experimento final.",
+      "title": "GMM: critério interno não maximiza ARI"
+    },
+    {
+      "background": "0B0B0B",
+      "elements": [
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.4,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0.8,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 1.2000000000000002,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 1.6,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 2,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 2.4,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 2.8,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 3.1999999999999997,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 3.5999999999999996,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 3.9999999999999996,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 4.3999999999999995,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 4.8,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 5.2,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 5.6000000000000005,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 6.000000000000001,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 6.400000000000001,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 6.800000000000002,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 7.200000000000002,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 7.600000000000002,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 8.000000000000002,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 8.400000000000002,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 8.800000000000002,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 9.200000000000003,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 9.600000000000003,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 10.000000000000004,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 10.400000000000004,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 10.800000000000004,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 11.200000000000005,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 11.600000000000005,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 12.000000000000005,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 12.400000000000006,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 12.800000000000006,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 13.200000000000006,
+          "y": 0,
+          "w": 0.006,
+          "h": 7.5,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "vertical"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 0.4,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 0.8,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 1.2000000000000002,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 1.6,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 2,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 2.4,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 2.8,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 3.1999999999999997,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 3.5999999999999996,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 3.9999999999999996,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 4.3999999999999995,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 4.8,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 5.2,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 5.6000000000000005,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 6.000000000000001,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 6.400000000000001,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 6.800000000000002,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 0,
+          "y": 7.200000000000002,
+          "w": 13.333333,
+          "h": 0.006,
+          "fill": "121212",
+          "role": "decoration",
+          "component": "PixelGridBackground",
+          "part": "horizontal"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 7.13,
+          "w": 9.6,
+          "h": 0.24,
+          "fontSize": 12,
+          "font": "Liberation Mono",
+          "color": "AAAAAA",
+          "mono": true,
+          "text": "10 / 18 [EXP] [ART] [DIAG]",
+          "role": "footer"
+        },
+        {
+          "kind": "image",
+          "path": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-retro-src/assets/logo-branco.png",
+          "x": 10.55,
+          "y": 6.94,
+          "w": 1.9,
+          "h": 0.4258035714285714,
+          "alt": "Marcas do Centro de Informática e da UFPE em branco",
+          "role": "image",
+          "component": "Footer"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 0.5,
+          "w": 12,
+          "h": 1.16,
+          "fontSize": 32,
+          "font": "Liberation Mono",
+          "color": "F5F5F5",
+          "mono": true,
+          "text": "UPGMA: ARI 0,7184 no corte k = 3",
           "bold": true,
           "role": "title"
         },
@@ -8479,7 +9280,7 @@
           "y": 2.3800000000000003,
           "w": 11,
           "h": 3.1199999999999997,
-          "alt": "A silhueta Manhattan também favorece k = 2 (0,6192).",
+          "alt": "A árvore usa Manhattan; em k = 3, ARI = 0,7184 e silhueta = 0,4517.",
           "role": "image",
           "component": "PixelWindow"
         },
@@ -8493,7 +9294,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "A silhueta Manhattan também favorece k = 2 (0,6192)."
+          "text": "A árvore usa Manhattan; em k = 3, ARI = 0,7184 e silhueta =\n0,4517."
         },
         {
           "kind": "text",
@@ -8509,8 +9310,8 @@
           "role": "footer"
         }
       ],
-      "notes": "Tempo: 1 min. UPGMA com ligação média e Manhattan. O dendrograma usa as 12 subárvores finais, com contagens de folhas entre parênteses. As linhas marcam os cortes em dois e três grupos. A avaliação principal usa distância euclidiana. O diagnóstico com Manhattan retorna 0,6192, 0,5024, 0,4084 e 0,3770 para k de 2 a 5. Em k=3, o ARI externo é 0,7184.",
-      "title": "Uma árvore permite vários cortes"
+      "notes": "Tempo: 1 min. O UPGMA usa ligação média e distância Manhattan para construir uma única árvore. O dendrograma mostra as 12 subárvores finais; as linhas marcam cortes em dois e três grupos. A silhueta oficial, calculada com Euclidiana no espaço padronizado, é 0,5802 em k=2 e 0,4517 em k=3. Neste segundo corte, o ARI é 0,7184.",
+      "title": "UPGMA: ARI 0,7184 no corte k = 3"
     },
     {
       "background": "0B0B0B",
@@ -9137,7 +9938,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "10 / 17 [EXP] [ART]",
+          "text": "11 / 18 [EXP] [ART]",
           "role": "footer"
         },
         {
@@ -9494,7 +10295,7 @@
           "font": "Liberation Mono",
           "color": "0B0B0B",
           "mono": true,
-          "text": "MÉTRICAS SEM RUÍDO",
+          "text": "SILHUETA × COBERTURA",
           "background": "F5F5F5",
           "role": "label",
           "component": "PixelWindow",
@@ -9553,19 +10354,19 @@
           "x": 7.3,
           "y": 2.9400000000000004,
           "w": 4.87,
-          "h": 1.6699999999999995,
+          "h": 1.053333333333333,
           "fontSize": 20,
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Silhueta 0,6035 · ARI\n0,5760.",
+          "text": "Escolhida: S = 0,6035 · ARI\n= 0,5760.",
           "background": "141414"
         },
         {
           "kind": "shape",
           "shape": "rect",
           "x": 7.08,
-          "y": 4.89,
+          "y": 4.273333333333333,
           "w": 0.07,
           "h": 0.07,
           "fill": "F5F5F5",
@@ -9576,14 +10377,39 @@
         {
           "kind": "text",
           "x": 7.3,
-          "y": 4.79,
+          "y": 4.173333333333334,
           "w": 4.87,
-          "h": 1.6699999999999995,
+          "h": 1.053333333333333,
           "fontSize": 20,
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Mesma partição dos outros\nseis em 144 flores.",
+          "text": "Maior S da grade: 0,6482.",
+          "background": "141414"
+        },
+        {
+          "kind": "shape",
+          "shape": "rect",
+          "x": 7.08,
+          "y": 5.506666666666666,
+          "w": 0.07,
+          "h": 0.07,
+          "fill": "F5F5F5",
+          "role": "decoration",
+          "component": "ContentSlide",
+          "part": "bullet"
+        },
+        {
+          "kind": "text",
+          "x": 7.3,
+          "y": 5.406666666666666,
+          "w": 4.87,
+          "h": 1.053333333333333,
+          "fontSize": 20,
+          "font": "Liberation Mono",
+          "color": "F5F5F5",
+          "mono": true,
+          "text": "Mas cobria só 76,67% da\nbase.",
           "background": "141414"
         }
       ],
@@ -10215,7 +11041,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "11 / 17 [EXP] [ART]",
+          "text": "12 / 18 [EXP] [ART]",
           "role": "footer"
         },
         {
@@ -11016,7 +11842,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "12 / 17 [EXP] [ART] [DIAG]",
+          "text": "13 / 18 [EXP] [ART] [DIAG]",
           "role": "footer"
         },
         {
@@ -11817,7 +12643,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "13 / 17 [EXP] [ART]",
+          "text": "14 / 18 [EXP] [ART]",
           "role": "footer"
         },
         {
@@ -11960,7 +12786,7 @@
           "y": 2.3800000000000003,
           "w": 11,
           "h": 3.1199999999999997,
-          "alt": "Setosa permanece isolada; a posição entre ilhas não mede distância original.",
+          "alt": "t-SNE: perp. 30 · UMAP: 15 viz., min_dist 0,1 · seed 42.",
           "role": "image",
           "component": "PixelWindow"
         },
@@ -11974,7 +12800,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Setosa permanece isolada; a posição entre ilhas não mede\ndistância original."
+          "text": "t-SNE: perp. 30 · UMAP: 15 viz., min_dist 0,1 · seed 42."
         },
         {
           "kind": "text",
@@ -12618,7 +13444,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "14 / 17 [EXP] [ART]",
+          "text": "15 / 18 [EXP] [ART]",
           "role": "footer"
         },
         {
@@ -12642,7 +13468,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "t-SNE preservou mais vizinhos locais",
+          "text": "Maior preservação local: t-SNE",
           "bold": true,
           "role": "title"
         },
@@ -12975,7 +13801,7 @@
         }
       ],
       "notes": "Tempo: 1 min. Trustworthiness penaliza vizinhos artificiais introduzidos pela projeção comparando o espaço padronizado 4D com o 2D, usando dez vizinhos e distância euclidiana. PCA=0,978156, Kernel PCA=0,932238, t-SNE=0,988813 e UMAP=0,978349. PCA e UMAP são muito próximos neste índice. Os valores não demonstram superioridade universal nem estabilidade entre sementes. O gráfico tem origem zero e valores numéricos explícitos.",
-      "title": "t-SNE preservou mais vizinhos locais"
+      "title": "Maior preservação local: t-SNE"
     },
     {
       "background": "0B0B0B",
@@ -13602,7 +14428,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "15 / 17 [ART] [EXP]",
+          "text": "16 / 18 [ART] [EXP]",
           "role": "footer"
         },
         {
@@ -13824,7 +14650,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Mesma base e mesma\npadronização.",
+          "text": "Tunagem e rodada final\nseparadas.",
           "background": "141414"
         },
         {
@@ -13849,7 +14675,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Dez sementes por perfil e\nk.",
+          "text": "Novas sementes na rodada\nfinal.",
           "background": "141414"
         },
         {
@@ -14023,7 +14849,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Uma execução por projeção.",
+          "text": "10 sementes ≠ 10 amostras\nindependentes.",
           "background": "141414"
         },
         {
@@ -14048,7 +14874,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Uma única base de dados.",
+          "text": "Grade discreta; uma única\nbase.",
           "background": "141414"
         },
         {
@@ -14073,11 +14899,11 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Cobertura afeta os índices\ndo DBSCAN.",
+          "text": "Cobertura afeta o DBSCAN.",
           "background": "141414"
         }
       ],
-      "notes": "Tempo: 1 min. As sementes variam a inicialização com as mesmas observações. As configurações vencedoras dependem da grade e, para DBSCAN, do mínimo de cobertura. Na Questão 2, cada projeção usa uma configuração. As métricas de agrupamento são calculadas no espaço padronizado de quatro atributos.",
+      "notes": "Tempo: 1 min. As sementes medem sensibilidade da otimização nas mesmas 150 flores, não variabilidade amostral. A busca discreta não prova otimalidade fora da grade. As configurações dependem do critério interno e, no DBSCAN, do piso de cobertura. Cada projeção foi executada uma vez, portanto sua estabilidade visual não foi estimada.",
       "title": "O alcance das conclusões é descritivo"
     },
     {
@@ -14705,7 +15531,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "16 / 17 [ART] [EXP]",
+          "text": "17 / 18 [ART] [EXP]",
           "role": "footer"
         },
         {
@@ -14927,7 +15753,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "A silhueta orientou a escolha dos perfis e de k.",
+          "text": "Seis métodos escolheram k = 2 pela silhueta.",
           "background": "141414"
         },
         {
@@ -14952,7 +15778,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Entre os perfis escolhidos, GMM/EM obteve ARI 0,9039 em\nk = 3.",
+          "text": "Entre os perfis escolhidos, UPGMA teve ARI 0,7184 em k\n= 3.",
           "background": "141414"
         },
         {
@@ -14977,7 +15803,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "PCA explica a variância; t-SNE destaca a vizinhança\nlocal.",
+          "text": "DBSCAN reteve 96%; inicializações afetaram k = 3.",
           "background": "141414"
         },
         {
@@ -15002,7 +15828,7 @@
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "Interprete métrica, projeção e objetivo em conjunto.",
+          "text": "Silhueta e ARI avaliam propriedades distintas.",
           "background": "141414"
         }
       ],
@@ -15634,7 +16460,7 @@
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "17 / 17 retroui-pixel",
+          "text": "18 / 18 retroui-pixel",
           "role": "footer"
         },
         {
@@ -15715,25 +16541,25 @@
           "x": 1,
           "y": 2.18,
           "w": 11.1,
-          "h": 0.5666666666666667,
+          "h": 0.84,
           "fontSize": 16,
           "font": "Liberation Mono",
           "color": "F5F5F5",
           "mono": true,
-          "text": "[ART] Fátima Araújo e Rogrigo Gomes. Agrupamento e redução de\ndimensionalidade na base Iris. UFPE, 2026.",
+          "text": "[ART] Fátima Araújo e Rodrigo Gomes. Agrupamento e Redução de\nDimensionalidade na Base Iris: Busca de Hiperparâmetros e Avaliação\nComparativa. UFPE, 2026.",
           "role": "reference"
         },
         {
           "kind": "text",
           "x": 1,
-          "y": 2.866666666666667,
+          "y": 3.14,
           "w": 11.1,
           "h": 0.45,
           "fontSize": 14,
           "font": "Liberation Mono",
           "color": "AAAAAA",
           "mono": true,
-          "text": "file:docs/artigo/artigo_ieee_revisado.pdf",
+          "text": "file:artigo_iris_ieee_paginacao_corrigida.pdf",
           "role": "reference"
         },
         {

@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "issues": [],
+  "reviewer": "Codex",
+  "method": "Inspeção visual das 18 prévias PNG, com revisão ampliada dos slides 8, 10, 11, 16 e 18.",
+  "observations": [
+    "Títulos, últimas linhas, legendas, eixos, margens, contraste, rodapés e marcas institucionais foram conferidos.",
+    "O slide 8 distingue as três famílias de configuração e usa amarelo somente nos perfis escolhidos.",
+    "O slide 10 preserva a topologia e torna visíveis os cortes para dois e três grupos; a explicação das contagens está legível.",
+    "O slide 11 destaca o piso de 95% e mantém as cinco linhas de sensibilidade sem sobreposição.",
+    "O slide 16 apresenta faixas observadas, amplitudes, contagens de melhor objetivo e a ressalva sobre independência e intervalos de confiança.",
+    "O slide 18 contém apenas referências acadêmicas, sem caminhos ou identificadores internos."
+  ],
+  "fingerprint": "b7893b3ef0f8d9de5ed2566e697efa886ed2364edd83a7b3535cc3726eac4223",
+  "reviewedAt": "2026-11-19T23:59:06.275Z"
+}

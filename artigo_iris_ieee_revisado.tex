@@ -1,0 +1,365 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{balance}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{fig/}}
+\hypersetup{pdftitle={Agrupamento e Redução de Dimensionalidade na Base Iris: Busca de Hiperparâmetros e Avaliação Comparativa},pdfauthor={Fátima Araújo; Rodrigo Gomes}}
+\newcommand{\pnum}[1]{#1}
+\newcommand{\kmed}{K-Medoids}
+\newcommand{\kfcm}{Kernel FCM}
+\newcommand{\sild}{\operatorname{Sil}}
+\renewcommand{\abstractname}{Resumo}
+\renewcommand{\IEEEkeywordsname}{Palavras-chave}
+\renewcommand{\tablename}{TABELA}
+\addto\captionsbrazil{\renewcommand{\figurename}{Fig.}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\title{Agrupamento e Redução de Dimensionalidade na Base Iris: Busca de Hiperparâmetros e Avaliação Comparativa}
+\author{
+\IEEEauthorblockN{Fátima Araújo\IEEEauthorrefmark{1}, Rodrigo Gomes\IEEEauthorrefmark{2}}
+\IEEEauthorblockA{Centro de Informática -- Universidade Federal de Pernambuco, Recife, Brasil\\
+\IEEEauthorrefmark{1}frqal@cin.ufpe.br \quad \IEEEauthorrefmark{2}rgar@cin.ufpe.br}
+}
+\begin{document}
+\maketitle
+\begin{abstract}
+Este trabalho analisa sete métodos de agrupamento e quatro técnicas de redução de dimensionalidade aplicados à base Iris padronizada. Uma busca em grade avaliou 28 configurações de cinco algoritmos particionais, com dez inicializações para cada valor de $k\in\{2,3,4,5\}$, além de 24 combinações do DBSCAN. A seleção dos hiperparâmetros utilizou exclusivamente a silhueta; a concordância com as espécies foi examinada posteriormente pelo índice de Rand ajustado (ARI). A etapa final, com sementes distintas, selecionou dois grupos para os seis métodos que requerem escolha de $k$. Com $k=3$, o maior ARI entre os perfis efetivamente selecionados foi obtido pelo UPGMA ($0{,}7184$). O DBSCAN reteve 144 das 150 observações e apresentou silhueta $0{,}6035$, ressaltando a necessidade de controlar a cobertura ao avaliar métodos com ruído. A análise de sensibilidade mostrou que a preferência por hiperparâmetros depende do critério interno e que algumas soluções variam consideravelmente com a inicialização. Nas projeções bidimensionais, as duas primeiras componentes da PCA explicaram $95{,}80\%$ da variância, enquanto o t-SNE apresentou a maior preservação local de vizinhanças na avaliação adotada ($0{,}9888$).
+\end{abstract}
+\begin{IEEEkeywords}
+Agrupamento, busca de hiperparâmetros, análise de sensibilidade, silhueta, ARI, Iris, redução de dimensionalidade.
+\end{IEEEkeywords}
+
+\section{Introdução}
+A avaliação de algoritmos de agrupamento requer distinguir dois objetivos: produzir grupos internamente coesos e recuperar classes conhecidas. Essas propriedades não são equivalentes, pois a geometria favorecida por um algoritmo pode divergir da estrutura definida pelos rótulos. A base Iris constitui um caso ilustrativo: suas três espécies são conhecidas, mas os agrupamentos são construídos sem acesso a essa informação.
+
+Neste estudo, examinam-se K-Means, Fuzzy C-Means (FCM), Kernel FCM, K-Medoids, misturas gaussianas ajustadas por expectativa-maximização (GMM/EM), UPGMA e DBSCAN. A comparação considera seleção de hiperparâmetros, variação entre inicializações, número de grupos e cobertura. Complementarmente, PCA, Kernel PCA, t-SNE e UMAP são usados para examinar a representação bidimensional dos dados, conforme o escopo experimental de \cite{enunciado}. A contribuição é apresentar uma análise reprodutível do \emph{espaço de busca}, de seu efeito nos agrupamentos e das limitações dos critérios de seleção, sem confundir valores de tunagem com os da rodada final.
+
+\section{Base de Dados e Critérios de Avaliação}
+\subsection{Base e pré-processamento}
+Foi utilizado o arquivo \texttt{iris.data} disponibilizado pela UCI \cite{uci}, contendo 150 observações igualmente distribuídas entre \emph{I. setosa}, \emph{I. versicolor} e \emph{I. virginica}. Os atributos são comprimento e largura da sépala e da pétala, em centímetros. Essa edição possui dois registros cujas medidas diferem da versão fornecida por \texttt{load\_iris} do scikit-learn (linhas 35 e 38, contando a partir de 1); assim, a origem do arquivo foi mantida explicitamente para permitir reprodução. Os rótulos de espécie foram excluídos da construção e da seleção dos agrupamentos.
+
+Os atributos foram padronizados para reduzir a influência de diferenças de escala e dispersão nas distâncias euclidianas e Manhattan. Para observação $i$ e atributo $r$, aplicou-se
+\begin{equation}
+ z_{ir}=\frac{x_{ir}-\mu_r}{\sigma_r},\quad
+ \sigma_r=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(x_{ir}-\mu_r)^2},
+ \label{eq:zscore}
+\end{equation}
+com $\mu_r=n^{-1}\sum_i x_{ir}$ e $n=150$. A Tabela~\ref{tab:estatisticas} apresenta os parâmetros da transformação. Essa padronização não remove a sobreposição intrínseca entre as espécies.
+\begin{table}[!t]
+\caption{Estatísticas da base utilizada (cm).}
+\label{tab:estatisticas}
+\centering\footnotesize
+\begin{tabular}{lrr}
+\toprule
+Atributo & Média & Desvio-padrão\\
+\midrule
+Comprimento da sépala & 5,8433 & 0,8253\\
+Largura da sépala & 3,0540 & 0,4321\\
+Comprimento da pétala & 3,7587 & 1,7585\\
+Largura da pétala & 1,1987 & 0,7606\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Métricas e prevenção de seleção supervisionada}
+A qualidade interna foi estimada pela silhueta \cite{rousseeuw}:
+\begin{equation}
+ s(i)=\frac{b(i)-a(i)}{\max\{a(i),b(i)\}},
+ \qquad S=\frac{1}{n}\sum_{i=1}^{n}s(i),
+ \label{eq:sil}
+\end{equation}
+onde $a(i)$ é a dissimilaridade média no grupo de $i$ e $b(i)$ a menor média em outro grupo. A silhueta foi calculada com distância euclidiana no espaço padronizado. Como o índice não é definido para um único grupo, $k=1$ participou das execuções finais, mas não da seleção por silhueta. A preferência dessa métrica por grupos relativamente compactos e bem separados deve ser considerada na interpretação.
+
+A concordância externa com as espécies foi quantificada pelo ARI \cite{hubert}, que corrige a concordância entre partições pelo valor esperado ao acaso. \textbf{O ARI não orientou a escolha de hiperparâmetros, da semente ou de $k$}; seu uso restringiu-se à avaliação posterior. Desse modo, evitou-se empregar os rótulos verdadeiros como alvo de ajuste em uma tarefa não supervisionada. O ARI nesta base não constitui, entretanto, uma medida de generalização para outras amostras.
+
+Para o DBSCAN, ruídos (rótulo $-1$) foram removidos do cálculo da silhueta e do ARI; a mesma máscara foi aplicada às espécies no cálculo do ARI. A cobertura $C=(n-n_{\mathrm{ruido}})/n$ registra a fração avaliada. A apresentação de $S$ e ARI desacompanhados de $C$ poderia favorecer soluções que descartam observações difíceis.
+
+\section{Métodos de Agrupamento}
+O K-Means minimiza a soma das distâncias quadráticas aos centroides, cuja posição inicial pode conduzir a mínimos locais distintos \cite{macqueen}. O FCM substitui atribuições exclusivas por pertinências $u_{ij}$ e minimiza uma soma de distâncias ponderadas por $u_{ij}^{m}$; o expoente $m>1$ controla a difusão das pertinências \cite{bezdek}. O Kernel FCM utiliza distâncias induzidas por um kernel RBF, representando proximidade não linear. Na implementação analisada, para protótipo $v$ no espaço original,
+\begin{equation}
+ d_\gamma^2(x,v)=2[1-\exp(-\gamma\lVert x-v\rVert^2)],
+ \label{eq:kernel}
+\end{equation}
+cuja aproximação para $\gamma\to0$ é $2\gamma\lVert x-v\rVert^2$. Assim, valores pequenos de $\gamma$ tornam sua geometria próxima à euclidiana reescalada, antecipando resultados semelhantes aos do FCM \cite{graves,zhang}.
+
+O K-Medoids emprega observações reais como representantes e minimiza a soma das distâncias aos medoides; no PAM, a inicialização \texttt{build} constrói uma solução inicial antes das trocas \cite{kaufman}. O GMM/EM ajusta probabilisticamente componentes gaussianas; a parametrização da covariância determina se os grupos podem apresentar formas alongadas ou precisam ser aproximadamente isotrópicos \cite{dempster}. O UPGMA produz uma hierarquia aglomerativa pela média de distâncias entre grupos \cite{sokal}. O DBSCAN constrói grupos por conectividade de regiões densas, controladas pelo raio $\varepsilon$ e pelo mínimo de observações de vizinhança \cite{ester}.
+
+\section{Protocolo Experimental e Espaço de Busca}
+\subsection{Separação entre tunagem e rodada final}
+A avaliação foi dividida em duas etapas para distinguir \emph{configuração do método} e \emph{avaliação com o perfil fixado}. Na \textbf{tunagem}, utilizaram-se sementes 42--51, com dez chamadas para cada par $(c,k)$, sendo $c$ uma configuração da grade e $k\in\{2,3,4,5\}$. Em cada par, selecionou-se a execução com melhor valor da função objetivo do próprio algoritmo: mínimo para K-Means, FCM, Kernel FCM e K-Medoids; máximo de log-verossimilhança para GMM. Objetivos de algoritmos diferentes não são diretamente comparáveis.
+
+A configuração $c^*$ de cada método particional maximizou a silhueta média dos quatro valores de $k$:
+\begin{equation}
+ c^*=\arg\max_{c\in\mathcal{G}}\frac{1}{4}\sum_{k=2}^{5}S(c,k),
+ \label{eq:search}
+\end{equation}
+com $S(c,k)$ calculada sobre a melhor execução por objetivo. A média com pesos iguais evita escolher hiperparâmetros exclusivamente para $k=3$, cujo valor é conhecido a partir das espécies. Não se selecionou $k^*$ na tunagem; apenas um perfil de hiperparâmetros por método. Empates foram resolvidos pela ordem predefinida da grade.
+
+Na \textbf{rodada final}, fixou-se $c^*$ e realizaram-se dez novas execuções por $k\in\{1,2,3,4,5\}$, com sementes 52--61. Escolheu-se a melhor execução por função objetivo em cada $k$; o número final de grupos foi o de maior silhueta entre $k\in\{2,3,4,5\}$. Isso torna explícitas as duas fontes de variação: a configuração e a inicialização. O UPGMA utilizou uma única árvore com distância Manhattan e ligação média; o DBSCAN foi executado uma vez com o par selecionado na grade.
+
+\subsection{Intervalos e valores efetivamente pesquisados}
+A Tabela~\ref{tab:grade} especifica \emph{todos} os domínios discretos testados. A busca foi exaustiva \emph{dentro dessa grade}, não em todo o espaço contínuo de hiperparâmetros. As sementes foram repetições experimentais, não dimensões da grade.
+
+\begin{table*}[!t]
+\caption{Espaço de busca da tunagem e configuração fixada para a rodada final.}
+\label{tab:grade}
+\centering\footnotesize
+\begin{tabularx}{\textwidth}{@{}lYcl@{}}
+\toprule
+Método & Hiperparâmetros e domínio da busca & Perfis & Configuração escolhida\\
+\midrule
+K-Means & \texttt{init}\,$\in\{$\texttt{random}, \texttt{k-means++}$\}$ & 2 & \texttt{k-means++}\\
+FCM & $m\in\{1{,}5;\,2;\,2{,}5\}$ & 3 & $m=2$\\
+Kernel FCM & $m\in\{1{,}5;\,2;\,2{,}5\}$, $\gamma\in\{0{,}05;\,0{,}25;\,1\}$ & 9 & $m=2$, $\gamma=0{,}05$\\
+K-Medoids & PAM euclidiano; \texttt{init}\,$\in\{$\texttt{random}, \texttt{build}$\}$ & 2 & \texttt{build}\\
+GMM/EM & covariância $\in\{\texttt{full,tied,diag,spherical}\}$; regularização $\in\{10^{-6},10^{-4},10^{-2}\}$ & 12 & \texttt{spherical}, $10^{-2}$\\
+DBSCAN & $\varepsilon\in\{0{,}4;\,0{,}6;\,0{,}8;\,1\}\cup d_5\{0{,}75;\,1;\,1{,}5;\,2\}$; \texttt{min\_samples}$\in\{3,5,10\}$ & 24 & $\varepsilon=0{,}6943$, mínimo 3\\
+UPGMA & Sem busca: distância Manhattan e ligação média fixadas no protocolo & -- & Cortes $k=1,\ldots,5$\\
+\bottomrule
+\end{tabularx}
+\vspace{1mm}\parbox{\textwidth}{\footnotesize $d_5=0{,}462862$: mediana da distância ao quinto vizinho, incluindo o próprio ponto. Os quatro raios relativos resultantes foram $0{,}3471$, $0{,}4629$, $0{,}6943$ e $0{,}9257$.}
+\end{table*}
+
+A grade foi concebida para testar mecanismos relevantes, e não para demonstrar otimalidade global. No K-Means, as inicializações \texttt{random} e \texttt{k-means++} permitem avaliar o efeito da distribuição inicial dos centroides sobre os mínimos locais. Para FCM, $m\in\{1{,}5;2;2{,}5\}$ cobre atribuições mais rígidas, um valor de referência amplamente empregado ($m=2$) e pertinências mais difusas. No Kernel FCM, os três valores de $\gamma$ exploram escalas distintas de decaimento do kernel RBF sobre atributos padronizados: valores baixos preservam relações próximas da distância euclidiana, enquanto valores mais altos tornam a similaridade mais local. São valores exploratórios, não um intervalo teoricamente ótimo.
+
+No K-Medoids, comparar a inicialização aleatória à construtiva \texttt{build} permite examinar a influência da escolha inicial dos medoides. No GMM, as estruturas \texttt{full}, \texttt{tied}, \texttt{diag} e \texttt{spherical} representam graus diferentes de flexibilidade da covariância; $10^{-6}$, $10^{-4}$ e $10^{-2}$ testam intensidades crescentes de regularização para reduzir problemas de condicionamento. No DBSCAN, os valores de $\varepsilon$ combinam raios absolutos e múltiplos de uma distância característica ao quinto vizinho, enquanto \texttt{min\_samples}$\in\{3,5,10\}$ permite observar diferentes exigências de densidade. Como o quinto vizinho é contado incluindo a própria observação, essa distância é uma referência empírica de escala e não uma estimativa independente do parâmetro ótimo.
+
+No DBSCAN, o piso de cobertura de $95\%$ foi \textbf{definido antes da busca}, permitindo o descarte de, no máximo, sete flores. Somente pares com $C\geq 95\%$ e silhueta definida foram elegíveis; entre eles, selecionou-se o de maior silhueta, com desempate por cobertura e ordem da grade. O raio relativo foi parametrizado por $d_5$ para explorar escalas relacionadas à densidade observada, complementando os quatro raios absolutos. Como $\varepsilon$ e \texttt{min\_samples} controlam diretamente a quantidade de ruído, a restrição de cobertura impede maximizar a silhueta à custa da exclusão indiscriminada de flores.
+
+Foram realizados $28\times4\times10=1120$ ajustes particionais e 24 testes de DBSCAN na tunagem ($1144$ ajustes). A rodada final compreendeu $5\times5\times10=250$ ajustes particionais, uma construção UPGMA e uma chamada DBSCAN ($252$ ajustes). O total foi, portanto, \textbf{1396 ajustes}; cortes adicionais da mesma árvore não foram contados como novos ajustes. K-Means e GMM utilizaram uma inicialização por chamada (\texttt{n\_init=1}); no GMM, \texttt{max\_iter=100}, \texttt{tol}$=10^{-5}$ e \texttt{init\_params=random\_from\_data}. Uma execução do GMM em $k=5$, semente 54, não convergiu; a solução selecionada por objetivo convergiu. FCM, Kernel FCM e PAM admitiram até 300 iterações. As versões das dependências foram registradas no protocolo de reprodutibilidade, incluindo \texttt{fuzzy-c-means==2.3.1}.
+
+\section{Análise de Sensibilidade da Tunagem}
+As Figs.~\ref{fig:kmeans}--\ref{fig:dbscan} apresentam a resposta dos métodos aos hiperparâmetros efetivamente avaliados. Os gráficos são descritivos e não representam novos ajustes; o ARI foi calculado somente para avaliação externa, não para a seleção.
+
+\begin{figure}[!t]
+\centering\includegraphics[width=\columnwidth]{tunagem_kmeans.pdf}
+\caption{K-Means: silhueta em $k=2$ a $5$ e ARI em $k=3$ para as duas inicializações pesquisadas.}
+\label{fig:kmeans}
+\end{figure}
+\begin{figure}[!t]
+\centering\includegraphics[width=\columnwidth]{tunagem_fcm.pdf}
+\caption{FCM: efeito do expoente $m$ sobre a silhueta por $k$ e a concordância com as espécies em $k=3$.}
+\label{fig:fcm}
+\end{figure}
+\begin{figure}[!t]
+\centering\includegraphics[width=\columnwidth]{tunagem_kmedoids.pdf}
+\caption{K-Medoids (PAM): resposta às inicializações \texttt{random} e \texttt{build}.}
+\label{fig:kmedoids}
+\end{figure}
+
+\subsection{Algoritmos particionais: inicialização e difusão}
+No K-Means (Fig.~\ref{fig:kmeans}), a inicialização \texttt{k-means++} apresentou silhueta média de $0{,}4443$, frente a $0{,}4436$ com \texttt{random}. A diferença é pequena, mas o mecanismo é pertinente: distribuir melhor os centroides iniciais reduz o risco de soluções ruins. Os resultados não autorizam afirmar superioridade universal, pois a variação entre sementes e os demais valores de $k$ também importam.
+
+No FCM (Fig.~\ref{fig:fcm}), o expoente $m=2$ obteve a maior média ($0{,}4431$) entre os três valores testados. Valores menores tornam as pertinências mais concentradas, enquanto valores maiores suavizam as atribuições; como a silhueta e o ARI foram calculados após a conversão para rótulos exclusivos, a preferência reflete também o efeito dessa decisão de avaliação. A escolha $m=2$ está vinculada à grade e não constitui um parâmetro ótimo em sentido global.
+
+No PAM (Fig.~\ref{fig:kmedoids}), a estratégia \texttt{build} aumentou a silhueta em $k=3$ de $0{,}4497$ para $0{,}4555$, mas reduziu o ARI de $0{,}6765$ para $0{,}6416$. A inicialização construtiva torna a solução menos dependente de sorteios e favorece a função objetivo; contudo, uma melhora na geometria dos agrupamentos não implica melhor recuperação das espécies.
+
+\begin{figure*}[!t]
+\centering\includegraphics[width=.97\textwidth]{tunagem_kernel_fcm.pdf}
+\caption{Kernel FCM: (esquerda) silhueta média para as nove combinações de $m$ e $\gamma$; (direita) comportamento da silhueta com $\gamma$ para cada $k$, mantendo $m=2$. Valores de ARI foram usados apenas na análise posterior.}
+\label{fig:kfcm}
+\end{figure*}
+\begin{figure*}[!t]
+\centering\includegraphics[width=.97\textwidth]{tunagem_gmm.pdf}
+\caption{GMM/EM: busca fatorial entre quatro parametrizações de covariância e três regularizações. A seleção baseou-se na média das silhuetas (esquerda); o ARI em $k=3$ (direita) evidencia que o critério externo pode favorecer outra configuração.}
+\label{fig:gmm}
+\end{figure*}
+\begin{figure*}[!t]
+\centering\includegraphics[width=.97\textwidth]{tunagem_dbscan.pdf}
+\caption{DBSCAN: sensibilidade de silhueta, ARI e cobertura ao raio $\varepsilon$ e a \texttt{min\_samples}. A linha tracejada indica o piso de cobertura pré-definido ($95\%$), e o círculo vermelho identifica a configuração selecionada. Métricas computadas sem ruído.}
+\label{fig:dbscan}
+\end{figure*}
+
+\subsection{Kernel FCM, GMM/EM e DBSCAN}
+No Kernel FCM (Fig.~\ref{fig:kfcm}), a melhor combinação foi $m=2$ e $\gamma=0{,}05$, com silhueta média de $0{,}4419$. Mantendo $m=2$ e $k=4$, elevar $\gamma$ de $0{,}05$ para $0{,}25$ e $1$ reduziu a silhueta de $0{,}3985$ para $0{,}3941$ e $0{,}3872$, respectivamente. Conforme a Eq.~\eqref{eq:kernel}, valores pequenos de $\gamma$ aproximam a geometria do FCM e ajudam a explicar a coincidência das partições em $k=3$; não demonstram, por si, equivalência das funções objetivo.
+
+Para o GMM (Fig.~\ref{fig:gmm}), a combinação \texttt{spherical} com regularização $10^{-2}$ maximizou a média de silhueta ($0{,}4503$). Essa preferência é coerente com o favorecimento de grupos compactos e aproximadamente isotrópicos por um critério baseado em distância euclidiana. Na tunagem, com $k=3$, a covariância \texttt{full} apresentou ARI de $0{,}9222$, mas silhueta de $0{,}3685$; a alternativa esférica obteve ARI de $0{,}6199$ e silhueta de $0{,}4568$. A configuração \texttt{full} não foi escolhida, pois otimizar ARI com os rótulos disponíveis descaracterizaria a seleção não supervisionada. A silhueta euclidiana compara distâncias intra e intergrupo e tende a favorecer partições compactas e bem separadas no espaço observado. Já a maximização da verossimilhança do GMM avalia o ajuste probabilístico, incluindo orientação e dispersão das componentes gaussianas. O ARI, por sua vez, quantifica concordância com uma partição de referência, independentemente de seu ajuste geométrico ou probabilístico. Portanto, maior silhueta, maior verossimilhança e maior ARI respondem a questões distintas; o contraste entre \texttt{spherical} e \texttt{full} não constitui incoerência, mas revela a dependência da conclusão em relação ao critério utilizado.
+
+No DBSCAN (Fig.~\ref{fig:dbscan}), a maior silhueta sem ruído da grade foi $0{,}6482$ ($\varepsilon=0{,}6$, \texttt{min\_samples}$=10$), porém com cobertura de apenas $76{,}67\%$, abaixo do piso. O par escolhido ($\varepsilon=0{,}6943$, mínimo 3) produziu silhueta $0{,}6035$, ARI $0{,}5760$ e cobertura $96\%$. No mesmo raio, elevar o mínimo de 3 para 5 aumentou a silhueta para $0{,}6104$, mas reduziu a cobertura para $94{,}67\%$, tornando o par inelegível. A cobertura, portanto, não é uma informação acessória; ela integra a justificativa da seleção.
+
+\begin{figure*}[!t]
+\centering
+\begin{minipage}{.48\textwidth}\centering\includegraphics[width=\linewidth]{pca.pdf}\\[-.4em]{\footnotesize (a) PCA}\end{minipage}\hfill
+\begin{minipage}{.48\textwidth}\centering\includegraphics[width=\linewidth]{kernel_pca.pdf}\\[-.4em]{\footnotesize (b) Kernel PCA}\end{minipage}\\[.5em]
+\begin{minipage}{.48\textwidth}\centering\includegraphics[width=\linewidth]{tsne.pdf}\\[-.4em]{\footnotesize (c) t-SNE}\end{minipage}\hfill
+\begin{minipage}{.48\textwidth}\centering\includegraphics[width=\linewidth]{umap.pdf}\\[-.4em]{\footnotesize (d) UMAP}\end{minipage}
+\caption{Projeções 2D da base Iris padronizada. As cores indicam as espécies exclusivamente para interpretação visual; nenhuma projeção foi ajustada por esses rótulos. Eixos de métodos distintos não possuem escala diretamente comparável.}
+\label{fig:projecoes}
+\end{figure*}
+
+\section{Resultados e Robustez da Rodada Final}
+\subsection{Perfis selecionados e número de grupos}
+Após fixar os hiperparâmetros, os cinco métodos particionais e o UPGMA selecionaram $k^*=2$ pela silhueta. Nas 150 flores, produziram a mesma separação: uma classe de 50 \emph{setosas} e outra com as 100 flores restantes. Consequentemente, obtiveram silhueta $0{,}5802$ e ARI $0{,}5681$. A coincidência decorre da estrutura geométrica predominante da amostra e não demonstra identidade entre as funções objetivo dos métodos.
+
+\begin{table*}[!t]
+\caption{Partições selecionadas na rodada final. O ARI não participou da seleção.}
+\label{tab:final}
+\centering\footnotesize
+\begin{tabular}{@{}l l r r r r@{}}
+\toprule
+Método & Perfil fixado pela tunagem & $k$ & Silhueta & ARI & $n$ avaliado\\
+\midrule
+K-Means & \texttt{k-means++} & 2 & 0,5802 & 0,5681 & 150\\
+FCM & $m=2$ & 2 & 0,5802 & 0,5681 & 150\\
+Kernel FCM & $m=2$, $\gamma=0{,}05$ & 2 & 0,5802 & 0,5681 & 150\\
+K-Medoids & \texttt{build} & 2 & 0,5802 & 0,5681 & 150\\
+GMM/EM & \texttt{spherical}, $\operatorname{reg}=10^{-2}$ & 2 & 0,5802 & 0,5681 & 150\\
+UPGMA & ligação média; Manhattan & 2 & 0,5802 & 0,5681 & 150\\
+DBSCAN & $\varepsilon=0{,}6943$, mínimo 3 & 2 & 0,6035 & 0,5760 & 144\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+O DBSCAN classificou seis observações como ruído: \textbf{uma setosa, uma versicolor e quatro virginicas}. Sobre as 144 flores retidas, os sete métodos produziram partições equivalentes (ARI entre partições igual a 1), e os métodos não densitários também obtiveram silhueta $0{,}6035$ e ARI $0{,}5760$ quando avaliados apenas nessa amostra. Assim, a maior silhueta nominal do DBSCAN na Tabela~\ref{tab:final} não deve ser interpretada como vantagem na mesma população de observações.
+
+\begin{figure}[!t]
+\centering\includegraphics[width=\columnwidth]{silhuetas_comparadas.pdf}
+\caption{Silhueta na rodada final conforme $k$, com os hiperparâmetros já fixados.}
+\label{fig:finalk}
+\end{figure}
+
+Para análise complementar, mantiveram-se três grupos sem alterar os perfis. Nessa condição, o maior ARI \emph{entre os perfis escolhidos} foi do UPGMA, $0{,}7184$ (silhueta $0{,}4517$); seguiram-se K-Medoids ($0{,}6416$), FCM e Kernel FCM ($0{,}6303$), GMM esférico ($0{,}6199$) e K-Means ($0{,}6011$). A alternativa GMM \texttt{full} com ARI maior na tunagem não integra essa comparação, pois não foi selecionada pelo procedimento predefinido. A Fig.~\ref{fig:finalk} confirma que $k=2$ favorece o critério interno nos perfis avaliados.
+
+\subsection{Variabilidade entre sementes}
+A robustez foi examinada nas dez execuções finais (sementes 52--61) em $k=2$ e $k=3$. A Tabela~\ref{tab:var} apresenta média, desvio-padrão amostral, mínimo e máximo de silhueta e ARI. A coluna de objetivo conta quantas chamadas ficaram a até $10^{-3}$ do melhor objetivo observado para o mesmo método e $k$; no GMM, essa tolerância agrupa log-verossimilhanças próximas, mas não idênticas. Como o UPGMA é determinístico, suas entradas não correspondem a dez sementes independentes.
+
+\begin{table*}[!t]
+\caption{Variabilidade da silhueta e do ARI na rodada final. DP: desvio-padrão amostral.}
+\label{tab:var}
+\centering\scriptsize
+\begin{tabular}{@{}llc rrrr rrrr@{}}
+\toprule
+& & Objetivo & \multicolumn{4}{c}{Silhueta} & \multicolumn{4}{c}{ARI}\\
+\cmidrule(lr){4-7}\cmidrule(l){8-11}
+$k$ & Método & melhor/10 & Média & DP & Mín. & Máx. & Média & DP & Mín. & Máx.\\
+\midrule
+\multirow{6}{*}{2}
+& K-Means & 10/10 & 0,5802 & 0,0000 & 0,5802 & 0,5802 & 0,5681 & 0,0000 & 0,5681 & 0,5681\\
+& FCM & 10/10 & 0,5802 & 0,0000 & 0,5802 & 0,5802 & 0,5681 & 0,0000 & 0,5681 & 0,5681\\
+& Kernel FCM & 10/10 & 0,5802 & 0,0000 & 0,5802 & 0,5802 & 0,5681 & 0,0000 & 0,5681 & 0,5681\\
+& K-Medoids & 10/10 & 0,5802 & 0,0000 & 0,5802 & 0,5802 & 0,5681 & 0,0000 & 0,5681 & 0,5681\\
+& GMM/EM & 1/10 & 0,5802 & 0,0000 & 0,5802 & 0,5802 & 0,5681 & 0,0000 & 0,5681 & 0,5681\\
+& UPGMA & -- & 0,5802 & --- & 0,5802 & 0,5802 & 0,5681 & --- & 0,5681 & 0,5681\\
+\midrule
+\multirow{6}{*}{3}
+& K-Means & 1/10 & 0,4633 & 0,0086 & 0,4554 & 0,4787 & 0,5760 & 0,0808 & 0,4290 & 0,6451\\
+& FCM & 10/10 & 0,4574 & 0,0000 & 0,4574 & 0,4574 & 0,6303 & 0,0000 & 0,6303 & 0,6303\\
+& Kernel FCM & 10/10 & 0,4574 & 0,0000 & 0,4574 & 0,4574 & 0,6303 & 0,0000 & 0,6303 & 0,6303\\
+& K-Medoids & 10/10 & 0,4555 & 0,0000 & 0,4555 & 0,4555 & 0,6416 & 0,0000 & 0,6416 & 0,6416\\
+& GMM/EM & 6/10 & 0,4581 & 0,0039 & 0,4568 & 0,4693 & 0,5999 & 0,0633 & 0,4199 & 0,6199\\
+& UPGMA & -- & 0,4517 & --- & 0,4517 & 0,4517 & 0,7184 & --- & 0,7184 & 0,7184\\
+\bottomrule
+\end{tabular}
+\vspace{.5mm}\parbox{\textwidth}{\scriptsize Nota: o UPGMA produziu uma única árvore determinística e não foi repetido com dez sementes. As entradas de média, mínimo e máximo representam, nesse caso, uma única observação; o desvio-padrão não é aplicável (---). Para os métodos estocásticos, DP é o desvio-padrão amostral das dez execuções.}
+\end{table*}
+
+Em $k=2$, todas as partições foram estáveis em termos de rótulos, apesar de diferenças na função objetivo do GMM. Em $k=3$, o K-Means atingiu seu melhor objetivo em apenas uma das dez execuções; o ARI variou de $0{,}4290$ a $0{,}6451$. A execução escolhida por objetivo apresentou ARI $0{,}6011$, inferior ao de outra inicialização, o que evidencia a dependência do critério de seleção. O GMM também mostrou variação expressiva de ARI ($0{,}4199$--$0{,}6199$). Os resultados de FCM, Kernel FCM e PAM \texttt{build} repetiram os mesmos rótulos em todas as sementes. Uma ordenação de métodos por ARI de uma execução, portanto, não deve ser interpretada como ranking estatisticamente estável.
+
+\subsection{Sensibilidade do DBSCAN à cobertura}
+Reaplicou-se a mesma regra de seleção aos 24 pares já avaliados, modificando somente o piso de cobertura. Trata-se de uma análise \emph{a posteriori}, sem alterar o piso de $95\%$ empregado no experimento principal. A Tabela~\ref{tab:pisos} evidencia o compromisso entre descarte e silhueta.
+
+\begin{table}[!t]
+\caption{Pisos de cobertura aplicados à mesma grade DBSCAN.}
+\label{tab:pisos}
+\centering\footnotesize
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+Piso & $\varepsilon$ & Mín. & Cob. & Sil. & ARI\\
+\midrule
+97\% & 1,000 & 10 & 97,33\% & 0,5984 & 0,5706\\
+95\% & 0,694 & 3 & 96,00\% & 0,6035 & 0,5760\\
+94\% & 0,694 & 5 & 94,67\% & 0,6104 & 0,5733\\
+85\% & 0,694 & 10 & 86,67\% & 0,6276 & 0,6001\\
+75\% & 0,600 & 10 & 76,67\% & 0,6482 & 0,6358\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+À medida que o requisito de cobertura é relaxado, a solução elegível de maior silhueta passa de $0{,}5984$ (piso $97\%$) para $0{,}6482$ (piso $75\%$). A partição comum de dois grupos na amostra integral tem silhueta $0{,}5802$; essa comparação ilustra a influência do descarte, sem atribuir monotonicidade a cada par individual do DBSCAN. A retirada de observações próximas às fronteiras pode elevar artificialmente a separação aparente dos grupos. Portanto, a comparação interalgoritmos exige controlar o subconjunto avaliado, como realizado para as 144 flores retidas.
+
+
+
+\section{Redução de Dimensionalidade}
+Foram construídas projeções bidimensionais por PCA, Kernel PCA, t-SNE e UMAP. A PCA maximiza variância linear em direções ortogonais sucessivas \cite{hotelling}; a Kernel PCA realiza análise espectral de um kernel centralizado \cite{scholkopf}. O t-SNE procura preservar afinidades locais pela minimização da divergência de Kullback--Leibler \cite{tsne}, ao passo que o UMAP otimiza uma representação baseada em relações de vizinhança \cite{umap}. Essas técnicas não são classificadores nem garantem preservação de distâncias globais ou de densidades.
+
+A Tabela~\ref{tab:reducao} consolida as saídas numéricas relevantes, extraídas das execuções registradas, sem reajustar os modelos. A preservação local foi medida por \emph{trustworthiness} para dez vizinhos \cite{venna}; os valores são comparáveis somente nesta definição de vizinhança e nas configurações avaliadas. As coordenadas projetadas formam matrizes $150\times2$ e são ilustradas na Tabela~\ref{tab:coords}, que apresenta a primeira observação de cada transformação. A Fig.~\ref{fig:projecoes} mostra as projeções completas.
+
+\begin{table}[!t]
+\caption{Saídas da redução de dimensionalidade (duas dimensões).}
+\label{tab:reducao}
+\centering\scriptsize
+\begin{tabularx}{\columnwidth}{@{}lY@{}}
+\toprule
+Método & Configuração e resultados registrados \\
+\midrule
+PCA & SVD completa; $\lambda_{1,2}=(2{,}9304;0{,}9274)$; variância por componente $(72{,}77\%;23{,}03\%)$; acumulada $95{,}80\%$; $T_{10}=0{,}9782$. \\
+Kernel PCA & RBF, $\gamma=0{,}25$; $\lambda_{1,2}=(39{,}1321;17{,}7924)$ do kernel centralizado; $57{,}95\%$ do traço desse kernel; $T_{10}=0{,}9322$. \\
+t-SNE & Perplexidade 30; 999 iterações registradas (limite 1000); taxa efetiva 50; divergência KL $0{,}1642$; $T_{10}=0{,}9888$. \\
+UMAP & 15 vizinhos; $\mathrm{min\_dist}=0{,}1$; métrica euclidiana; $T_{10}=0{,}9783$. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Para a PCA, as duas direções principais, na ordem comprimento/largura da sépala e comprimento/largura da pétala, apresentaram coeficientes $(0{,}5224;-0{,}2634;0{,}5813;0{,}5656)$ e $(0{,}3723;0{,}9256;0{,}0211;0{,}0654)$, respectivamente. Os quatro componentes explicaram, respectivamente, $72{,}77\%$, $23{,}03\%$, $3{,}68\%$ e $0{,}52\%$ da variância, totalizando $95{,}80\%$ nos dois primeiros. O primeiro eixo atribuiu peso expressivo às medidas de pétala, distinguindo principalmente \emph{setosa} das demais espécies. Na Kernel PCA, o traço da matriz de kernel centralizada foi $98{,}2247$; seus dois maiores autovalores corresponderam a $57{,}95\%$ desse traço, fração definida no espaço de características RBF e não na variância dos atributos originais.
+
+\begin{table}[!t]
+\caption{Coordenadas da primeira observação em cada projeção.}
+\label{tab:coords}
+\centering\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Método & Dimensão 1 & Dimensão 2 \\
+\midrule
+PCA & $-2{,}2645$ & $0{,}5057$ \\
+Kernel PCA & $0{,}7990$ & $-0{,}0997$ \\
+t-SNE & $-26{,}7801$ & $-1{,}1567$ \\
+UMAP & $-4{,}2544$ & $7{,}1625$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+No t-SNE, utilizaram-se inicialização por PCA, taxa de aprendizado automática, semente 42 e limite de 1000 iterações; a execução registrou 999 iterações, taxa efetiva 50 e divergência KL final $0{,}1642$. No UMAP, adotaram-se 15 vizinhos, \texttt{min\_dist}$=0{,}1$, distância euclidiana, inicialização espectral e semente 42. Como houve uma única projeção por método, não se pode inferir estabilidade visual sob mudanças de sementes ou parâmetros. As saídas de coordenadas completas foram preservadas como resultados suplementares do experimento; os valores exemplificados na Tabela~\ref{tab:coords} não são uma amostra estatística adicional.
+
+O t-SNE apresentou a maior preservação local de vizinhanças ($T_{10}=0{,}9888$), não necessariamente a melhor conservação da estrutura global. As projeções (Fig.~\ref{fig:projecoes}) mostram separação visual pronunciada de \emph{I. setosa} e sobreposição variável entre \emph{versicolor} e \emph{virginica}, consistente com a preferência por dois grupos nos agrupadores avaliados. Eixos e distâncias nas diferentes técnicas não devem ser comparados diretamente.
+
+\section{Discussão e Ameaças à Validade}
+Três fatores limitam a interpretação. Primeiro, a busca discretizada não prova otimalidade fora dos valores da Tabela~\ref{tab:grade}; além disso, a média de silhuetas em $k=2$ a $5$ atribui o mesmo peso a diferentes números de grupos e favorece determinadas geometrias. Segundo, as dez sementes medem somente a sensibilidade da otimização nas \emph{mesmas} 150 flores, não variabilidade amostral ou desempenho de generalização. Métodos determinísticos, como o UPGMA com distância e ligação fixadas, não permitem estimar dispersão entre inicializações com uma única execução. Terceiro, DBSCAN depende da cobertura: a melhora de silhueta sob descarte não deve ser confundida com melhor representação de toda a base. Por isso, relatam-se cobertura e métricas calculadas em amostra comum.
+
+A silhueta euclidiana é apenas uma avaliação interna da separação geométrica, não um teste de adequação probabilística: por isso, uma covariância esférica pode superar a completa em silhueta e simultaneamente apresentar menor ARI. Em particular, o maior ARI observado na tunagem para o GMM \texttt{full} não autoriza substituir o perfil selecionado pela silhueta. A avaliação externa emprega as três espécies conhecidas após a seleção, como diagnóstico interpretativo e não como alvo de tunagem. Ainda assim, as análises exploratórias com ARI e os valores escolhidos devem ser entendidos como resultados específicos da Iris, de seu arquivo UCI e do pré-processamento adotado. A comparação com outras bases e com medidas internas adicionais seria necessária para sustentar generalizações.
+
+\section{Conclusão}
+A separação entre a busca dos hiperparâmetros e a seleção de $k$ permitiu identificar tanto os perfis preferidos pela silhueta quanto sua estabilidade entre inicializações. A grade compreendeu 28 configurações particionais e 24 pares do DBSCAN, totalizando 1396 ajustes nas duas etapas. No experimento final, seis métodos selecionaram dois grupos; com três grupos, o maior ARI entre os perfis selecionados pertenceu ao UPGMA ($0{,}7184$). No K-Means, a dispersão do ARI em $k=3$ ($0{,}4290$--$0{,}6451$) demonstra que uma execução isolada é insuficiente para caracterizar robustez.
+
+No DBSCAN, a restrição de cobertura previamente definida foi decisiva: a maior silhueta da grade descartaria quase um quarto da base. Os gráficos de sensibilidade e as tabelas tornam explícito esse compromisso e evidenciam por que o ARI não deve substituir a silhueta como regra de seleção não supervisionada. Nas projeções, PCA e t-SNE se destacaram, respectivamente, pela retenção de variância linear e pela preservação local de vizinhanças, objetivos que devem permanecer conceitualmente separados.
+
+\balance
+\begin{thebibliography}{99}
+\bibitem{enunciado} F. de A. T. de Carvalho, ``Projeto AM-NS 2026-2,'' Centro de Informática, Universidade Federal de Pernambuco, Recife, 2026.
+\bibitem{uci} R. A. Fisher, ``Iris,'' UCI Machine Learning Repository, 1936, doi: 10.24432/C56C76.
+\bibitem{rousseeuw} P. J. Rousseeuw, ``Silhouettes: A graphical aid to the interpretation and validation of cluster analysis,'' \emph{J. Comput. Appl. Math.}, vol. 20, pp. 53--65, 1987.
+\bibitem{hubert} L. Hubert and P. Arabie, ``Comparing partitions,'' \emph{J. Classification}, vol. 2, pp. 193--218, 1985.
+\bibitem{macqueen} J. MacQueen, ``Some methods for classification and analysis of multivariate observations,'' in \emph{Proc. 5th Berkeley Symp. Math. Statist. Probab.}, vol. 1, pp. 281--297, 1967.
+\bibitem{bezdek} J. C. Bezdek, \emph{Pattern Recognition with Fuzzy Objective Function Algorithms}. New York: Plenum Press, 1981.
+\bibitem{graves} D. Graves and W. Pedrycz, ``Kernel-based fuzzy clustering and fuzzy clustering: A comparative experimental study,'' \emph{Fuzzy Sets Syst.}, vol. 161, no. 4, pp. 522--543, 2010.
+\bibitem{zhang} D.-Q. Zhang and S.-C. Chen, ``A novel kernelized fuzzy C-means algorithm with application in medical image segmentation,'' \emph{Artif. Intell. Med.}, vol. 32, no. 1, pp. 37--50, 2004.
+\bibitem{kaufman} L. Kaufman and P. J. Rousseeuw, \emph{Finding Groups in Data: An Introduction to Cluster Analysis}. Hoboken, NJ: Wiley, 1990.
+\bibitem{dempster} A. P. Dempster, N. M. Laird, and D. B. Rubin, ``Maximum likelihood from incomplete data via the EM algorithm,'' \emph{J. Roy. Statist. Soc. B}, vol. 39, no. 1, pp. 1--38, 1977.
+\bibitem{sokal} R. R. Sokal and C. D. Michener, ``A statistical method for evaluating systematic relationships,'' \emph{Univ. Kansas Sci. Bull.}, vol. 38, no. 22, pp. 1409--1438, 1958.
+\bibitem{ester} M. Ester, H.-P. Kriegel, J. Sander, and X. Xu, ``A density-based algorithm for discovering clusters in large spatial databases with noise,'' in \emph{Proc. KDD}, pp. 226--231, 1996.
+\bibitem{hotelling} H. Hotelling, ``Analysis of a complex of statistical variables into principal components,'' \emph{J. Educational Psychology}, vol. 24, no. 6, pp. 417--441, 1933.
+\bibitem{scholkopf} B. Schölkopf, A. Smola, and K.-R. Müller, ``Nonlinear component analysis as a kernel eigenvalue problem,'' \emph{Neural Computation}, vol. 10, no. 5, pp. 1299--1319, 1998.
+\bibitem{tsne} L. van der Maaten and G. Hinton, ``Visualizing data using t-SNE,'' \emph{J. Mach. Learn. Res.}, vol. 9, pp. 2579--2605, 2008.
+\bibitem{umap} L. McInnes, J. Healy, and J. Melville, ``UMAP: Uniform manifold approximation and projection for dimension reduction,'' arXiv:1802.03426, 2018.
+\bibitem{venna} J. Venna and S. Kaski, ``Neighborhood preservation in nonlinear projection methods: An experimental study,'' in \emph{Proc. ICANN}, pp. 485--491, 2001.
+\end{thebibliography}
+\end{document}

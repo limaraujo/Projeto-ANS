@@ -23,6 +23,7 @@ q2 = json.loads((R / 'execucoes_questao_2.json').read_text())
 diagnostics = json.loads((ROOT / 'docs/artigo/diagnosticos_revisao.json').read_text())
 metrics = pd.read_csv(R / 'metricas_por_k.csv')
 perfis = pd.read_csv(R / 'tunagem/particionais.csv')
+dbscan_grid = pd.read_csv(R / 'tunagem/dbscan.csv')
 agrupamento = diagnostics['agrupamento']
 dbscan = agrupamento['dbscan']
 mesma_amostra = agrupamento['mesma_amostra']
@@ -64,40 +65,109 @@ ax.legend(loc='center left', bbox_to_anchor=(1.02,.5), frameon=False, fontsize=2
 axes_style(ax)
 save(fig, 'silhuetas')
 
-# Faixas por configuração em k=3. Os pontos marcam o perfil selecionado.
-fig, axs = plt.subplots(1, 2, figsize=(16, 4.5), sharey=True)
-fig.subplots_adjust(left=.15, bottom=.19, top=.84, right=.97, wspace=.12)
-k3 = perfis[perfis.k == 3]
-rotulos = [names[key] for key in list(names)[:-1]]
-for ax, coluna, titulo in zip(axs, ['silhueta', 'ari'], ['Silhueta', 'ARI']):
-    for i, key in enumerate(list(names)[:-1]):
-        valores = k3[k3.algoritmo == key][coluna].dropna()
-        selecionado = metrics[(metrics.algoritmo == key) & (metrics.k == 3)].iloc[0][coluna]
-        ax.hlines(i, valores.min(), valores.max(), colors=WHITE, lw=4)
-        ax.scatter(selecionado, i, s=112, color=YELLOW, zorder=3)
-    ax.set(yticks=range(len(rotulos)), yticklabels=rotulos, title=titulo,
-           ylim=(len(rotulos) - .5, -.5))
-    ax.tick_params(labelsize=24)
+# Tunagem dos métodos com escolhas diretamente comparáveis por curvas.
+fig, axs = plt.subplots(1, 3, figsize=(16, 4.5), sharex=True, sharey=True)
+fig.subplots_adjust(left=.065, bottom=.22, top=.82, right=.985, wspace=.18)
+panels = [
+    ('k-means', 'K-Means', 'init'),
+    ('fuzzy-k-means', 'FCM', 'm'),
+    ('k-medoids', 'K-Medoids', 'init')
+]
+for ax, (key, title, field) in zip(axs, panels):
+    data = perfis[perfis.algoritmo == key]
+    for j, (value, group) in enumerate(data.groupby(field, dropna=False)):
+        selected = bool(group.configuracao_selecionada.iloc[0])
+        if field == 'm':
+            label = f'm = {str(value).replace(".", ",")}'
+        else:
+            label = str(value)
+        ax.plot(group.k, group.silhueta, marker=['s','o','^'][j % 3], ms=7,
+                lw=3 if selected else 2, color=YELLOW if selected else [WHITE, '#66D9EF', '#E8A4D8'][j % 3],
+                linestyle='-' if selected else '--', label=label)
+    ax.set_title(title, fontsize=25)
+    ax.set(xticks=[2,3,4,5], ylim=(.30,.61))
+    ax.grid(alpha=.14)
+    ax.legend(frameon=False, fontsize=18, labelcolor=WHITE, loc='lower left')
     ax.xaxis.set_major_formatter(decimal_formatter)
-    ax.grid(alpha=.14, axis='x')
-save(fig, 'sensibilidade')
+    ax.yaxis.set_major_formatter(decimal_formatter)
+axs[0].set_ylabel('Silhueta')
+fig.supxlabel('Número de grupos (k)', y=.04, fontsize=22)
+save(fig, 'tunagem_particionais')
 
-# Contraste entre critério interno e avaliação externa para o GMM.
-gmm = metrics[(metrics.algoritmo == 'gaussian-mixture') & metrics.k.isin([2,3])].sort_values('k')
-fig, ax = plt.subplots(figsize=(16,4.5))
-fig.subplots_adjust(left=.08, right=.95, top=.92, bottom=.22)
+# Tunagem de Kernel FCM, GMM e DBSCAN: mapas compactos e compromisso com cobertura.
+fig, axs = plt.subplots(1, 3, figsize=(16, 4.5))
+fig.subplots_adjust(left=.065, bottom=.22, top=.80, right=.985, wspace=.30)
+
+kernel_grid = (perfis[perfis.algoritmo == 'kernel-fuzzy-k-means']
+               .drop_duplicates(['m','gamma'])
+               .pivot(index='m', columns='gamma', values='silhueta_media')
+               .sort_index(ascending=False).sort_index(axis=1))
+im = axs[0].imshow(kernel_grid.values, cmap='viridis', vmin=.17, vmax=.46, aspect='auto')
+axs[0].set(title='Kernel FCM', xlabel='gamma', ylabel='m',
+           xticks=range(len(kernel_grid.columns)),
+           xticklabels=[str(x).replace('.', ',') for x in kernel_grid.columns],
+           yticks=range(len(kernel_grid.index)),
+           yticklabels=[str(x).replace('.', ',') for x in kernel_grid.index])
+for i in range(kernel_grid.shape[0]):
+    for j in range(kernel_grid.shape[1]):
+        axs[0].text(j, i, f'{kernel_grid.iloc[i,j]:.3f}'.replace('.', ','),
+                    ha='center', va='center', fontsize=16, color=WHITE)
+sel_kernel = perfis[(perfis.algoritmo == 'kernel-fuzzy-k-means') & perfis.configuracao_selecionada].iloc[0]
+ki = list(kernel_grid.index).index(sel_kernel['m'])
+kj = list(kernel_grid.columns).index(sel_kernel['gamma'])
+axs[0].add_patch(plt.Rectangle((kj-.48,ki-.48),.96,.96,fill=False,edgecolor=YELLOW,lw=3))
+
+gmm_grid = (perfis[perfis.algoritmo == 'gaussian-mixture']
+            .drop_duplicates(['covariance_type','reg_covar'])
+            .pivot(index='covariance_type', columns='reg_covar', values='silhueta_media')
+            .reindex(['full','tied','diag','spherical']).sort_index(axis=1))
+axs[1].imshow(gmm_grid.values, cmap='viridis', vmin=.17, vmax=.46, aspect='auto')
+axs[1].set(title='GMM/EM', xlabel='regularização',
+           xticks=range(len(gmm_grid.columns)),
+           xticklabels=['10⁻⁶','10⁻⁴','10⁻²'],
+           yticks=range(len(gmm_grid.index)), yticklabels=gmm_grid.index)
+for i in range(gmm_grid.shape[0]):
+    for j in range(gmm_grid.shape[1]):
+        axs[1].text(j, i, f'{gmm_grid.iloc[i,j]:.3f}'.replace('.', ','),
+                    ha='center', va='center', fontsize=15, color=WHITE)
+sel_gmm = perfis[(perfis.algoritmo == 'gaussian-mixture') & perfis.configuracao_selecionada].iloc[0]
+gi = list(gmm_grid.index).index(sel_gmm['covariance_type'])
+gj = list(gmm_grid.columns).index(sel_gmm['reg_covar'])
+axs[1].add_patch(plt.Rectangle((gj-.48,gi-.48),.96,.96,fill=False,edgecolor=YELLOW,lw=3))
+
+for minimum, marker in [(3,'o'),(5,'s'),(10,'^')]:
+    d = dbscan_grid[(dbscan_grid.min_samples == minimum) & dbscan_grid.silhueta.notna()]
+    axs[2].scatter(d.cobertura_pct, d.silhueta, s=58, marker=marker,
+                   label=f'min = {minimum}', alpha=.85)
+chosen = dbscan_grid[dbscan_grid.selecionado].iloc[0]
+axs[2].scatter(chosen.cobertura_pct, chosen.silhueta, s=155, facecolors='none',
+               edgecolors=YELLOW, linewidths=3, zorder=5)
+axs[2].axvline(95, color=YELLOW, lw=2, ls='--')
+axs[2].set(title='DBSCAN', xlabel='Cobertura (%)', ylabel='Silhueta',
+           xlim=(10,101), ylim=(.12,.68))
+axs[2].grid(alpha=.14)
+axs[2].legend(frameon=False, fontsize=16, labelcolor=WHITE, loc='lower left')
+for ax in axs:
+    ax.tick_params(labelsize=17)
+save(fig, 'tunagem_complexos')
+
+# GMM: compara o perfil selecionado ao perfil full de maior ARI na tunagem.
+fig, ax = plt.subplots(figsize=(16, 4.5))
+fig.subplots_adjust(left=.11, bottom=.27, top=.90, right=.97)
+labels = ['Esférica selecionada\nreg = 10⁻²', 'Completa na tunagem\nreg = 10⁻²']
+sil = [0.4568295013461273, 0.3684745512544146]
+ari = [0.6199243317810601, 0.9222414299226981]
 x = np.arange(2)
-for j, (k, color) in enumerate([(2,WHITE),(3,YELLOW)]):
-    row = gmm[gmm.k == k].iloc[0]
-    vals = [row.silhueta, row.ari]
-    bars = ax.bar(x + (j-.5)*.3, vals, .28, label=f'k = {k}', color=color)
-    for b,v in zip(bars, vals):
-        ax.text(b.get_x()+b.get_width()/2, v+.025, fmt(v), ha='center', fontsize=27, color=color)
-ax.set(xticks=x, xticklabels=['Silhueta', 'ARI'], ylim=(0,1.09), yticks=[0,.5,1])
-ax.legend(loc='upper left', frameon=False, ncol=2, labelcolor=WHITE, fontsize=26)
-axes_style(ax)
-save(fig, 'gmm_comparacao')
-gmm_k2, gmm_k3 = gmm.itertuples(index=False)
+for offset, values, label, color in [(-.18, sil, 'Silhueta', WHITE), (.18, ari, 'ARI', YELLOW)]:
+    bars = ax.bar(x + offset, values, .32, label=label, color=color)
+    for bar, value in zip(bars, values):
+        ax.text(bar.get_x()+bar.get_width()/2, value+.025, fmt(value),
+                ha='center', fontsize=23, color=color)
+ax.set(xticks=x, xticklabels=labels, ylim=(0,1.08), yticks=[0,.25,.5,.75,1])
+ax.yaxis.set_major_formatter(decimal_formatter)
+ax.grid(alpha=.14, axis='y')
+ax.legend(frameon=False, fontsize=23, labelcolor=WHITE, ncol=2, loc='upper left')
+save(fig, 'gmm_tunagem')
 
 # Usa a árvore armazenada, sem recalcular a hierarquia.
 stored = q1['upgma']['2']
@@ -192,45 +262,51 @@ extremo_dbscan = dbscan['tabela'][2]
 slides = [
     {'layout':'CoverSlide','title':'Iris: grupos e projeções','duck':False,
      'coverLogo':'assets/logo-branco.png',
-     'subtitle':'Agrupamento e redução de dimensionalidade\nFátima Araújo e Rogrigo Gomes · Equipe 08',
+     'subtitle':'Busca de hiperparâmetros e avaliação comparativa\nFátima Araújo e Rodrigo Gomes · Equipe 08',
      'notes':'Abertura (30 s). A separação geométrica coincide com as três espécies? O estudo compara sete agrupadores, incluindo sensibilidade aos hiperparâmetros, e quatro projeções.'},
     cols('Três espécies; quantos grupos?', 'BASE IRIS',
-        ['150 flores; 50 por espécie.','Quatro medidas em centímetros.','Sépalas e pétalas: comprimento e largura.'],
-        'PREPARAÇÃO', ['Z-score: z = (x − μ) / σ.','μ e σ populacionais por atributo.','Espécies usadas após o ajuste.'], ['ART','EXP'],
-        'Tempo: 1 min. Usou-se codigo/iris/iris.data. Para cada atributo, μ é a média das 150 observações e σ é a raiz da média dos desvios quadráticos em relação a μ. A análise é descritiva da base completa. Os rótulos de espécie servem à avaliação externa e à identificação visual.'),
+        ['150 flores; 50 por espécie.','Quatro medidas em centímetros.','Arquivo Iris da UCI explicitado.'],
+        'PREPARAÇÃO', ['Z-score: z = (x − μ) / σ.','μ e σ populacionais por atributo.','Rótulos usados somente depois.'], ['ART','EXP'],
+        'Tempo: 1 min. Usou-se codigo/iris/iris.data, correspondente à edição da UCI. As linhas 35 e 38 diferem de load_iris do scikit-learn; por isso a origem do arquivo precisa ser explicitada. Para cada atributo, μ é a média das 150 observações e σ é o desvio-padrão populacional. Os rótulos de espécie não entram no ajuste nem na seleção.'),
     cols('Sete métodos, cinco perspectivas','PARTIÇÕES',
         ['K-Means: centroides.','FCM e Kernel FCM: pertinências.','K-Medoids: flores como representantes.'],
         'OUTRAS ESTRUTURAS',['GMM/EM: mistura probabilística.','UPGMA: hierarquia de grupos.','DBSCAN: densidade e ruído.'],['ART'],
         f'Tempo: 1 min. O Kernel FCM usa protótipos no espaço de entrada e kernel RBF. K-Medoids usa PAM e Euclidiana. UPGMA usa ligação média com Manhattan. Perfis selecionados: {perfil_notas}.'),
-    {'layout':'DiagramSlide','title':'O protocolo separa ajuste e avaliação',
-     'steps':['Padronizar X','10 sementes por perfil e k','Selecionar pelo objetivo','Escolher pela silhueta'],
-     'takeaway':f"{contagens['ajustes_totais']} ajustes ao todo · 252 registros no protocolo final.",
+    {'layout':'DiagramSlide','title':'Tunagem e rodada final são separadas',
+     'steps':['TUNAGEM\n1.120 part.\n+ 24 DBSCAN',
+              '42–51\nperfil pela\nmédia S₂…₅',
+              'FINAL\n250 part.\n+ árvore + DBSCAN',
+              '52–61\nobjetivo →\nk por silhueta'],
+     'takeaway':"1.144 na tunagem + 252 na rodada final = 1.396 ajustes.",
      'mainFlow':[0,1,2], 'citations':['EXP','ART'],
-     'notes':f"Tempo: 1,5 min. A grade inclui {contagens['ajustes_particionais']} ajustes nos métodos particionais em k de 2 a 5 e {contagens['ajustes_dbscan']} candidatos no DBSCAN. Em cada perfil e k, escolhe-se a melhor execução pela função objetivo. Silhueta seleciona perfil e k, com desempate por menor k e ordem da grade. Os perfis escolhidos acrescentam dez execuções em k=1. UPGMA usa cinco cortes da mesma árvore. O DBSCAN escolhe a maior silhueta válida com pelo menos {contagens['cobertura_minima_dbscan_pct']}% de cobertura. O ARI é calculado depois das escolhas."},
+     'notes':f"Tempo: 1,5 min. A tunagem inclui {contagens['ajustes_particionais']} ajustes particionais em k de 2 a 5 e {contagens['ajustes_dbscan']} candidatos do DBSCAN: 1.144 ajustes. Em cada configuração e k, a melhor execução é escolhida pela função objetivo. O perfil fixado maximiza a média das quatro silhuetas, sem escolher k nessa etapa. A rodada final usa novas sementes, 52 a 61, nos cinco valores de k. Só então k é escolhido pela silhueta. UPGMA usa uma árvore; DBSCAN, a configuração elegível com pelo menos {contagens['cobertura_minima_dbscan_pct']}% de cobertura. O ARI não orienta nenhuma escolha."},
     cols('Silhueta e ARI respondem a perguntas distintas','SILHUETA',
         ['Coesão e separação geométrica.','Define k após selecionar o ajuste.','k = 1: valor indefinido.'],
         'ARI',['Concordância com as espécies.','Desconta o acordo ao acaso.','Avaliação externa; não escolhe k.'],['ART','EXP'],
         'Tempo: 1 min. Silhueta s(i)=(b(i)−a(i))/max(a(i),b(i)): a é distância média ao próprio grupo; b é a menor distância média a outro grupo. Usa-se distância euclidiana para todos, inclusive para avaliar a árvore Manhattan. ARI=1 indica partições equivalentes; próximo de zero, acordo esperado ao acaso; pode ser negativo. ARI não é percentual de acerto.'),
-    figure('A silhueta favorece dois grupos' if particao_comum else 'Silhueta dos perfis selecionados','silhuetas',
+    figure('Rodada final: silhueta favorece k = 2' if particao_comum else 'Silhueta dos perfis selecionados','silhuetas',
         (f'Seis métodos em k = 2. Silhueta {perfil_final[0][3]} e ARI {perfil_final[0][4]}.'
          if particao_comum else 'Curvas por número de grupos. Em k = 1, a silhueta é indefinida.'), ['EXP'],
         'Tempo: 1 min. Cada ponto usa a execução de melhor objetivo no perfil escolhido e no respectivo k. ' + particao_nota),
-    figure('Hiperparâmetros afetam as métricas','sensibilidade',
-        'Faixas entre perfis em k = 3. O ponto marca o perfil escolhido pela busca.', ['EXP','ART'],
-        'Tempo: 1,5 min. Cada extremo usa a melhor execução por objetivo da sua configuração. ' + sensibilidade_notas),
-    figure('GMM em dois e três componentes','gmm_comparacao',
-        'Silhueta mede a geometria dos grupos. ARI mede concordância com espécies.', ['EXP','ART'],
-        f'Tempo: 1,5 min. Em k=2, silhueta {fmt(gmm_k2.silhueta)} e ARI {fmt(gmm_k2.ari)}. Em k=3, silhueta {fmt(gmm_k3.silhueta)} e ARI {fmt(gmm_k3.ari)}. Comparamos o mesmo perfil em k distintos. A silhueta orientou a escolha; o ARI descreve a concordância com as espécies.'),
-    figure('Uma árvore permite vários cortes','dendrograma',
-        'A silhueta Manhattan também favorece k = 2 (0,6192).', ['EXP','ART','DIAG'],
-        'Tempo: 1 min. UPGMA com ligação média e Manhattan. O dendrograma usa as 12 subárvores finais, com contagens de folhas entre parênteses. As linhas marcam os cortes em dois e três grupos. A avaliação principal usa distância euclidiana. O diagnóstico com Manhattan retorna 0,6192, 0,5024, 0,4084 e 0,3770 para k de 2 a 5. Em k=3, o ARI externo é 0,7184.'),
+    figure('Tunagem: inicialização e difusividade','tunagem_particionais',
+        'Perfis em amarelo foram escolhidos pela média das silhuetas em k = 2…5.', ['EXP','ART'],
+        'Tempo: 1,5 min. K-Means comparou random e k-means++; a diferença média foi pequena e k-means++ foi selecionado. No FCM, m = 2 venceu a média; m controla a difusividade das pertinências. No K-Medoids, a inicialização build foi superior à random na média. Cada ponto representa a melhor das dez execuções pela função objetivo, usando sementes 42–51.'),
+    figure('Kernel, GMM e DBSCAN na tunagem','tunagem_complexos',
+        'Contorno amarelo: perfil escolhido; no DBSCAN, a linha marca 95% de cobertura.', ['EXP','ART'],
+        'Tempo: 2 min. Kernel FCM avaliou nove pares de m e gamma; m = 2 e gamma = 0,05 maximizou a silhueta média. O GMM cruzou quatro estruturas de covariância com três regularizações; venceu spherical com regularização 0,01. O DBSCAN avaliou 24 pares de epsilon e min_samples. O círculo amarelo identifica epsilon = 0,6943 e min_samples = 3; pontos à esquerda de 95% eram inelegíveis, mesmo com silhueta maior.'),
+    figure('GMM: critério interno não maximiza ARI','gmm_tunagem',
+        'k = 3: o perfil esférico foi selecionado; o perfil full teve maior ARI apenas na tunagem.', ['EXP','ART'],
+        'Tempo: 1,5 min. O perfil selecionado pela silhueta média foi spherical com regularização 0,01. Em k=3, ele obteve silhueta 0,4568 e ARI 0,6199. Na tunagem, full com a mesma regularização obteve silhueta menor, 0,3685, e ARI maior, 0,9222. Não são duas execuções do mesmo perfil. O ARI não participou da seleção; por isso a alternativa full não definiu o experimento final.'),
+    figure('UPGMA: ARI 0,7184 no corte k = 3','dendrograma',
+        'A árvore usa Manhattan; em k = 3, ARI = 0,7184 e silhueta = 0,4517.', ['EXP','ART','DIAG'],
+        'Tempo: 1 min. O UPGMA usa ligação média e distância Manhattan para construir uma única árvore. O dendrograma mostra as 12 subárvores finais; as linhas marcam cortes em dois e três grupos. A silhueta oficial, calculada com Euclidiana no espaço padronizado, é 0,5802 em k=2 e 0,4517 em k=3. Neste segundo corte, o ARI é 0,7184.'),
     cols('DBSCAN avalia os pontos retidos','CONFIGURAÇÃO',
         [f"ε = {dbscan['eps']} · mínimo = {dbscan['min_samples']}.",
          f"{dbscan['grupos']} grupos e {dbscan['ruido']} pontos de ruído.",
          f"{dbscan['n']} flores retidas · {dbscan['cobertura']}% da base."],
-        'MÉTRICAS SEM RUÍDO',[f"Silhueta {dbscan['silhueta']} · ARI {dbscan['ari']}.",
-        (f"Mesma partição dos outros seis em {dbscan['n']} flores." if empate_amostra
-         else f"Comparação restrita às mesmas {dbscan['n']} flores.")],['EXP','ART'],
+        'SILHUETA × COBERTURA',[f"Escolhida: S = {dbscan['silhueta']} · ARI = {dbscan['ari']}.",
+         f"Maior S da grade: {extremo_dbscan[5]}.",
+         f"Mas cobria só {extremo_dbscan[4]}% da base."],['EXP','ART'],
         f'Tempo: 1 min. Excluir os rótulos −1 do DBSCAN reduz a amostra de ambas as métricas. '
         f'O mínimo de {dbscan["min_samples"]} inclui o próprio ponto. A maior silhueta da grade foi {extremo_dbscan[5]} com cobertura de {extremo_dbscan[4]}%. ' + amostra_nota),
     figure('PCA retém 95,80% em dois eixos','pca',
@@ -240,9 +316,9 @@ slides = [
         'A fração retida se refere ao espectro do kernel centralizado.', ['EXP','ART','DIAG'],
         'Tempo: 1 min. Usa-se RBF com gamma=0,25, duas componentes e solver denso. Os autovalores 39,1321 e 17,7924 representam 39,8394% e 18,1140% do traço completo (98,2247). O percentual acumulado descreve a variância no espaço de características do RBF. Gamma foi fixado antes do ajuste. As cores e os símbolos indicam espécies.'),
     figure('t-SNE e UMAP enfatizam vizinhanças','tsne_umap',
-        'Setosa permanece isolada; a posição entre ilhas não mede distância original.', ['EXP','ART'],
+        't-SNE: perp. 30 · UMAP: 15 viz., min_dist 0,1 · seed 42.', ['EXP','ART'],
         'Tempo: 1,5 min. t-SNE: perplexidade 30, inicialização PCA, semente 42, máximo de 1.000 iterações, KL final 0,1642 e taxa efetiva 50. O atributo n_iter_ registrou 999. UMAP: 15 vizinhos, min_dist=0,1, spread=1, inicialização espectral, semente 42 e uma thread. A saída 150 × 2 variou de −5,8964 a 10,1182 no eixo 1 e de 2,2188 a 9,0128 no eixo 2. A curva de similaridade usa a=1,5769 e b=0,8951. Cada técnica teve uma execução, com eixos sem unidade física.'),
-    {'layout':'ResultsSlide','title':'t-SNE preservou mais vizinhos locais',
+    {'layout':'ResultsSlide','title':'Maior preservação local: t-SNE',
      'labels':['PCA','Kernel PCA','t-SNE','UMAP'],
      'values':[round(q2[k]['trustworthiness_10'],4) for k in ['pca','kernel_pca','tsne','umap']],
      'unit':'Trustworthiness · 10 vizinhos',
@@ -250,15 +326,15 @@ slides = [
      'highlightIndex':2,'citations':['EXP','ART'],
      'notes':'Tempo: 1 min. Trustworthiness penaliza vizinhos artificiais introduzidos pela projeção comparando o espaço padronizado 4D com o 2D, usando dez vizinhos e distância euclidiana. PCA=0,978156, Kernel PCA=0,932238, t-SNE=0,988813 e UMAP=0,978349. PCA e UMAP são muito próximos neste índice. Os valores não demonstram superioridade universal nem estabilidade entre sementes. O gráfico tem origem zero e valores numéricos explícitos.'},
     cols('O alcance das conclusões é descritivo','O QUE SUSTENTA',
-        ['Mesma base e mesma padronização.','Dez sementes por perfil e k.','Sensibilidade documentada nas grades.'],
-        'O QUE LIMITA',['Uma execução por projeção.','Uma única base de dados.','Cobertura afeta os índices do DBSCAN.'],['ART','EXP'],
-        'Tempo: 1 min. As sementes variam a inicialização com as mesmas observações. As configurações vencedoras dependem da grade e, para DBSCAN, do mínimo de cobertura. Na Questão 2, cada projeção usa uma configuração. As métricas de agrupamento são calculadas no espaço padronizado de quatro atributos.'),
+        ['Tunagem e rodada final separadas.','Novas sementes na rodada final.','Sensibilidade documentada nas grades.'],
+        'O QUE LIMITA',['10 sementes ≠ 10 amostras independentes.','Grade discreta; uma única base.','Cobertura afeta o DBSCAN.'],['ART','EXP'],
+        'Tempo: 1 min. As sementes medem sensibilidade da otimização nas mesmas 150 flores, não variabilidade amostral. A busca discreta não prova otimalidade fora da grade. As configurações dependem do critério interno e, no DBSCAN, do piso de cobertura. Cada projeção foi executada uma vez, portanto sua estabilidade visual não foi estimada.'),
     {'layout':'ConclusionSlide','title':'Grupos geométricos diferem de espécies',
      'windowTitle':'CONCLUSÕES',
-     'bullets':['A silhueta orientou a escolha dos perfis e de k.',
-        f"Entre os perfis escolhidos, {agrupamento['maior_ari_k3']['nome']} obteve ARI {agrupamento['maior_ari_k3']['ari']} em k = 3.",
-        'PCA explica a variância; t-SNE destaca a vizinhança local.',
-        'Interprete métrica, projeção e objetivo em conjunto.'],
+     'bullets':['Seis métodos escolheram k = 2 pela silhueta.',
+        f"Entre os perfis escolhidos, {agrupamento['maior_ari_k3']['nome']} teve ARI {agrupamento['maior_ari_k3']['ari']} em k = 3.",
+        'DBSCAN reteve 96%; inicializações afetaram k = 3.',
+        'Silhueta e ARI avaliam propriedades distintas.'],
      'citations':['ART','EXP'],
      'notes':'Fechamento (45 s). ' + particao_nota + ' ' + amostra_nota + ' Retomar a comparação com as três espécies e o papel das projeções.'},
     {'layout':'ReferencesSlide','title':'Fontes e rastreabilidade','ids':['ART','EXP','DIAG'],
@@ -266,34 +342,34 @@ slides = [
 ]
 spec = {'title':'Iris: agrupamento e redução de dimensionalidade',
     'plan':{'objective':'Apresentar protocolo, resultados e limites da comparação na Iris.',
-    'audience':'Turma do CIn/UFPE · 2026.2', 'minutes':18,'slideCount':len(slides),
+    'audience':'Turma do CIn/UFPE · 2026.2', 'minutes':22,'slideCount':len(slides),
     'depth':'intermediária','language':'pt-BR','profile':'retroui-pixel',
     'narrative':'Pergunta → métodos → protocolo → evidências → projeções → limites → conclusão.',
     'assumptions':['Tema retro solicitado: retroui-pixel, 16:9, pt-BR.',
-        'Assumiu-se que a apresentação é sobre o projeto local e o artigo revisado mais recente.',
-        '17 slides, cerca de 18 minutos; notas de apresentação incluídas.',
+        'Fonte principal definida pelo usuário: artigo_iris_ieee_paginacao_corrigida.pdf.',
+        '18 slides, cerca de 22 minutos, reservando 8 minutos para discussão.',
         'Artefatos existentes são a evidência; nenhum ajuste foi reexecutado.',
         'Fontes Pixelify Sans e JetBrains Mono podem usar Liberation Mono como fallback.',
         'Texto, diagramas e barras permanecem editáveis; figuras são imagens com SVG-fonte adicional.'],
     'analysis':{'centralTheme':'Separação geométrica e classes biológicas respondem a critérios diferentes.',
         'concepts':['Silhueta interna','ARI externo','Seleção por função objetivo','Padronização','Projeções 2D'],
-        'arguments':['k deve ser selecionado após a melhor execução por objetivo.',
+        'arguments':['O perfil é fixado na tunagem antes de selecionar k na rodada final.',
             'Silhueta maior não implica maior ARI.','A projeção não é prova de novas classes.'],
-        'results':[f"{contagens['ajustes_totais']} ajustes e 252 registros no protocolo final.",particao_nota,
-            f'O perfil escolhido de GMM atinge ARI {fmt(gmm_k3.ari)} em k=3.', amostra_nota,
+        'results':['1.144 ajustes na tunagem e 252 na rodada final: 1.396 no total.',particao_nota,
+            'Entre os perfis selecionados, UPGMA atinge ARI 0,7184 em k=3.', amostra_nota,
             'PCA 2D retém 95,80%; Kernel PCA retém 57,95% no espaço RBF; t-SNE tem trustworthiness=0,9888.'],
-        'visualOpportunities':['Fluxo de seleção','Curvas por k','Faixas de sensibilidade', 'Contraste GMM','Árvore armazenada',
+        'visualOpportunities':['Fluxo de seleção','Curvas por k','Mapas de tunagem', 'Contraste GMM','Árvore armazenada',
             'Quatro projeções com cores e símbolos','Barras de preservação local']},
-    'sources':[{'path':'docs/artigo/artigo_ieee_revisado.pdf','author':'Equipe 08',
-        'consulted':True,'sections':'Texto extraído; fonte Typst integral; seções de métodos, resultados e discussão.'},
+    'sources':[{'path':'artigo_iris_ieee_paginacao_corrigida.pdf','author':'Fátima Araújo e Rodrigo Gomes',
+        'consulted':True,'sections':'PDF integral; oito páginas; métodos, protocolo, resultados, discussão e conclusão.'},
         {'path':'resultados/','consulted':True,'sections':'Métricas Q1, metadados, contingências, árvore e coordenadas Q2.'},
         {'path':'docs/artigo/diagnosticos_revisao.json','consulted':True,'sections':'Resultados, sensibilidade, amostra comum, UPGMA e espectro RBF.'}],
     'limitations':['Referências teóricas consultadas por meio do artigo local; sem nova revisão externa.',
         'Revisão da apresentação verifica fidelidade aos registros; não substitui auditoria dos experimentos.']},
     'visual':{'grid':True,'gridOpacity':.28,'gridSpacing':.4,'logoInFooter':True},
     'slides':slides,'references':[
-        {'id':'ART','text':'Fátima Araújo e Rogrigo Gomes. Agrupamento e redução de dimensionalidade na base Iris. UFPE, 2026.',
-         'url':'file:docs/artigo/artigo_ieee_revisado.pdf'},
+        {'id':'ART','text':'Fátima Araújo e Rodrigo Gomes. Agrupamento e Redução de Dimensionalidade na Base Iris: Busca de Hiperparâmetros e Avaliação Comparativa. UFPE, 2026.',
+         'url':'file:artigo_iris_ieee_paginacao_corrigida.pdf'},
         {'id':'EXP','text':'Equipe 08. Questões 1 e 2: métricas, partições, hierarquia, parâmetros e coordenadas. Registros do projeto, 2026.',
          'url':'file:resultados/'},
         {'id':'DIAG','text':'Equipe 08. Diagnósticos de agrupamento, sensibilidade e projeção, 2026.',

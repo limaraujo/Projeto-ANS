@@ -1,18 +1,18 @@
 {
   "status": "passed",
   "backend": "ooxml",
-  "generatedAt": "2026-11-19T18:09:23.925Z",
+  "generatedAt": "2026-11-19T23:30:12.827Z",
   "issues": [],
   "conversion": {
-    "pdf": "outputs/apresentacao-iris-retro/presentation.pdf",
+    "pdf": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-iris-retro/presentation.pdf",
     "engine": "native-subset",
-    "pages": 17,
+    "pages": 18,
     "limitation": "Cairo/Pango conversion of supported editable OOXML only; LibreOffice/PowerPoint compatibility is not established by this export."
   },
-  "validatedAt": "2026-11-19T18:09:57.196Z",
-  "slideCount": 17,
-  "pdfPages": 17,
-  "previewCount": 17,
+  "validatedAt": "2026-11-19T23:30:52.075Z",
+  "slideCount": 18,
+  "pdfPages": 18,
+  "previewCount": 18,
   "checks": [
     "ZIP CRC",
     "XML parse",
@@ -49,18 +49,20 @@
       14,
       15,
       16,
-      17
+      17,
+      18
     ],
     "issues": [],
     "reviewer": "Codex",
-    "method": "Inspeção visual das 17 prévias. A cada regeneração, conferência visual dos slides alterados (10 e 16) e comparação pixel a pixel dos demais.",
+    "method": "Inspeção visual de todas as 18 prévias PNG; slides 8 e 14 revistos novamente após a correção final.",
     "observations": [
-      "Conferidos títulos, eixos, legendas, alinhamento dos cartões e contraste.",
-      "Comparados os números do protocolo e do DBSCAN e as faixas de sensibilidade com os registros oficiais.",
-      "PDF renderizado pelo conversor nativo Cairo/Pango. A abertura no Microsoft PowerPoint permanece sem verificação."
+      "Títulos, últimas linhas, legendas, eixos, margens, contraste e rodapés foram conferidos.",
+      "O protocolo em duas etapas, o total de 1.396 ajustes e o ARI 0,7184 do UPGMA em k = 3 estão legíveis e coerentes com o artigo correto.",
+      "Os dois slides de tunagem distinguem os perfis escolhidos e o piso de cobertura sem condensar seis gráficos em uma única tela.",
+      "O slide do GMM diferencia o perfil esférico selecionado da alternativa full observada na tunagem."
     ],
-    "fingerprint": "5294d873821f801593d46e1b46a6ea84fd74c42997b368e1536468282a4c7105",
-    "reviewedAt": "2026-11-19T18:09:56.679Z"
+    "fingerprint": "7f29ffe9bdaa7a0ba87959d9af8fbce3586968c19f6ba4dc2326180e78bda559",
+    "reviewedAt": "2026-11-19T23:30:51.614Z"
   },
   "limitations": [
     "Text fit uses conservative font metrics, not a typography engine.",

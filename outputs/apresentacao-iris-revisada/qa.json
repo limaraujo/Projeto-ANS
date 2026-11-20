@@ -1,0 +1,98 @@
+{
+  "status": "passed",
+  "backend": "ooxml",
+  "generatedAt": "2026-11-19T23:58:23.698Z",
+  "issues": [],
+  "conversion": {
+    "pdf": "/home/araujo/Graduação/7º período/Aprendizado não Supervisionado/Projeto/outputs/apresentacao-iris-revisada/presentation.pdf",
+    "engine": "native-subset",
+    "pages": 18,
+    "limitation": "Cairo/Pango conversion of supported editable OOXML only; LibreOffice/PowerPoint compatibility is not established by this export."
+  },
+  "validatedAt": "2026-11-19T23:59:06.753Z",
+  "slideCount": 18,
+  "pdfPages": 18,
+  "previewCount": 18,
+  "checks": [
+    "ZIP CRC",
+    "XML parse",
+    "OPC relationships",
+    "slide count",
+    "editable text",
+    "OOXML bounds",
+    "PDF page count",
+    "rendered text coverage",
+    "PDF word bounds",
+    "PNG count/signature",
+    "scene bounds",
+    "overlap",
+    "text fit estimate",
+    "font minimum",
+    "contrast"
+  ],
+  "visualReview": {
+    "status": "passed",
+    "pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "issues": [],
+    "reviewer": "Codex",
+    "method": "Inspeção visual das 18 prévias PNG, com revisão ampliada dos slides 8, 10, 11, 16 e 18.",
+    "observations": [
+      "Títulos, últimas linhas, legendas, eixos, margens, contraste, rodapés e marcas institucionais foram conferidos.",
+      "O slide 8 distingue as três famílias de configuração e usa amarelo somente nos perfis escolhidos.",
+      "O slide 10 preserva a topologia e torna visíveis os cortes para dois e três grupos; a explicação das contagens está legível.",
+      "O slide 11 destaca o piso de 95% e mantém as cinco linhas de sensibilidade sem sobreposição.",
+      "O slide 16 apresenta faixas observadas, amplitudes, contagens de melhor objetivo e a ressalva sobre independência e intervalos de confiança.",
+      "O slide 18 contém apenas referências acadêmicas, sem caminhos ou identificadores internos."
+    ],
+    "fingerprint": "b7893b3ef0f8d9de5ed2566e697efa886ed2364edd83a7b3535cc3726eac4223",
+    "reviewedAt": "2026-11-19T23:59:06.275Z"
+  },
+  "limitations": [
+    "Text fit uses conservative font metrics, not a typography engine.",
+    "PDF text presence does not prove text is fully visible.",
+    "Visual review is a reviewer declaration; no automatic image understanding.",
+    "Reference existence and scientific accuracy require source review.",
+    "Bar charts are editable native shapes; PptxGenJS uses native PowerPoint charts.",
+    "Cairo/Pango conversion of supported editable OOXML only; LibreOffice/PowerPoint compatibility is not established by this export.",
+    "heading: Pixelify Sans ausente; usando Liberation Mono.",
+    "body: JetBrains Mono ausente; usando Liberation Mono.",
+    "code: JetBrains Mono ausente; usando Liberation Mono."
+  ],
+  "fonts": {
+    "requested": {
+      "heading": "Pixelify Sans",
+      "body": "JetBrains Mono",
+      "code": "JetBrains Mono"
+    },
+    "resolved": {
+      "heading": "Liberation Mono",
+      "body": "Liberation Mono",
+      "code": "Liberation Mono"
+    },
+    "warnings": [
+      "heading: Pixelify Sans ausente; usando Liberation Mono.",
+      "body: JetBrains Mono ausente; usando Liberation Mono.",
+      "code: JetBrains Mono ausente; usando Liberation Mono."
+    ],
+    "embedded": false
+  }
+}

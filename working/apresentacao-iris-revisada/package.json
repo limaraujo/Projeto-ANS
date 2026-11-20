@@ -1,0 +1,13 @@
+{
+  "name": "slides-creator", "version": "1.0.0", "private": true,
+  "description": "Codex skill for editable scientific presentations",
+  "type": "module", "engines": { "node": ">=18" },
+  "scripts": {
+    "doctor": "node scripts/cli.mjs doctor",
+    "test": "node tests/run.mjs",
+    "test:integration": "node tests/integration.test.mjs",
+    "demo": "node scripts/cli.mjs build --spec tests/fixtures/dbscan.json --out outputs/dbscan",
+    "install:skill": "node scripts/install.mjs"
+  },
+  "dependencies": { "pptxgenjs": "4.0.1" }
+}

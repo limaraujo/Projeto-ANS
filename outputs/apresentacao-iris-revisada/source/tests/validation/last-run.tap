@@ -1,0 +1,56 @@
+
+> slides-creator@1.0.0 test
+> node tests/run.mjs
+
+TAP version 13
+# Subtest: 12 slides e os três perfis mantêm os mínimos de legibilidade
+ok 1 - 12 slides e os três perfis mantêm os mínimos de legibilidade
+  ---
+  duration_ms: 16.115582
+  type: 'test'
+  ...
+# Subtest: citações inexistentes, bibliografia ausente e contagem incorreta são recusadas
+ok 2 - citações inexistentes, bibliografia ausente e contagem incorreta são recusadas
+  ---
+  duration_ms: 1.087818
+  type: 'test'
+  ...
+# Subtest: limites, sobreposição, fonte, contraste e cortes estimados são detectados
+ok 3 - limites, sobreposição, fonte, contraste e cortes estimados são detectados
+  ---
+  duration_ms: 3.711646
+  type: 'test'
+  ...
+# Subtest: valores e figuras inválidos são recusados antes da geração
+ok 4 - valores e figuras inválidos são recusados antes da geração
+  ---
+  duration_ms: 1.014576
+  type: 'test'
+  ...
+# Subtest: dados sintéticos declarados correspondem às contagens mostradas
+ok 5 - dados sintéticos declarados correspondem às contagens mostradas
+  ---
+  duration_ms: 0.471685
+  type: 'test'
+  ...
+# Subtest: fluxo real: 12 PPTX/PDF/PNG, notas, extração, revisão, falhas e reprodução portátil
+ok 6 - fluxo real: 12 PPTX/PDF/PNG, notas, extração, revisão, falhas e reprodução portátil
+  ---
+  duration_ms: 5206.546964
+  type: 'test'
+  ...
+# Subtest: backend PptxGenJS: integração real quando a dependência está instalada
+ok 7 - backend PptxGenJS: integração real quando a dependência está instalada # SKIP
+  ---
+  duration_ms: 0.275376
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 5237.400382

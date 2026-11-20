@@ -1,0 +1,322 @@
+{
+  "title": "Iris: agrupamento e redução de dimensionalidade",
+  "plan": {
+    "objective": "Apresentar protocolo, resultados e limites da comparação na Iris.",
+    "audience": "Turma do CIn/UFPE · 2026.2",
+    "minutes": 22,
+    "slideCount": 18,
+    "depth": "intermediária",
+    "language": "pt-BR",
+    "profile": "retroui-pixel",
+    "narrative": "Pergunta → métodos → protocolo → evidências → projeções → limites → conclusão.",
+    "assumptions": [
+      "Tema retro solicitado: retroui-pixel, 16:9, pt-BR.",
+      "Fonte científica principal: artigo IEEE revisado da equipe.",
+      "18 slides, cerca de 22 minutos, reservando 8 minutos para discussão.",
+      "Artefatos existentes são a evidência; nenhum ajuste foi reexecutado.",
+      "Fontes Pixelify Sans e JetBrains Mono podem usar Liberation Mono como fallback.",
+      "Texto, diagramas e barras permanecem editáveis; figuras são imagens com SVG-fonte adicional."
+    ],
+    "analysis": {
+      "centralTheme": "Separação geométrica e classes biológicas respondem a critérios diferentes.",
+      "concepts": [
+        "Silhueta interna",
+        "ARI externo",
+        "Seleção por função objetivo",
+        "Padronização",
+        "Projeções 2D"
+      ],
+      "arguments": [
+        "O perfil é fixado na tunagem antes de selecionar k na rodada final.",
+        "Silhueta maior não implica maior ARI.",
+        "A projeção não é prova de novas classes."
+      ],
+      "results": [
+        "1.144 ajustes na tunagem e 252 na rodada final: 1.396 no total.",
+        "Os seis métodos selecionaram a mesma partição em k=2. Um grupo reúne as 50 setosas. O outro contém 50 versicolors e 50 virginicas. Silhueta 0,5802 e ARI 0,5681 em 150 flores.",
+        "Entre os perfis selecionados, UPGMA atinge ARI 0,7184 em k=3.",
+        "As sete partições coincidem nas 144 flores retidas, com silhueta 0,6035 e ARI 0,5760.",
+        "PCA 2D retém 95,80%; Kernel PCA retém 57,95% no espaço RBF; t-SNE tem trustworthiness=0,9888."
+      ],
+      "visualOpportunities": [
+        "Fluxo de seleção",
+        "Curvas por k",
+        "Mapas de tunagem",
+        "Contraste GMM",
+        "Árvore armazenada",
+        "Quatro projeções com cores e símbolos",
+        "Barras de preservação local"
+      ]
+    },
+    "sources": [
+      {
+        "path": "artigo_iris_ieee_revisado.pdf",
+        "author": "Fátima Araújo e Rodrigo Gomes",
+        "consulted": true,
+        "sections": "Artigo IEEE revisado; métodos, protocolo, variabilidade, sensibilidade, resultados e referências."
+      },
+      {
+        "path": "resultados/",
+        "consulted": true,
+        "sections": "Métricas Q1, metadados, contingências, árvore e coordenadas Q2."
+      },
+      {
+        "path": "docs/artigo/diagnosticos_revisao.json",
+        "consulted": true,
+        "sections": "Resultados, sensibilidade, amostra comum, UPGMA e espectro RBF."
+      }
+    ],
+    "limitations": [
+      "Referências teóricas consultadas por meio do artigo local; sem nova revisão externa.",
+      "Revisão da apresentação verifica fidelidade aos registros; não substitui auditoria dos experimentos."
+    ]
+  },
+  "visual": {
+    "grid": true,
+    "gridOpacity": 0.28,
+    "gridSpacing": 0.4,
+    "logoInFooter": true
+  },
+  "slides": [
+    {
+      "layout": "CoverSlide",
+      "title": "Iris: grupos e projeções",
+      "duck": false,
+      "coverLogo": "assets/input/cover-logo-1.png",
+      "subtitle": "Busca de hiperparâmetros e avaliação comparativa\nFátima Araújo e Rodrigo Gomes · Equipe 08",
+      "notes": "Abertura (30 s). A separação geométrica coincide com as três espécies? O estudo compara sete agrupadores, incluindo sensibilidade aos hiperparâmetros, e quatro projeções."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "Três espécies; quantos grupos?",
+      "columns": [
+        {
+          "title": "BASE IRIS",
+          "bullets": [
+            "150 flores; 50 por espécie.",
+            "Quatro medidas em centímetros.",
+            "Arquivo Iris da UCI explicitado."
+          ]
+        },
+        {
+          "title": "PREPARAÇÃO",
+          "bullets": [
+            "Z-score: z = (x − μ) / σ.",
+            "μ e σ populacionais por atributo.",
+            "Rótulos usados somente depois."
+          ]
+        }
+      ],
+      "notes": "Tempo: 1 min. Usou-se codigo/iris/iris.data, correspondente à edição da UCI. As linhas 35 e 38 diferem de load_iris do scikit-learn; por isso a origem do arquivo precisa ser explicitada. Para cada atributo, μ é a média das 150 observações e σ é o desvio-padrão populacional. Os rótulos de espécie não entram no ajuste nem na seleção."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "Sete métodos, cinco perspectivas",
+      "columns": [
+        {
+          "title": "PARTIÇÕES",
+          "bullets": [
+            "K-Means: centroides.",
+            "FCM e Kernel FCM: pertinências.",
+            "K-Medoids: flores como representantes."
+          ]
+        },
+        {
+          "title": "OUTRAS ESTRUTURAS",
+          "bullets": [
+            "GMM/EM: mistura probabilística.",
+            "UPGMA: hierarquia de grupos.",
+            "DBSCAN: densidade e ruído."
+          ]
+        }
+      ],
+      "notes": "Tempo: 1 min. O Kernel FCM usa protótipos no espaço de entrada e kernel RBF. K-Medoids usa PAM e Euclidiana. UPGMA usa ligação média com Manhattan. Perfis selecionados: K-Means: k-means++, k=2. FCM: m = 2, k=2. Kernel FCM: m = 2; γ = 0,05, k=2. K-Medoids: build, k=2. GMM/EM: spherical; reg = 0.01, k=2. UPGMA: ligação média, Manhattan, k=2. DBSCAN: ε = 0,694; min_samples = 3, k=2."
+    },
+    {
+      "layout": "DiagramSlide",
+      "title": "Tunagem e rodada final são separadas",
+      "steps": [
+        "TUNAGEM\n1.120 part.\n+ 24 DBSCAN",
+        "42–51\nperfil pela\nmédia S₂…₅",
+        "FINAL\n250 part.\n+ árvore + DBSCAN",
+        "52–61\nobjetivo →\nk por silhueta"
+      ],
+      "takeaway": "1.144 na tunagem + 252 na rodada final = 1.396 ajustes.",
+      "mainFlow": [
+        0,
+        1,
+        2
+      ],
+      "notes": "Tempo: 1,5 min. A tunagem inclui 1120 ajustes particionais em k de 2 a 5 e 24 candidatos do DBSCAN: 1.144 ajustes. Em cada configuração e k, a melhor execução é escolhida pela função objetivo. O perfil fixado maximiza a média das quatro silhuetas, sem escolher k nessa etapa. A rodada final usa novas sementes, 52 a 61, nos cinco valores de k. Só então k é escolhido pela silhueta. UPGMA usa uma árvore; DBSCAN, a configuração elegível com pelo menos 95.0% de cobertura. O ARI não orienta nenhuma escolha."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "Silhueta e ARI respondem a perguntas distintas",
+      "columns": [
+        {
+          "title": "SILHUETA",
+          "bullets": [
+            "Coesão e separação geométrica.",
+            "Define k após selecionar o ajuste.",
+            "k = 1: valor indefinido."
+          ]
+        },
+        {
+          "title": "ARI",
+          "bullets": [
+            "Concordância com as espécies.",
+            "Desconta o acordo ao acaso.",
+            "Avaliação externa; não escolhe k."
+          ]
+        }
+      ],
+      "notes": "Tempo: 1 min. Silhueta s(i)=(b(i)−a(i))/max(a(i),b(i)): a é distância média ao próprio grupo; b é a menor distância média a outro grupo. Usa-se distância euclidiana para todos, inclusive para avaliar a árvore Manhattan. ARI=1 indica partições equivalentes; próximo de zero, acordo esperado ao acaso; pode ser negativo. ARI não é percentual de acerto."
+    },
+    {
+      "layout": "figure",
+      "title": "Rodada final: silhueta favorece k = 2",
+      "path": "assets/input/figure-6.png",
+      "alt": "Seis métodos em k = 2. Silhueta 0,5802 e ARI 0,5681.",
+      "caption": "Seis métodos em k = 2. Silhueta 0,5802 e ARI 0,5681.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "notes": "Tempo: 1 min. Cada ponto usa a execução de melhor objetivo no perfil escolhido e no respectivo k. Os seis métodos selecionaram a mesma partição em k=2. Um grupo reúne as 50 setosas. O outro contém 50 versicolors e 50 virginicas. Silhueta 0,5802 e ARI 0,5681 em 150 flores."
+    },
+    {
+      "layout": "figure",
+      "title": "Tunagem: inicialização e difusividade",
+      "path": "assets/input/figure-7.png",
+      "alt": "Perfis em amarelo foram escolhidos pela média das silhuetas em k = 2…5.",
+      "caption": "Perfis em amarelo foram escolhidos pela média das silhuetas em k = 2…5.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "notes": "Tempo: 1,5 min. K-Means comparou random e k-means++; a diferença média foi pequena e k-means++ foi selecionado. No FCM, m = 2 venceu a média; m controla a difusividade das pertinências. No K-Medoids, a inicialização build foi superior à random na média. Cada ponto representa a melhor das dez execuções pela função objetivo, usando sementes 42–51."
+    },
+    {
+      "layout": "figure",
+      "title": "Tunagem: perfis escolhidos em amarelo",
+      "path": "assets/input/figure-8.png",
+      "alt": "Kernel FCM, GMM/EM e DBSCAN. Amarelo identifica m=2 e gamma=0,05; GMM esferico com regularizacao 10^-2; e DBSCAN com epsilon 0,694 e min_samples 3.",
+      "caption": "Escolhidas: Kernel FCM m = 2, γ = 0,05; GMM spherical, reg = 10⁻²; DBSCAN ε = 0,694, min_samples = 3.",
+      "attribution": "Fonte: artigo IEEE revisado da equipe; visualização dos registros existentes.",
+      "notes": "Tempo: 2 min. Amarelo marca somente os perfis efetivamente escolhidos. O Kernel FCM selecionou m = 2 e gamma = 0,05. O GMM selecionou covariância spherical e regularização 0,01; em k = 3, esse perfil obteve silhueta 0,4568 e ARI 0,6199. Esses valores não pertencem ao perfil full. O DBSCAN selecionou epsilon 0,694 e min_samples 3 sob piso de 95% de cobertura."
+    },
+    {
+      "layout": "figure",
+      "title": "GMM: critério interno não maximiza ARI",
+      "path": "assets/input/figure-9.png",
+      "alt": "k = 3: o perfil esférico foi selecionado; o perfil full teve maior ARI apenas na tunagem.",
+      "caption": "k = 3: o perfil esférico foi selecionado; o perfil full teve maior ARI apenas na tunagem.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "notes": "Tempo: 1,5 min. O perfil selecionado pela silhueta média foi spherical com regularização 0,01. Em k=3, ele obteve silhueta 0,4568 e ARI 0,6199. Na tunagem, full com a mesma regularização obteve silhueta menor, 0,3685, e ARI maior, 0,9222. Não são duas execuções do mesmo perfil. O ARI não participou da seleção; por isso a alternativa full não definiu o experimento final."
+    },
+    {
+      "layout": "figure",
+      "title": "UPGMA: ARI 0,7184 no corte k = 3",
+      "path": "assets/input/figure-10.png",
+      "alt": "Dendrograma UPGMA condensado em doze subárvores, com cortes visíveis para dois e três grupos e explicação das contagens entre parênteses.",
+      "caption": "Manhattan; em k = 3: ARI = 0,7184 e silhueta = 0,4517.",
+      "attribution": "Fonte: artigo IEEE revisado da equipe; topologia e valores preservados.",
+      "notes": "Tempo: 1 min. O UPGMA usa ligação média e distância Manhattan para construir uma única árvore. As folhas mostradas são subárvores agregadas; os números entre parênteses são contagens de observações, não identificadores. As linhas marcam os cortes em dois e três grupos. Em k = 3, ARI = 0,7184 e silhueta euclidiana = 0,4517."
+    },
+    {
+      "layout": "figure",
+      "title": "DBSCAN: cobertura muda a leitura da silhueta",
+      "path": "assets/input/figure-11.png",
+      "alt": "Tabela de sensibilidade do DBSCAN para pisos de cobertura de 97, 95, 94, 85 e 75 por cento; a linha de 95 por cento está destacada.",
+      "caption": "Configuração escolhida: 2 grupos; ruído = 1 setosa, 1 versicolor e 4 virginica.",
+      "attribution": "Fonte: artigo IEEE revisado da equipe; mesma grade experimental, sem novos ajustes.",
+      "notes": "Tempo: 1 min. O piso de 95% foi fixado antes da seleção dos hiperparâmetros. Os pisos inferiores foram examinados depois como análise de sensibilidade. Quando o DBSCAN descarta mais flores, a silhueta aumenta, mas as métricas passam a descrever amostras diferentes. Por isso, silhuetas sob coberturas distintas não devem ser comparadas sem considerar quais observações foram retidas. A configuração escolhida formou dois grupos e marcou seis flores como ruído: uma setosa, uma versicolor e quatro virginica."
+    },
+    {
+      "layout": "figure",
+      "title": "PCA retém 95,80% em dois eixos",
+      "path": "assets/input/figure-12.png",
+      "alt": "Setosa se separa; versicolor e virginica mantêm uma região de sobreposição.",
+      "caption": "Setosa se separa; versicolor e virginica mantêm uma região de sobreposição.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "notes": "Tempo: 1,5 min. A PCA foi ajustada com quatro componentes e SVD completa. Valores singulares: 20,8955, 11,7551, 4,7014 e 1,7582. A média de entrada é numericamente próxima de zero após o z-score. PC1 explica 72,7705% e PC2 23,0305%. Os maiores loadings da PC1 estão em comprimento e largura de pétala (0,9950 e 0,9682). PC2 enfatiza largura de sépala (0,8913). As cores e os símbolos indicam as espécies conhecidas."
+    },
+    {
+      "layout": "figure",
+      "title": "Kernel PCA muda a geometria",
+      "path": "assets/input/figure-13.png",
+      "alt": "A fração retida se refere ao espectro do kernel centralizado.",
+      "caption": "A fração retida se refere ao espectro do kernel centralizado.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "notes": "Tempo: 1 min. Usa-se RBF com gamma=0,25, duas componentes e solver denso. Os autovalores 39,1321 e 17,7924 representam 39,8394% e 18,1140% do traço completo (98,2247). O percentual acumulado descreve a variância no espaço de características do RBF. Gamma foi fixado antes do ajuste. As cores e os símbolos indicam espécies."
+    },
+    {
+      "layout": "figure",
+      "title": "t-SNE e UMAP enfatizam vizinhanças",
+      "path": "assets/input/figure-14.png",
+      "alt": "t-SNE: perp. 30 · UMAP: 15 viz., min_dist 0,1 · seed 42.",
+      "caption": "t-SNE: perp. 30 · UMAP: 15 viz., min_dist 0,1 · seed 42.",
+      "attribution": "Fonte: artefatos da Equipe 08. Gráfico autoral; dados originais preservados.",
+      "notes": "Tempo: 1,5 min. t-SNE: perplexidade 30, inicialização PCA, semente 42, máximo de 1.000 iterações, KL final 0,1642 e taxa efetiva 50. O atributo n_iter_ registrou 999. UMAP: 15 vizinhos, min_dist=0,1, spread=1, inicialização espectral, semente 42 e uma thread. A saída 150 × 2 variou de −5,8964 a 10,1182 no eixo 1 e de 2,2188 a 9,0128 no eixo 2. A curva de similaridade usa a=1,5769 e b=0,8951. Cada técnica teve uma execução, com eixos sem unidade física."
+    },
+    {
+      "layout": "ResultsSlide",
+      "title": "Maior preservação local: t-SNE",
+      "labels": [
+        "PCA",
+        "Kernel PCA",
+        "t-SNE",
+        "UMAP"
+      ],
+      "values": [
+        0.9782,
+        0.9322,
+        0.9888,
+        0.9783
+      ],
+      "unit": "Trustworthiness · 10 vizinhos",
+      "caption": "Diagnóstico desta configuração; não é acurácia nem avaliação global.",
+      "highlightIndex": 2,
+      "notes": "Tempo: 1 min. Trustworthiness penaliza vizinhos artificiais introduzidos pela projeção comparando o espaço padronizado 4D com o 2D, usando dez vizinhos e distância euclidiana. PCA=0,978156, Kernel PCA=0,932238, t-SNE=0,988813 e UMAP=0,978349. PCA e UMAP são muito próximos neste índice. Os valores não demonstram superioridade universal nem estabilidade entre sementes. O gráfico tem origem zero e valores numéricos explícitos."
+    },
+    {
+      "layout": "figure",
+      "title": "Inicializações alteram o ARI em k = 3",
+      "path": "assets/input/figure-16.png",
+      "alt": "Intervalos observados de ARI para K-Means, de 0,4290 a 0,6451, e GMM/EM, de 0,4199 a 0,6199, em dez inicializações.",
+      "caption": "Amplitude entre sementes na mesma base; as faixas não são intervalos de confiança.",
+      "attribution": "Fonte: artigo IEEE revisado da equipe; rodada final, sementes 52–61.",
+      "notes": "Tempo: 1 min. Em k = 3, o K-Means atingiu o melhor objetivo em 1 de 10 execuções e o ARI variou de 0,4290 a 0,6451. No GMM, o ARI variou de 0,4199 a 0,6199. Considerando como equivalentes os objetivos a até 10^-3 do melhor valor, 6 de 10 execuções do GMM atingiram o melhor objetivo; as log-verossimilhanças são próximas, não exatamente iguais. Dez inicializações não equivalem a dez amostras independentes do conjunto de dados."
+    },
+    {
+      "layout": "ConclusionSlide",
+      "title": "Grupos geométricos diferem de espécies",
+      "windowTitle": "CONCLUSÕES",
+      "bullets": [
+        "Seis métodos escolheram k = 2 pela silhueta.",
+        "Entre os perfis escolhidos, UPGMA teve ARI 0,7184 em k = 3.",
+        "DBSCAN reteve 96%; inicializações afetaram k = 3.",
+        "Silhueta e ARI avaliam propriedades distintas."
+      ],
+      "notes": "Fechamento (45 s). Os seis métodos selecionaram a mesma partição em k=2. Um grupo reúne as 50 setosas. O outro contém 50 versicolors e 50 virginicas. Silhueta 0,5802 e ARI 0,5681 em 150 flores. As sete partições coincidem nas 144 flores retidas, com silhueta 0,6035 e ARI 0,5760. Retomar a comparação com as três espécies e o papel das projeções."
+    },
+    {
+      "layout": "TwoColumnSlide",
+      "title": "Referências acadêmicas",
+      "compact": true,
+      "columns": [
+        {
+          "title": "ESTUDO E DADOS",
+          "bullets": [
+            "Araújo, F.; Gomes, R. Agrupamento e Redução de Dimensionalidade na Base Iris. UFPE, 2026.",
+            "Fisher, R. A. Iris. UCI ML Repository, 1936. DOI: 10.24432/C56C76."
+          ]
+        },
+        {
+          "title": "MÉTRICAS E DENSIDADE",
+          "bullets": [
+            "Rousseeuw (1987). Silhouettes. JCAM 20:53–65. DOI: 10.1016/0377-0427(87)90125-7.",
+            "Hubert & Arabie (1985). Comparing partitions. J. Classification 2:193–218.",
+            "Ester et al. (1996). DBSCAN. Proc. KDD, pp. 226–231."
+          ]
+        }
+      ],
+      "notes": "Material de apoio. As referências foram preservadas do artigo IEEE revisado. Não são exibidos caminhos, diretórios ou identificadores internos do projeto."
+    }
+  ],
+  "references": []
+}

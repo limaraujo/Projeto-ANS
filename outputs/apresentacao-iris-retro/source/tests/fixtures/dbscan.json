@@ -1,0 +1,40 @@
+{
+  "title": "DBSCAN: agrupamento por densidade",
+  "plan": {
+    "request": "Crie uma apresentação técnica sobre o algoritmo DBSCAN, com 12 slides, diagramas, exemplos e notas.",
+    "objective": "Explicar a expansão por densidade e avaliar quando usar DBSCAN",
+    "audience": "Estudantes de computação", "minutes": 15, "slideCount": 12,
+    "depth": "intermediária", "language": "pt-BR", "profile": "academic-minimal",
+    "narrative": "Motivação, definições, expansão, exemplo sintético, escolhas, limites e síntese",
+    "assumptions": ["Público conhece distância euclidiana.", "Exemplo bidimensional e sintético; nenhum resultado experimental é alegado.", "Notas de apresentação incluídas para testar o fluxo completo."],
+    "analysis": {
+      "centralTheme": "A conectividade entre regiões densas permite formar agrupamentos sem fixar sua quantidade.",
+      "concepts": ["Vizinhança ε", "MinPts", "Núcleo, borda e ruído", "Expansão de agrupamentos"],
+      "arguments": ["Definir densidade local antes de explicar a expansão", "Separar o exemplo didático de avaliação empírica"],
+      "results": ["Contagens de vizinhos calculadas diretamente das coordenadas do exemplo"],
+      "visualOpportunities": ["Processo de expansão", "Dispersão sintética", "Contagem de vizinhos por ponto"]
+    },
+    "sources": [
+      {"id":"E1996","consulted":"2026-11-16","sections":"Definições e descrição do algoritmo; sem reproduzir benchmarks"},
+      {"id":"SK","consulted":"2026-11-16","sections":"Parâmetros, notas e limitações de implementação"}
+    ]
+  },
+  "slides": [
+    {"layout":"title","title":"DBSCAN: agrupamento por densidade","subtitle":"Dos vizinhos locais à estrutura dos dados","notes":"Apresente a pergunta central: como encontrar grupos quando sua quantidade não é conhecida?"},
+    {"layout":"bullets","title":"Densidade local define os agrupamentos","bullets":["Não exige definir o número de grupos.","Expande regiões densas conectadas.","Pode separar observações como ruído."],"citations":["E1996"],"notes":"Explique a motivação sem prometer que todo conjunto de dados contém grupos bem definidos."},
+    {"layout":"columns","title":"Núcleo, borda e ruído têm papéis distintos","columns":[{"title":"Núcleo","bullets":["Possui pelo menos MinPts vizinhos, incluindo o próprio ponto.","Permite continuar a expansão."]},{"title":"Borda e ruído","bullets":["Borda: vizinho de um núcleo, mas não é núcleo.","Ruído: não pertence a um agrupamento encontrado."]}],"citations":["E1996"],"notes":"Um ponto inicialmente tratado como ruído pode posteriormente ser incorporado como borda durante a expansão."},
+    {"layout":"equation","title":"ε e MinPts tornam a densidade operacional","equation":"Nε(p) = {q ∈ D | d(p, q) ≤ ε}","bullets":["ε é o raio; d é a métrica escolhida.","p é núcleo quando |Nε(p)| ≥ MinPts.","A escala das variáveis afeta as distâncias."],"citations":["E1996","SK"],"notes":"Especifique que a vizinhança inclui o próprio ponto. A definição depende da métrica e das unidades das variáveis."},
+    {"layout":"process","title":"A expansão avança pelos pontos de núcleo","steps":["Consultar vizinhos","Testar densidade","Expandir o grupo","Repetir nos demais"],"takeaway":"Pontos de borda são incluídos, mas não prolongam a expansão.","citations":["E1996"],"notes":"A consulta e a expansão se repetem até não haver núcleos adicionais alcançáveis no agrupamento atual."},
+    {"layout":"code","title":"Uma fila organiza a expansão","code":"fila ← vizinhos de um núcleo\nenquanto fila não estiver vazia:\n  q ← retirar(fila)\n  se q ainda não foi visitado:\n    marcar q como visitado\n    se q for núcleo: enfileirar vizinhos\n  se q não tem grupo: atribuir grupo atual","caption":"Pseudocódigo didático do passo de expansão; consulta e deduplicação são abstraídas.","citations":["E1996"],"notes":"A implementação precisa evitar consultas repetidas e definir como registrar pontos já classificados. O trecho não representa o algoritmo completo."},
+    {"layout":"scatter","title":"Dois grupos e três pontos isolados","label":"Exemplo sintético • distância euclidiana • ε = 0,5 • MinPts = 4","points":[{"x":1,"y":1,"group":"Grupo A"},{"x":1.1,"y":1.1,"group":"Grupo A"},{"x":0.9,"y":1.1,"group":"Grupo A"},{"x":1.1,"y":0.9,"group":"Grupo A"},{"x":0.85,"y":0.9,"group":"Grupo A"},{"x":1,"y":1.2,"group":"Grupo A"},{"x":3,"y":3,"group":"Grupo B"},{"x":3.1,"y":3.1,"group":"Grupo B"},{"x":2.9,"y":3,"group":"Grupo B"},{"x":3.2,"y":2.9,"group":"Grupo B"},{"x":3,"y":3.2,"group":"Grupo B"},{"x":2.8,"y":2.9,"group":"Grupo B"},{"x":4.6,"y":0.3,"group":"Ruído"},{"x":0.2,"y":4.3,"group":"Ruído"},{"x":4.7,"y":4.5,"group":"Ruído"}],"xLabel":"Coordenada x • esquema sem marcas numéricas","yLabel":"Coordenada y","caption":"Coordenadas definidas no JSON; ilustração didática, sem avaliação experimental.","notes":"Mostre os dois conjuntos compactos e os pontos isolados. O slide seguinte usa as coordenadas exatas, sem depender da leitura de uma escala no desenho."},
+    {"layout":"bar","title":"Contar vizinhos distingue núcleo e isolamento","label":"Exemplo sintético • ε = 0,5 • inclui o próprio ponto","labels":["p = (1; 1)","p = (3; 3)","p = (4,6; 0,3)"],"values":[6,6,1],"unit":"Número de vizinhos","caption":"Contagens calculadas das 15 coordenadas do slide anterior. Com MinPts = 4, os dois primeiros são núcleos.","notes":"Compare cada contagem ao limiar quatro. O terceiro ponto não tem outro ponto a distância até 0,5."},
+    {"layout":"columns","title":"Parâmetros dependem da representação","columns":[{"title":"Antes de agrupar","bullets":["Escolher variáveis e métrica.","Examinar escalas e unidades.","Justificar ε e MinPts."]},{"title":"Ao interpretar","bullets":["Variar parâmetros e inspecionar estabilidade.","Conferir ruído e casos de borda.","Relacionar grupos ao domínio."]}],"citations":["SK"],"notes":"Estas são orientações de análise, não uma regra que identifica automaticamente a melhor parametrização."},
+    {"layout":"figure","title":"Analisar, sintetizar e validar o resultado","path":"../../assets/graphics/pipeline.svg","alt":"Três etapas conectadas: análise, síntese e validação","caption":"Interpretação proposta: estudar os dados, resumir a estrutura e verificar sua utilidade no domínio.","attribution":"Diagrama vetorial original desta skill; interpretação didática, sem dados de terceiros.","notes":"O diagrama descreve o trabalho analítico ao redor do algoritmo, não substitui suas etapas de expansão."},
+    {"layout":"bullets","title":"A escolha é útil quando seus limites são claros","bullets":["Densidades muito diferentes dificultam um único ε.","Bordas compartilhadas podem depender da ordem dos dados.","Custo e memória dependem da implementação e da vizinhança.","Grupos encontrados exigem interpretação no domínio."],"citations":["SK"],"notes":"A documentação do scikit-learn descreve possíveis custos quadráticos de memória; não generalize esse comportamento a toda implementação de DBSCAN."},
+    {"layout":"references","title":"Referências e proveniência","ids":["E1996","SK"],"notes":"As fontes foram consultadas para o conteúdo conceitual. Gráfico e dispersão usam somente dados sintéticos explicitados no JSON."}
+  ],
+  "references": [
+    {"id":"E1996","text":"Ester, M.; Kriegel, H.-P.; Sander, J.; Xu, X. A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise. KDD, 1996, p. 226–231.","url":"https://cdn.aaai.org/KDD/1996/KDD96-037.pdf"},
+    {"id":"SK","text":"Scikit-learn. DBSCAN: parâmetros, funcionamento e notas de implementação. Documentação oficial. Acesso em 16 nov. 2026.","url":"https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html"}
+  ]
+}
